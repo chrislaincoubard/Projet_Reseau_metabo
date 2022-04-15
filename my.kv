@@ -1,0 +1,60 @@
+#kv du MyApp.py
+
+<MyPanel>:
+    
+    do_default_tab : False
+    
+    TabbedPanelItem :
+    
+        text : "Main"
+        font_size :  20
+        FloatLayout:
+
+            Button:
+                id : btn
+                text:"Choisissez un \n fichier "
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
+                on_press : root.call()
+    
+    TabbedPanelItem :
+    
+        text : "BLASTing"
+        font_size :  20
+
+        FloatLayout:
+
+            Button:
+                id : btn
+                text:"Choisissez un \n fichier "
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
+            Button:
+                id : btn
+                text:"Choisissez un \n fichier "
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
+            Button:
+                id : btn
+                text:"Choisissez un \n fichier "
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+    
+    TabbedPanelItem :
+    
+        text : "MPWTing"
+        font_size :  20
+
+        FloatLayout:
+
+            Button:
+                id : btn
+                text:"Choisissez un \n fichier "
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
+                
+                
+            
+           
+
+<Button>:
+    size_hint: 0.2,0.2  
+    font_size : 20
+    color : 1,1,1,1
+    background_color : 150,2,31,1
+    
