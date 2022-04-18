@@ -52,10 +52,39 @@ class Graph:
     def show_graph(self):
         nt = Network("750px", "750px")
         nt.from_nx(self.G)
-        nt.show_buttons()
+        # nt.show_buttons() show buttons must be turned off if non-default paramaters are set
         nt.toggle_hide_edges_on_drag(True)
-        nt.set_edge_smooth("straightCross")
+        nt.set_edge_smooth("dynamic")
+        nt.set_options("""
+        var options = {
+          "nodes": {
+            "borderWidthSelected": 5
+          },
+          "edges": {
+            "color": {
+              "inherit": true
+            },
+            "smooth": {
+              "type": "straightCross",
+              "forceDirection": "none"
+            }
+          },
+          "interaction": {
+            "hideEdgesOnDrag": true,
+            "hover": true,
+            "multiselect": true
+          },
+          "physics": {
+            "barnesHut": {
+              "springLength": 175,
+              "avoidOverlap": 1
+            },
+            "minVelocity": 0.75
+          }
+        }
+        """)
         nt.show('nx.html')
+
 
     def add_nodes_from(self, nodes):
         self.G.add_nodes_from(nodes)
