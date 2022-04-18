@@ -25,7 +25,8 @@ class Graph:
             item["size"] = 20
             item["group"] = 2
             item["title"] = item["id"]
-            del item["name"]
+            if "name" in item:
+                del item["name"]
             self.nodes_metabolites.append((item['id'], item))
 
     def create_nodes_reactions(self):
@@ -33,7 +34,8 @@ class Graph:
             item["size"] = 50
             item["group"] = 1
             item["title"] = item["id"]
-            del item["name"]
+            if "name" in item:
+                del item["name"]
             self.nodes_reactions.append((item['id'], item))
 
     def create_edges(self):
@@ -99,9 +101,23 @@ class Graph:
         self.create_Graph()
         self.show_graph()
 
-
+    def save_graph_json(self, name):  # not working properly still
+        tot_dico = {}
+        meta = []
+        reac = []
+        for item in self.nodes_metabolites:
+            print(self.nodes_metabolites)
+            meta.append(item[1])
+        for item in self.nodes_reactions:
+            reac.append(item[1])
+        print(meta)
+        tot_dico["metabolites"] = meta
+        tot_dico["reactions"] = reac
+        with open(name, 'w') as f:
+            f.write(json.dumps(tot_dico))
 
 if __name__ == '__main__':
-    Gr = Graph("Test_glycolysis.json")
+    Gr = Graph("Test_with_POO.json")
     Gr.load_graph()
+    # Gr.save_graph_json("Test_with_POO.json")
 
