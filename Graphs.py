@@ -101,7 +101,7 @@ class Graph:
         self.create_Graph()
         self.show_graph()
 
-    def save_graph_json(self, name):  # not working properly still
+    def save_graph_json(self, name):
         tot_dico = {}
         meta = []
         reac = []
