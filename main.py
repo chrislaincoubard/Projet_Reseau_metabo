@@ -4,15 +4,16 @@ import json
 with open('Test_glycolysis.json') as json_file:
     data = json.load(json_file)
 
-    print("Type:", type(data))
-    print(type(data['metabolites']))
-    print("\nmetabolites:", data['metabolites'])
-    print("\nmetabolites:", sorted(data['metabolites'], key=lambda k: k['name']))
-    print("\nreaction:", data['reaction'])
-    print("\nreaction:", sorted(data['reaction'], key=lambda k: k['name']))
+#     print("Type:", type(data))
+#     print(type(data['metabolites']))
+#     print("\nmetabolites:", data['metabolites'])
+#     print("\nmetabolites:", sorted(data['metabolites'], key=lambda k: k['name']))
+#     print("\nreaction:", data['reaction'])
+#     print("\nreaction:", sorted(data['reaction'], key=lambda k: k['name']))
 
 
 class Graph:
+    data = {}
     Metabolites = []
     Reaction = []
     nodes_metabolites = []
@@ -27,14 +28,14 @@ class Graph:
         self.LoadJson(file)
 
     def print_data(self):
-        print(self.data['metabolites'])
-        print(self.data['reaction'])
+        print("\nmetabolites not sorted", self.data['metabolites'])
+        print("\nreaction not sorted", self.data['reaction'])
 
     def SortJson(self, file):
         self.Metabolites = sorted(file["metabolites"], key=lambda k: k["name"])
-        print(self.Metabolites)
+        print("\nmetabolites sorted", self.Metabolites)
         self.Reaction = sorted(file["reaction"], key=lambda k: k["name"])
-        print(self.Reaction)
+        print("\nreaction sorted", self.Reaction)
 
     def create_nodes_metabolites(self):
         for item in self.Metabolites:
@@ -44,7 +45,7 @@ class Graph:
             if "name" in item:
                 del item["name"]
             self.nodes_metabolites.append((item['id'], item))
-            print(self.nodes_metabolites)
+        print("\nmetabolites sorted for networkX ", self.nodes_metabolites)
 
     def create_nodes_reactions(self):
         for item in self.Reaction:
@@ -54,7 +55,7 @@ class Graph:
             if "name" in item:
                 del item["name"]
             self.nodes_reactions.append((item['id'], item))
-            print(self.nodes_reactions)
+        print("\nreaction sorted for networkX", self.nodes_reactions)
 
     def Search(self, file, category, keyword):
         a = 0
