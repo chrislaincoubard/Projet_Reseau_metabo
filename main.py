@@ -31,9 +31,9 @@ class Graph:
         print(self.data['reaction'])
 
     def SortJson(self, file):
-        self.Metabolites.append(sorted(file["metabolites"], key=lambda k: k["name"]))
+        self.Metabolites = sorted(file["metabolites"], key=lambda k: k["name"])
         print(self.Metabolites)
-        self.Reaction.append(sorted(file["reaction"], key=lambda k: k["name"]))
+        self.Reaction = sorted(file["reaction"], key=lambda k: k["name"])
         print(self.Reaction)
 
     def create_nodes_metabolites(self):
@@ -44,7 +44,7 @@ class Graph:
             if "name" in item:
                 del item["name"]
             self.nodes_metabolites.append((item['id'], item))
-            print(nodes_metabolites)
+            print(self.nodes_metabolites)
 
     def create_nodes_reactions(self):
         for item in self.Reaction:
@@ -54,7 +54,7 @@ class Graph:
             if "name" in item:
                 del item["name"]
             self.nodes_reactions.append((item['id'], item))
-            print(nodes_reactions)
+            print(self.nodes_reactions)
 
     def Search(self, file, category, keyword):
         a = 0
