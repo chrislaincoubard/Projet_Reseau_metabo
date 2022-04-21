@@ -1,5 +1,24 @@
 #kv du MyApp.py
 
+<LoadDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Load"
+                on_release: root.load(filechooser.path, filechooser.selection)
+
 <MyPanel>:
     
     do_default_tab : False
@@ -15,7 +34,21 @@
                 text:"Choisissez un \n fichier "
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
                 on_press : root.call()
-    
+            Button:
+                id : btn
+                text:"Test"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
+                on_press : root.test()
+            Button:
+                id : btn
+                text:"TestLoad"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                on_press : root.show_load()
+
+
+
+
+
     TabbedPanelItem :
     
         text : "BLASTing"
@@ -25,17 +58,21 @@
 
             Button:
                 id : btn
-                text:"Choisissez un \n fichier "
+                text:"Choisissez un \n fichier modele"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
+                on_press : root.show_load()
             Button:
                 id : btn
-                text:"Choisissez un \n fichier "
+                text:"Choisissez un \n fichier fasta"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
+                on_press : root.show_load()
+
             Button:
                 id : btn
-                text:"Choisissez un \n fichier "
+                text:"Choisissez un \n fichier fasta "
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-    
+                on_press : root.show_load()
+
     TabbedPanelItem :
     
         text : "MPWTing"
@@ -55,6 +92,6 @@
 <Button>:
     size_hint: 0.2,0.2  
     font_size : 20
-    color : 1,1,1,1
-    background_color : 150,2,31,1
+    color : 1,1,1
+    background_color : "#E11E1E"
     
