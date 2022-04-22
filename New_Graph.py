@@ -4,14 +4,6 @@ import time
 from pyvis.network import Network
 
 
-#     print("Type:", type(data))
-#     print(type(data['metabolites']))
-#     print("\nmetabolites:", data['metabolites'])
-#     print("\nmetabolites:", sorted(data['metabolites'], key=lambda k: k['name']))
-#     print("\nreaction:", data['reaction'])
-#     print("\nreaction:", sorted(data['reaction'], key=lambda k: k['name']))
-
-
 class Graph:
     data = []
     Metabolites = []
@@ -23,7 +15,7 @@ class Graph:
     reac_keyword = [] #liste temp pour garder les catégories pour reactions et metabolites
     G = nx.MultiDiGraph()
 
-    #open the reference file and sort the metabolic and reaction by alphabetic order of ID.
+    
     def LoadJson_and_sort(self, file):
         with open(file, "r") as json_file:
             self.data = json.load(json_file)
@@ -41,11 +33,6 @@ class Graph:
         print("\nmetabolites not sorted", self.data["metabolites"])
         print("\nreaction not sorted", self.data['reactions'])
 
-    # def SortJson(self, file):
-    #     self.Metabolites = sorted(file["metabolites"], key=lambda k: k["name"])
-    #     print("\nmetabolites sorted", self.Metabolites)
-    #     self.Reaction = sorted(file["reactions"], key=lambda k: k["name"])
-    #     print("\nreaction sorted", self.Reaction)
 
     def meta_keyword_update(self,keyword):
         self.meta_keyword.append(keyword)
