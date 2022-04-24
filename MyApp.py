@@ -9,6 +9,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.tabbedpanel import TabbedPanel
 from  kivy.uix.label import Label
+from kivy.clock import Clock
 import subprocess
 import os
 
@@ -16,9 +17,13 @@ import os
 class MyPanel(TabbedPanel):
     files_blast=[]
     files_mpwting=[]
+    files_main=[]
     compteur_fasta=0
     compteur_sbml=0
     text_input = ObjectProperty(text)
+
+    def dismiss_popup_dt(self, dt):
+        self._popup.dismiss()
 
     def dismiss_popup(self):
         self._popup.dismiss()
@@ -26,23 +31,98 @@ class MyPanel(TabbedPanel):
 
 ####    MAIN   ####
 
-    def show_load_main(self):
-        content = LoadDialog(load=self.load_main, cancel=self.dismiss_popup)
-        self._popup = Popup(title="Load file", content=content,
-                            size_hint=(0.9, 0.9))
-        self._popup.open()
-        
-####### Fonction Load ( sert de main pour le blast) #######
 
-    def load_main(self, path, filename):
+#### MAIN FILES ####
+
+
+#### Boites Load files   ####
+
+    def show_load_files_main(self):
+        content = LoadDialog(load=self.load_files_main, cancel=self.dismiss_popup)
+        self._popup = Popup(title="Load file", content=content,
+                                size_hint=(0.9, 0.9))
+        self._popup.open()
+        for i in reversed (range(0,5)):
+            content = LoadDialog(load=self.load_files_main, cancel=self.dismiss_popup)
+            self._popup = Popup(title="Load file", content=content,
+                                size_hint=(0.9, 0.9))
+            self._popup.open()
+            converted_i=str(i)
+            converted_I=str(i+1)
+            if i ==0:
+                self._popup1=Popup(title='Information',content=Label(text="Vous devez charger 6 fichiers (.faa , .tsv, .gff , .sbml , .fasta et .fasta"),size_hint=(0.8,0.3))
+                self._popup1.open()
+            else:
+                self._popup1=Popup(title='Information',content=Label(text='Fichier' +converted_i+' chargé, selectionnez le fichier '+converted_I),size_hint=(0.5,0.5))
+                self._popup1.open()
+                   
+        
+####### Fonction Load Files ( sert de main ) #######
+
+    def load_files_main(self, path, filename):
         #compteur=0
         #listdir(fn)
-        for i in range (7):
-            with open(os.path.join(path, filename[0])) as stream:
-                self.text_input.text = stream.read()
-        self.dismiss_popup()
         
-    
+        with open(os.path.join(path, filename[0])) as stream:
+            self.text_input.text = stream.read()
+        print(filename)
+        
+
+        verifie=self.check_all(filename,self.files_main)
+        if verifie:
+            self.dismiss_popup()
+            self.launch_main(self.files_main)
+        
+
+#### Verifie au fur et à mesure de la selection le format des fichiers #### 
+    def check_all(self,filename,files_main):
+        check=False
+        format=[".fna",".tsv",".gff","sbml"]
+        compteur_fasta=0
+        good_format=False
+        print(filename,filename[0][-5:])
+        if filename[0][-4:] not in format and filename[0][-5:] != "fasta":
+            self._popup = Popup(title='Erreur',content=Label(text='Mauvais Format , recommencez'),size_hint=(0.5,0.5))
+            self._popup.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 1)
+
+        else: 
+            if filename[0][-5:] == "fasta":
+                for i in files_main:
+                    if i[0][-5:]=="fasta":
+                        compteur_fasta+=1
+                if compteur_fasta>2:
+                    self._popup = Popup(title='Erreur',content=Label(text='Format déjà chargé, recommencez'),size_hint=(0.5,0.5))
+                    self._popup.open()
+                    Clock.schedule_once(self.dismiss_popup_dt, 1)
+                else:
+                    files_main.append(filename)
+                    check=True
+            else:
+                for i in format:
+                    if i[0][-4:] == filename[0][-4:] and filename[0][-5:] != "fasta":
+                        self._popup = Popup(title='Erreur',content=Label(text='Format déjà chargé, recommencez'),size_hint=(0.5,0.5))
+                        self._popup.open()
+                        Clock.schedule_once(self.dismiss_popup_dt, 1)
+                    else:
+                        good_format=True
+                if good_format==True:
+                    files_main.append(filename)
+                    check=True
+        return check
+
+#### Lance le main ####
+
+    def launch_main(files_main):
+        cmd = f"python3 blasting.py {files_main[0]} {files_main[1]} {files_main[2]} {files_main[3]} {files_main[4]} {files_main[5]}"
+        p = subprocess.Popen(cmd, shell = True)
+        p.wait()
+        if p.returncode == 0 :
+            print('command : success')
+        else :
+            print('command : fail')
+
+
 
 ####    BLAST   ####
 
@@ -58,10 +138,12 @@ class MyPanel(TabbedPanel):
         compteur=0
         with open(os.path.join(path, filename[0])) as stream:
             self.text_input.text = stream.read()
-        self.dismiss_popup()
         
-        self.check_fastaOrSbml(filename,self.files_blast)
         
+        next=self.check_fastaOrSbml(filename,self.files_blast)
+        if next:
+            self.dismiss_popup()
+
         for i in range(len(self.files_blast)):
             compteur+=1
             if compteur == 3:
@@ -71,7 +153,8 @@ class MyPanel(TabbedPanel):
                     
                 else:
                     self.files_blast.clear()
-                    self._popup = Popup(title='Erreur',content=Label(text='Mauvais Fichiers , recommncez la sélection'),size_hint=(0.5,0.5))
+                    self._popup = Popup(title='Erreur',content=Label(text='Mauvais Fichiers , recommencez la sélection'),size_hint=(0.5,0.5))
+                    Clock.schedule_once(self.dismiss_popup_dt, 1)
 
 
 
@@ -79,15 +162,20 @@ class MyPanel(TabbedPanel):
 
     
     def check_fastaOrSbml(self, filename,files_blast):
-        
+        good_format=False
         check = filename[0][-5:]
         if check == "fasta" or check==".sbml":
             files_blast.append(filename)
-        else:
-            self.dismiss_popup()
-            self._popup = Popup(title='Erreur',content=Label(text='Mauvais Format'),size_hint=(0.5,0.5))
+            self._popup = Popup(title='Erreur',content=Label(text='Chargement réussi'),size_hint=(0.5,0.5))
             self._popup.open()
-            
+            Clock.schedule_once(self.dismiss_popup_dt, 1)
+            good_format=True
+        else:
+            good_format=False
+            self._popup = Popup(title='Erreur',content=Label(text='Mauvais Format,recommencez'),size_hint=(0.5,0.5))
+            self._popup.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 1)
+        return good_format
 ####### Verifie le format la liste de fichiers BLAST #######
 
 
@@ -137,10 +225,11 @@ class MyPanel(TabbedPanel):
         compteur=0
         with open(os.path.join(path, filename[0])) as stream:
             self.text_input.text = stream.read()
-        self.dismiss_popup()
         
-        self.check_format(filename,self.files_mpwting)
         
+        next=self.check_format(filename,self.files_mpwting)
+        if next:
+            self.dismiss_popup()
         for i in range(len(self.files_mpwting)):
             compteur+=1
             if compteur == 3:
@@ -150,19 +239,26 @@ class MyPanel(TabbedPanel):
                     
                 else:
                     self.files_mpwting.clear()
-                    self._popup = Popup(title='Erreur',content=Label(text='Mauvais Fichiers , recommncez la sélection'),size_hint=(0.5,0.5)) 
+                    self._popup = Popup(title='Erreur',content=Label(text='Mauvais Fichiers , recommencez la sélection'),size_hint=(0.5,0.5))
+                    Clock.schedule_once(self.dismiss_popup_dt, 1) 
 
 ####### Verifie le format des fichiers pour le mpwting #######
 
     def check_format(self, filename,files_mpwting):
-        
+        good_format=False
         check = filename[0][-4:]
         if check == ".fna" or check==".gff" or check==".tsv":
             files_mpwting.append(filename)
+            self._popup = Popup(title='Erreur',content=Label(text='Chargement réussi'),size_hint=(0.5,0.5))
+            self._popup.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 1)
+            good_format=True
         else:
-            self.dismiss_popup()
-            self._popup = Popup(title='Erreur',content=Label(text='Mauvais Format'),size_hint=(0.5,0.5))
-            self._popup.open()     
+            good_format=False
+            self._popup = Popup(title='Erreur',content=Label(text='Mauvais Format, recommencez'),size_hint=(0.5,0.5))
+            self._popup.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 1)
+        return good_format     
 
 ####### Verifie le format la liste de fichiers MPWTing #######
 

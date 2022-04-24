@@ -31,9 +31,14 @@
 
             Button:
                 id : btn
-                text:"Choisissez un dossier"
+                text:"Choisissez des fichiers"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
-                on_press : root.show_load_main()
+                on_press : root.show_load_files_main()
+            Button:
+                id : btn
+                text:"Choisissez un dossier"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                on_press : root.show_load_dir_main()
 
 
 
