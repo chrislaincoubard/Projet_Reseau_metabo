@@ -3,11 +3,10 @@ import networkx as nx
 import time
 from pyvis.network import Network
 
-
 class Graph:
     data = []
-    Metabolites = []
-    Reaction = []
+    Metabolites = [] #fill with search (needed only when creating a graph de novo
+    Reaction = [] #fill with search
     nodes_metabolites = []
     nodes_reactions = []
     edges = []
@@ -15,15 +14,15 @@ class Graph:
     reac_keyword = [] #liste temp pour garder les catégories pour reactions et metabolites
     G = nx.MultiDiGraph()
 
-    
-    def LoadJson_and_sort(self, file):
+    #open the reference file and sort the metabolic and reaction by alphabetic order of ID.
+    def Load_json(self, file):
         with open(file, "r") as json_file:
             self.data = json.load(json_file)
 
 
 
     def __init__(self, file):
-        self.LoadJson_and_sort(file)
+        self.Load_json(file)
 
     def clear_data(self):
         self.Metabolites.clear()
@@ -33,7 +32,6 @@ class Graph:
         print("\nmetabolites not sorted", self.data["metabolites"])
         print("\nreaction not sorted", self.data['reactions'])
 
-
     def meta_keyword_update(self,keyword):
         self.meta_keyword.append(keyword)
 
@@ -41,8 +39,8 @@ class Graph:
         self.reac_keyword.append(keyword)
 
 
-    def create_nodes_metabolites(self):
-        for item in self.Metabolites:
+    def create_nodes_metabolites(self, data):
+        for item in data:
             item["size"] = 20
             item["group"] = 2
             item["title"] = item["id"]
@@ -51,8 +49,8 @@ class Graph:
             self.nodes_metabolites.append((item['id'], item))
         print("\nmetabolites sorted for networkX ", self.nodes_metabolites)
 
-    def create_nodes_reactions(self):
-        for item in self.Reaction:
+    def create_nodes_reactions(self, data):
+        for item in data:
             item["size"] = 50
             item["group"] = 1
             item["title"] = item["id"]
@@ -61,6 +59,13 @@ class Graph:
             self.nodes_reactions.append((item['id'], item))
         print("\nreaction sorted for networkX", self.nodes_reactions)
 
+    def create_edges(self, type):
+        for reaction in type:
+            for metabolite, stoech in reaction["metabolites"].items():
+                if stoech > 0:
+                    self.edges.append([reaction["id"], metabolite])
+                if stoech < 0:
+                    self.edges.append([metabolite, reaction["id"]])
 
     #search for metabolites based on list of metabo ID
     #Does not work --> Forgot to add all the remainging metabolites.
@@ -91,8 +96,31 @@ class Graph:
         print("Metabolites",self.Metabolites)
         print("Reactions", self.Reaction)
 
+    # ------------------ Functions to load and save graphs ------------------- #
 
-    # ------------------ ADD TEMPORARY FUNCTIONS TO SHOW GRAPHS ----------------------------- #
+    def load_graph(self):
+        self.create_nodes_metabolites(self.data["metabolites"])
+        self.create_nodes_reactions(self.data["reactions"])
+        self.create_edges(self.data["reactions"])
+        self.create_Graph()
+        self.show_graph()
+
+    def save_graph_json(self, name):  # not working properly still
+        tot_dico = {}
+        meta = []
+        reac = []
+        for item in self.nodes_metabolites:
+            print(self.nodes_metabolites)
+            meta.append(item[1])
+        for item in self.nodes_reactions:
+            reac.append(item[1])
+        print(meta)
+        tot_dico["metabolites"] = meta
+        tot_dico["reactions"] = reac
+        with open(name, 'w') as f:
+            f.write(json.dumps(tot_dico))
+
+    # ------------------ Functions to show graph ----------------------------- #
 
     def create_Graph(self):
         self.G.add_nodes_from(self.nodes_metabolites)
@@ -105,10 +133,8 @@ class Graph:
         # nt.show_buttons() show buttons must be turned off if non-default paramaters are set
         nt.toggle_hide_edges_on_drag(True)
         nt.set_edge_smooth("dynamic")
-        # nt.show_buttons()
         nt.set_options("""
         var options = {
-        
           "edges": {
           "arrows": {
             "to": {
@@ -127,57 +153,12 @@ class Graph:
             "hideEdgesOnDrag": true
           },
           "physics": {
-            "enabled": false,
             "minVelocity": 0.75
           }
         }
         """)
         nt.show('nx.html')
 
-    def create_edges(self):
-        for reaction in self.Reaction:
-            for metabolite, stoech in reaction["metabolites"].items():
-                if stoech > 0:
-                    self.edges.append([reaction["id"], metabolite])
-                if stoech < 0:
-                    self.edges.append([metabolite, reaction["id"]])
 
 
 
-
-    #base idea for dichotomic search
-    #see if kept as it is
-    """
-    def Search(self, file, category, keyword):
-        a = 0
-        b = len(file)
-        if b == 0:
-            #cas où la liste est vide
-            return False
-        while b > a + 1:
-            m = (a + b) // 2
-            if t[m] > keyword:
-                b = m
-            else:
-                a = m
-        return t[a] == keyword
-        """
-
-
-if __name__ == '__main__':
-
-    # with open('Test_glycolysis.json') as json_file:
-    #     data = json.load(json_file)
-    g = Graph('actinidia_chinensis_merged.json')
-    # g.reac_keyword_update("RXN-20436")
-    # g.reac_keyword_update("RXN-17864")
-    g.search_reactions()
-    # g.meta_keyword_update("CPD-253_c")
-    # g.meta_keyword_update("L-DIHYDROXY-PHENYLALANINE_c")
-    g.meta_keyword_update("ACP_c")
-    g.search_metabolites()
-    g.create_nodes_metabolites()
-    g.create_nodes_reactions()
-    g.create_edges()
-    g.create_Graph()
-    g.show_graph()
