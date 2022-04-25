@@ -56,8 +56,8 @@ class Graph:
         for item in data:
             item["size"] = 50
             item["group"] = 1
-            self.title_reactions(data)
-            item["title"] = item["gene_reaction_rule"]
+            # self.title_reactions(data)
+            item["title"] = item["gene_reaction_rule"].replace(" or ", " <br>")
             if "name" in item:
                 del item["name"]
             self.nodes_reactions.append((item['id'], item))
@@ -112,7 +112,6 @@ class Graph:
         meta = []
         reac = []
         for gene in self.Reaction:
-            gene["gene_reaction_rule"] = gene["gene_reaction_rule"].replace(" <br> ", " or ")
             del gene["group"]
             del gene["size"]
             del gene["title"]
@@ -178,13 +177,13 @@ if __name__ == '__main__':
     g = Graph("test_BR.json")
     # g.meta_keyword_update("ADP_c")
     # g.meta_keyword_update("CPD-8843_c")
-    g.meta_keyword_update("GTP_c")
-    g.search_metabolites()
-    g.create_nodes_metabolites(g.Metabolites)
-    g.create_nodes_reactions(g.Reaction)
-    g.create_edges(g.Reaction)
-    g.create_Graph()
-    g.show_graph("My_graph.html")
+    # g.meta_keyword_update("GTP_c")
+    # g.search_metabolites()
+    # g.create_nodes_metabolites(g.Metabolites)
+    # g.create_nodes_reactions(g.Reaction)
+    # g.create_edges(g.Reaction)
+    # g.create_Graph()
+    # g.show_graph("My_graph.html")
     # g.save_graph_json("test_BR.json")
-    # g.load_graph()
+    g.load_graph()
 
