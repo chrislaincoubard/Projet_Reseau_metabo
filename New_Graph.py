@@ -38,8 +38,8 @@ class Graph:
     def reac_keyword_update(self,keyword):
         self.reac_keyword.append(keyword)
 
-    def title_reactions(self):
-        for gene in self.Reaction:
+    def title_reactions(self,data):
+        for gene in data:
             gene["gene_reaction_rule"] = gene["gene_reaction_rule"].replace(" or ", " <br> ")
 
     def create_nodes_metabolites(self, data):
@@ -56,7 +56,7 @@ class Graph:
         for item in data:
             item["size"] = 50
             item["group"] = 1
-            self.title_reactions()
+            self.title_reactions(data)
             item["title"] = item["gene_reaction_rule"]
             if "name" in item:
                 del item["name"]
@@ -111,12 +111,18 @@ class Graph:
         tot_dico = {}
         meta = []
         reac = []
-        for gene in self.nodes_reactions:
+        for gene in self.Reaction:
             gene["gene_reaction_rule"] = gene["gene_reaction_rule"].replace(" <br> ", " or ")
-        for item in self.nodes_metabolites:
-            meta.append(item[1])
-        for item in self.nodes_reactions:
-            reac.append(item[1])
+            del gene["group"]
+            del gene["size"]
+            del gene["title"]
+        for item in self.Metabolites:
+            del item["group"]
+            del item["size"]
+            del item["title"]
+            meta.append(item)
+        for item in self.Reaction:
+            reac.append(item)
         tot_dico["metabolites"] = meta
         tot_dico["reactions"] = reac
         with open(name, 'w') as f:
@@ -169,7 +175,7 @@ class Graph:
 
 if __name__ == '__main__':
 
-    g = Graph("actinidia_chinensis_merged.json")
+    g = Graph("test_BR.json")
     # g.meta_keyword_update("ADP_c")
     # g.meta_keyword_update("CPD-8843_c")
     g.meta_keyword_update("GTP_c")
@@ -179,4 +185,6 @@ if __name__ == '__main__':
     g.create_edges(g.Reaction)
     g.create_Graph()
     g.show_graph("My_graph.html")
+    # g.save_graph_json("test_BR.json")
+    # g.load_graph()
 
