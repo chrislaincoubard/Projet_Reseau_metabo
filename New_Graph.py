@@ -38,6 +38,9 @@ class Graph:
     def reac_keyword_update(self,keyword):
         self.reac_keyword.append(keyword)
 
+    def title_reactions(self):
+        for gene in self.Reaction:
+            gene["gene_reaction_rule"] = gene["gene_reaction_rule"].replace(" or ", " <br> ")
 
     def create_nodes_metabolites(self, data):
         for item in data:
@@ -53,7 +56,8 @@ class Graph:
         for item in data:
             item["size"] = 50
             item["group"] = 1
-            item["title"] = item["id"]
+            self.title_reactions()
+            item["title"] = item["gene_reaction_rule"]
             if "name" in item:
                 del item["name"]
             self.nodes_reactions.append((item['id'], item))
@@ -92,9 +96,7 @@ class Graph:
             for item in self.data["metabolites"]:
                 if item["id"] in temp_meta.keys() and item not in self.Metabolites:
                     self.Metabolites.append(item)
-        self.meta_keyword.clear()
-        print("Metabolites",self.Metabolites)
-        print("Reactions", self.Reaction)
+        self.reac_keyword.clear()
 
     # ------------------ Functions to load and save graphs ------------------- #
 
@@ -103,18 +105,18 @@ class Graph:
         self.create_nodes_reactions(self.data["reactions"])
         self.create_edges(self.data["reactions"])
         self.create_Graph()
-        self.show_graph()
+        self.show_graph("My_graph.html")
 
     def save_graph_json(self, name):  # not working properly still
         tot_dico = {}
         meta = []
         reac = []
+        for gene in self.nodes_reactions:
+            gene["gene_reaction_rule"] = gene["gene_reaction_rule"].replace(" <br> ", " or ")
         for item in self.nodes_metabolites:
-            print(self.nodes_metabolites)
             meta.append(item[1])
         for item in self.nodes_reactions:
             reac.append(item[1])
-        print(meta)
         tot_dico["metabolites"] = meta
         tot_dico["reactions"] = reac
         with open(name, 'w') as f:
@@ -127,14 +129,18 @@ class Graph:
         self.G.add_nodes_from(self.nodes_reactions)
         self.G.add_edges_from(self.edges)
 
-    def show_graph(self):
-        nt = Network("750px", "750px")
+    def show_graph(self, name):
+        nt = Network("1000px", "1000px")
         nt.from_nx(self.G)
         # nt.show_buttons() show buttons must be turned off if non-default paramaters are set
         nt.toggle_hide_edges_on_drag(True)
         nt.set_edge_smooth("dynamic")
+
         nt.set_options("""
         var options = {
+        "nodes": {
+            "borderWidthSelected": 5
+           },
           "edges": {
           "arrows": {
             "to": {
@@ -157,8 +163,20 @@ class Graph:
           }
         }
         """)
-        nt.show('nx.html')
+        nt.show(name)
 
 
 
+if __name__ == '__main__':
+
+    g = Graph("actinidia_chinensis_merged.json")
+    # g.meta_keyword_update("ADP_c")
+    # g.meta_keyword_update("CPD-8843_c")
+    g.meta_keyword_update("GTP_c")
+    g.search_metabolites()
+    g.create_nodes_metabolites(g.Metabolites)
+    g.create_nodes_reactions(g.Reaction)
+    g.create_edges(g.Reaction)
+    g.create_Graph()
+    g.show_graph("My_graph.html")
 
