@@ -80,7 +80,7 @@ class MyPanel(TabbedPanel):
         format=[".fna",".tsv",".gff","sbml"]
         compteur_fasta=0
         good_format=False
-        print(filename,filename[0][-5:])
+        
         if filename[0][-4:] not in format and filename[0][-5:] != "fasta":
             self._popup = Popup(title='Erreur',content=Label(text='Mauvais Format , recommencez'),size_hint=(0.5,0.5))
             self._popup.open()
@@ -183,14 +183,14 @@ class MyPanel(TabbedPanel):
         go_blast=False
         compteur_fasta=0
         compteur_sbml=0
-        for i in range[files_blast]:
+        for i in files_blast:
             if  files_blast[i][-5:] == "fasta":
                 compteur_fasta+=1 
             if files_blast[i][-5:] ==".sbml":
                 compteur_sbml+=1
         if compteur_fasta==2 and compteur_sbml==1:
             go_blast=True
-        for i in range[files_blast]:
+        for i in files_blast:
             if files_blast[1] == files_blast[2]:
                 go_blast=False
             if files_blast[3] == files_blast[2]:
@@ -267,7 +267,7 @@ class MyPanel(TabbedPanel):
         compteur_fna=0
         compteur_gff=0
         compteur_tsv=0
-        for i in range[files_mpwting]:
+        for i in files_mpwting:
             if  files_mpwting[i][-4:] == ".fna":
                 compteur_fna+=1 
             if files_mpwting[i][-4:] ==".gff":
