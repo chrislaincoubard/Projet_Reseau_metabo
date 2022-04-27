@@ -18,6 +18,20 @@
             Button:
                 text: "Load"
                 on_release: root.load(filechooser.path, filechooser.selection)
+<Choice>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "No"
+                on_release: root.cancel()
+            Button:
+                text: "Yes"
+                on_release: root.clear_files()
 
 <MyPanel>:
     
@@ -31,14 +45,44 @@
 
             Button:
                 id : btn
-                text:"Choisissez des fichiers"
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
-                on_press : root.show_load_files_main()
+                text:"Choisissez un \n fichier modele sbml"
+                pos_hint: {"center_x" : 0.2,"center_y" : 0.8}
+                on_press : root.show_load("sbml","main")
             Button:
                 id : btn
-                text:"Choisissez un dossier"
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-                on_press : root.show_load_dir_main()
+                text:"Choisissez un \n fichier faa"
+                pos_hint: {"center_x" : 0.2,"center_y" : 0.6}
+                on_press : root.show_load(".faa","main")
+
+            Button:
+                id : btn
+                text:"Choisissez un \n fichier faa "
+                pos_hint: {"center_x" : 0.2,"center_y" : 0.4}
+                on_press : root.show_load(".faa","main")
+            
+            Button:
+                id : btn
+                text:"Choisissez un \n fichier gff "
+                pos_hint: {"center_x" : 0.2,"center_y" : 0.2}
+                on_press : root.show_load(".gff","main")
+            
+            Button:
+                id : btn
+                text:"Choisissez un \n fichier fna "
+                pos_hint: {"center_x" : 0.7,"center_y" : 0.8}
+                on_press : root.show_load(".fna","main")
+            
+            Button:
+                id : btn
+                text:"Choisissez un \n fichier tsv "
+                pos_hint: {"center_x" : 0.7,"center_y" : 0.6}
+                on_press : root.show_load(".tsv","main")
+            
+            Button:
+                id : btn
+                text:"Choisissez un \n fichier gff "
+                pos_hint: {"center_x" : 0.7,"center_y" : 0.4}
+                on_press : root.show_load(".gff","main")
 
 
 
@@ -53,20 +97,26 @@
 
             Button:
                 id : btn
-                text:"Choisissez un \n fichier modele"
+                text:"Choisissez un \n fichier modele sbml"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
-                on_press : root.show_load_blast()
+                on_press : root.show_load("sbml","blast")
             Button:
                 id : btn
-                text:"Choisissez un \n fichier fasta"
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
-                on_press : root.show_load_blast()
+                text:"Choisissez un \n fichier faa"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.6}
+                on_press : root.show_load(".faa","blast")
 
             Button:
                 id : btn
-                text:"Choisissez un \n fichier fasta "
+                text:"Choisissez un \n fichier faa "
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.4}
+                on_press : root.show_load(".faa","blast")
+            
+            Button:
+                id : btn
+                text:"Choisissez un \n fichier gff "
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-                on_press : root.show_load_blast()
+                on_press : root.show_load(".gff","blast")
 
     TabbedPanelItem :
     
@@ -78,27 +128,34 @@
             Button:
                 id : btn
                 text:"Choisissez un \n fichier fna "
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
-                on_press : root.show_load_mpwting()
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.6}
+                on_press : root.show_load(".fna","mpwting")
             
             Button:
                 id : btn
                 text:"Choisissez un \n fichier tsv "
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
-                on_press : root.show_load_mpwting()
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.4}
+                on_press : root.show_load(".tsv","mpwting")
             
             Button:
                 id : btn
                 text:"Choisissez un \n fichier gff "
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-                on_press : root.show_load_mpwting()
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
+                on_press : root.show_load(".gff","mpwting")
+            
+            Button:
+                id : btn
+                size_hint: 0.12,0.12 
+                text:"clear files "
+                pos_hint: {"center_x" : 0.9,"center_y" : 0.9}
+                on_press : root.show_clear()
                 
                 
             
            
 
 <Button>:
-    size_hint: 0.2,0.2  
+    size_hint: 0.27,0.12  
     font_size : 20
     color : 1,1,1
     background_color : "#E11E1E"
