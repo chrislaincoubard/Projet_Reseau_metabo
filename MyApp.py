@@ -11,6 +11,8 @@ from kivy.uix.tabbedpanel import TabbedPanel
 import subprocess
 import os
 
+from numpy import empty
+
 
 class MyPanel(TabbedPanel):
     files=[]
@@ -46,12 +48,12 @@ class MyPanel(TabbedPanel):
 
         
         self.check_format(filename,self.files,self.format)
-        
+        print(self.files)
         if self.module=="blast" and len(self.files)==4:
             self.launch_blasting(self.files)
         if self.module=="mpwting" and len(self.files)==3:
             self.launch_mpwting(self.files)
-        if self.module=="main" and len(self.files)==7:
+        if self.module=="main" and len(self.files)==6:
             self.launch_main(self.files)
         
             
@@ -59,51 +61,71 @@ class MyPanel(TabbedPanel):
          
 
     def check_format(self, filename,files,format):
-
+        the_format=True
         check = filename[0][-4:]
         compteur=0
+        print(check)
         name=""
-        for i in files:
-            if i[-4:]==".faa":
-                compteur+=1
-                name=i
-            if i[-4:]==format and i[-4:]!=".faa":
+        if len(files) > 0 :
+            for i in files:
+                if i[-4:]==".faa":
+                    compteur+=1
+                    name=i
+                    print("ici")
+                if i[-4:]==format and i[-4:]!=".faa":
+                    self.dismiss_popup()
+                    self._popup = Popup(title='Erreur',content=Label(text='Format deja chargé,reessayez'),size_hint=(0.5,0.5))
+                    self._popup.open()
+                    Clock.schedule_once(self.dismiss_popup_dt, 1)
+                    the_format=False
+                    print("la")
+                if format == ".faa" and compteur>=2:
+                    self.dismiss_popup()
+                    self._popup = Popup(title='Erreur',content=Label(text='Format deja chargé,reessayez'),size_hint=(0.5,0.5))
+                    self._popup.open()
+                    Clock.schedule_once(self.dismiss_popup_dt, 1)
+                    the_format=False
+                    print("et la")
+        else:
+            if check == format:      
+                files.append(filename)
                 self.dismiss_popup()
-                self._popup = Popup(title='Erreur',content=Label(text='Format deja chargé,reessayez'),size_hint=(0.5,0.5))
-                self._popup.open()
-                Clock.schedule_once(self.dismiss_popup_dt, 1)
-            if format == ".faa" and compteur>=2:
-                self.dismiss_popup()
-                self._popup = Popup(title='Erreur',content=Label(text='Format deja chargé,reessayez'),size_hint=(0.5,0.5))
+                print("b")
+                self._popup = Popup(title='Information',content=Label(text='Chargement Réussi'),size_hint=(0.5,0.5))
                 self._popup.open()
                 Clock.schedule_once(self.dismiss_popup_dt, 1)
             else:
-                if check == format:
-                    if format==".fna" and compteur ==1:
-                        if name==filename:
-                            self._popup = Popup(title='Erreur',content=Label(text='Fichier deja chargé,reesayez'),size_hint=(0.5,0.5))
-                            self._popup.open()
-                            Clock.schedule_once(self.dismiss_popup_dt, 1)
-                        else:
-                            files.append(filename)
-                            self.dismiss_popup()
-                            print("b")
-                            self._popup = Popup(title='Information',content=Label(text='Chargement Réussi'),size_hint=(0.5,0.5))
-                            self._popup.open()
-                            Clock.schedule_once(self.dismiss_popup_dt, 1)
+                self._popup = Popup(title='Erreur',content=Label(text='Mauvais Format,reesayez'),size_hint=(0.5,0.5))
+                self._popup.open()
+                Clock.schedule_once(self.dismiss_popup_dt, 1)
+
+        if the_format and len(files)!=0:
+            if check == format:
+                if format==".fna" and compteur ==1:
+                    if name==filename:
+                        self._popup = Popup(title='Erreur',content=Label(text='Fichier deja chargé,reesayez'),size_hint=(0.5,0.5))
+                        self._popup.open()
+                        Clock.schedule_once(self.dismiss_popup_dt, 1)
                     else:
                         files.append(filename)
+                        print("rela")
                         self.dismiss_popup()
-                        print("b")
                         self._popup = Popup(title='Information',content=Label(text='Chargement Réussi'),size_hint=(0.5,0.5))
                         self._popup.open()
                         Clock.schedule_once(self.dismiss_popup_dt, 1)
                 else:
-                    self._popup = Popup(title='Erreur',content=Label(text='Mauvais Format,reesayez'),size_hint=(0.5,0.5))
+                    files.append(filename)
+                    self.dismiss_popup()
+                    print("b")
+                    self._popup = Popup(title='Information',content=Label(text='Chargement Réussi'),size_hint=(0.5,0.5))
                     self._popup.open()
                     Clock.schedule_once(self.dismiss_popup_dt, 1)
+            else:
+                self._popup = Popup(title='Erreur',content=Label(text='Mauvais Format,reesayez'),size_hint=(0.5,0.5))
+                self._popup.open()
+                Clock.schedule_once(self.dismiss_popup_dt, 1)   
 
-
+                    
 
     
     def launch_blasting(self,files):
@@ -135,7 +157,7 @@ class MyPanel(TabbedPanel):
         else :
             print('command : fail')
         self.files.clear()
-        
+
     #pas fini
     def show_clear(self):
         content = Choice(yes=self.clear_files, cancel=self.dismiss_popup)
