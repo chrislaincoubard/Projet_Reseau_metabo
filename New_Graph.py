@@ -14,12 +14,10 @@ class Graph:
     reac_keyword = [] #liste temp pour garder les catégories pour reactions et metabolites
     G = nx.MultiDiGraph()
 
-    #open the reference file and sort the metabolic and reaction by alphabetic order of ID.
+    #open the reference file and stores the data as attribute.
     def Load_json(self, file):
         with open(file, "r") as json_file:
             self.data = json.load(json_file)
-
-
 
     def __init__(self, file):
         self.Load_json(file)
@@ -27,20 +25,23 @@ class Graph:
     def clear_data(self):
         self.Metabolites.clear()
         self.Reaction.clear()
+        self.edges.clear()
+        self.G.clear()
+        self.nodes_reactions.clear()
+        self.nodes_metabolites.clear()
 
     def print_data(self):
         print("\nmetabolites not sorted", self.data["metabolites"])
         print("\nreaction not sorted", self.data['reactions'])
 
     def meta_keyword_update(self,keyword):
-        self.meta_keyword.append(keyword)
+        if keyword not in self.meta_keyword:
+            self.meta_keyword.append(keyword)
 
     def reac_keyword_update(self,keyword):
-        self.reac_keyword.append(keyword)
+        if keyword not in self.reac_keyword:
+            self.reac_keyword.append(keyword)
 
-    def title_reactions(self,data):
-        for gene in data:
-            gene["gene_reaction_rule"] = gene["gene_reaction_rule"].replace(" or ", " <br> ")
 
     def create_nodes_metabolites(self, data):
         for item in data:
@@ -74,6 +75,8 @@ class Graph:
     #search for metabolites based on list of metabo ID
     #Does not work --> Forgot to add all the remainging metabolites.
     def search_metabolites(self):
+        if not self.meta_keyword :
+            return None
         temp_meta = {}
         for key in self.meta_keyword:
             for item in self.data["reactions"]:
@@ -87,6 +90,8 @@ class Graph:
 
     #search for reactions based on list of reaction ID
     def search_reactions(self):
+        if not self.reac_keyword:
+            return None
         temp_meta = {}
         for key in self.reac_keyword:
             for item in self.data["reactions"]:
@@ -100,14 +105,13 @@ class Graph:
 
     # ------------------ Functions to load and save graphs ------------------- #
 
-    def load_graph(self):
+    def load_graph(self,name):
         self.create_nodes_metabolites(self.data["metabolites"])
         self.create_nodes_reactions(self.data["reactions"])
         self.create_edges(self.data["reactions"])
-        self.create_Graph()
-        self.show_graph("My_graph.html")
+        self.create_Graph(name)
 
-    def save_graph_json(self, name): 
+    def save_graph_json(self, name):
         tot_dico = {}
         meta = []
         reac = []
@@ -129,15 +133,24 @@ class Graph:
 
     # ------------------ Functions to show graph ----------------------------- #
 
-    def create_Graph(self):
+    def create_Graph(self,name):
+        self.search_metabolites()
+        self.search_reactions()
+        self.create_nodes_metabolites(self.Metabolites)
+        self.create_nodes_reactions(self.Reaction)
+        self.create_edges(self.Reaction)
         self.G.add_nodes_from(self.nodes_metabolites)
         self.G.add_nodes_from(self.nodes_reactions)
         self.G.add_edges_from(self.edges)
+        if "html" in name :
+            self.show_graph(name)
+        else :
+            self.show_graph(name+".html")
 
     def show_graph(self, name):
         nt = Network("1000px", "1000px")
         nt.from_nx(self.G)
-        # nt.show_buttons() show buttons must be turned off if non-default paramaters are set
+        # nt.show_buttons() # show buttons must be turned off if non-default paramaters are set
         nt.toggle_hide_edges_on_drag(True)
         nt.set_edge_smooth("dynamic")
 
@@ -174,16 +187,18 @@ class Graph:
 
 if __name__ == '__main__':
 
-    g = Graph("test_BR.json")
+    g = Graph("actinidia_chinensis_merged.json")
     # g.meta_keyword_update("ADP_c")
     # g.meta_keyword_update("CPD-8843_c")
-    # g.meta_keyword_update("GTP_c")
+    g.meta_keyword_update("GTP_c")
+    # g.reac_keyword_update('RXN-1727')
     # g.search_metabolites()
+    # g.search_reactions()
     # g.create_nodes_metabolites(g.Metabolites)
     # g.create_nodes_reactions(g.Reaction)
     # g.create_edges(g.Reaction)
-    # g.create_Graph()
+    g.create_Graph()
     # g.show_graph("My_graph.html")
-    # g.save_graph_json("test_BR.json")
-    g.load_graph()
+    # g.save_graph_json("test_recherche.json")
+    # g.load_graph()
 
