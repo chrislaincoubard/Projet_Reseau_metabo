@@ -1,4 +1,4 @@
-#kv du MyApp.py
+#:kivy 1.0
 
 <LoadDialog>:
     BoxLayout:
@@ -7,6 +7,7 @@
         orientation: "vertical"
         FileChooserIconView:
             id: filechooser
+            path : "/Users"
 
         BoxLayout:
             size_hint_y: None
@@ -23,6 +24,8 @@
         size: root.size
         pos: root.pos
         orientation: "vertical"
+        Label:
+            text: 'Voulez-vous réinitialiser la liste de fichiers?'
         BoxLayout:
             size_hint_y: None
             height: 30
@@ -31,7 +34,9 @@
                 on_release: root.cancel()
             Button:
                 text: "Yes"
-                on_release: root.clear_files()
+                on_release: root.self.clear_files()
+
+            
 
 <MyPanel>:
     
@@ -44,43 +49,52 @@
         FloatLayout:
 
             Button:
-                id : btn
+                id : btn1
                 text:"Choisissez un \n fichier modele sbml"
                 pos_hint: {"center_x" : 0.2,"center_y" : 0.8}
                 on_press : root.show_load("sbml","main")
             Button:
-                id : btn
+                id : btn2
                 text:"Choisissez un \n fichier faa"
                 pos_hint: {"center_x" : 0.2,"center_y" : 0.6}
                 on_press : root.show_load(".faa","main")
 
             Button:
-                id : btn
+                id : btn3
                 text:"Choisissez un \n fichier faa "
                 pos_hint: {"center_x" : 0.2,"center_y" : 0.4}
                 on_press : root.show_load(".faa","main")
             
             
             Button:
-                id : btn
+                id : btn4
                 text:"Choisissez un \n fichier fna "
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.8}
                 on_press : root.show_load(".fna","main")
             
             Button:
-                id : btn
+                id : btn5
                 text:"Choisissez un \n fichier tsv "
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.6}
                 on_press : root.show_load(".tsv","main")
             
             Button:
-                id : btn
+                id : btn6
                 text:"Choisissez un \n fichier gff "
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.4}
                 on_press : root.show_load(".gff","main")
+            
+            Button:
+                id : btn7
+                text:"Lancer le main "
+                pos_hint: {"center_x" : 0.7,"center_y" : 0.1}
+                on_press : root.go_module("main")
 
-
-
+            Button:
+                id : btn
+                text:"Parametres"
+                pos_hint: {"center_x" : 0.7,"center_y" : 0.2}
+                on_press : root.show_param()
 
 
     TabbedPanelItem :
@@ -93,25 +107,31 @@
             Button:
                 id : btn
                 text:"Choisissez un \n fichier modele sbml"
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
+                pos_hint: {"center_x" : 0.3,"center_y" : 0.8}
                 on_press : root.show_load("sbml","blast")
             Button:
                 id : btn
                 text:"Choisissez un \n fichier faa"
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.6}
+                pos_hint: {"center_x" : 0.3,"center_y" : 0.6}
                 on_press : root.show_load(".faa","blast")
 
             Button:
                 id : btn
                 text:"Choisissez un \n fichier faa "
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.4}
+                pos_hint: {"center_x" : 0.3,"center_y" : 0.4}
                 on_press : root.show_load(".faa","blast")
             
             Button:
                 id : btn
                 text:"Choisissez un \n fichier gff "
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                pos_hint: {"center_x" : 0.3,"center_y" : 0.2}
                 on_press : root.show_load(".gff","blast")
+            
+            Button:
+                id : btn
+                text:"Lancer le blast "
+                pos_hint: {"center_x" : 0.7,"center_y" : 0.5}
+                on_press : root.go_module("blast")
 
     TabbedPanelItem :
     
@@ -140,18 +160,102 @@
             
             Button:
                 id : btn
+                text:"Lancer le mpwting "
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                on_press : root.go_module("mpwting")
+            
+            Button:
+                id : btn
                 size_hint: 0.12,0.12 
                 text:"clear files "
                 pos_hint: {"center_x" : 0.9,"center_y" : 0.9}
                 on_press : root.show_clear()
-                
-                
-            
-           
+            Button:
+                id : btn
+                size_hint: 0.12,0.12 
+                text:"print files "
+                pos_hint: {"center_x" : 0.9,"center_y" : 0.5}
+                on_press : root.print_files()
 
+            Button:
+                id : btn
+                size_hint: 0.12,0.12 
+                text:"print files "
+                pos_hint: {"center_x" : 0.9,"center_y" : 0.2}
+                on_press : root.print_ids()
+                
 <Button>:
     size_hint: 0.27,0.12  
     font_size : 20
     color : 1,1,1
     background_color : "#E11E1E"
-    
+
+<Parametres>:
+    BoxLayout:
+        orientation:"vertical"
+        size: root.size
+        pos: root.pos
+        
+        Label :
+            text : "blast's identity percentage tolerated"
+            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+            size_hint: (0.1,0.1)
+        TextInput:
+            multiline : False
+            on_text_validate : 
+            text : ""
+            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+            size_hint: (0.1,0.1)
+        Label :
+            text : "tolerated length difference between the two aligned sequences"
+            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+            size_hint: (0.1,0.1)
+        TextInput:
+            multiline : False
+            on_text_validate : 
+            text : ""
+            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+            size_hint: (0.1,0.1)
+        Label :
+            text : "blast's e-value threshold value"
+            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+            size_hint: (0.1,0.1)
+        TextInput:
+            multiline : False
+            on_text_validate : 
+            text : ""
+            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+            size_hint: (0.1,0.1)
+        Label :
+            text : "minimum sequence coverage tolerated"
+            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+            size_hint: (0.1,0.1)
+        TextInput:
+            multiline : False
+            on_text_validate : 
+            text : ""
+            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+            size_hint: (0.1,0.1)
+        Label :
+            text : "blast's bit-score threshold value"
+            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+            size_hint: (0.1,0.1)
+        TextInput:
+            multiline : False
+            on_text_validate : 
+            text : ""
+            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+            size_hint: (0.1,0.1)
+        Button :
+            text : "cancel"
+            on_release : root.cancel()
+            pos_hint: {"center_x" : 0.3,"center_y" : 0}
+        Button :
+            text : "Submit"
+            pos_hint: {"center_x" : 0.7,"center_y" : 0}
+
+            
+
+
+
+
