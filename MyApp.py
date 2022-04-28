@@ -1,4 +1,5 @@
 
+from tkinter.messagebox import YES
 from kivy.uix.button import Button
 from kivy.clock import Clock
 from cgitb import text
@@ -8,10 +9,12 @@ from kivy.uix.popup import Popup
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.tabbedpanel import TabbedPanel
+from kivy.uix.widget import Widget
+from kivy.uix.textinput import TextInput
+from kivy.uix.boxlayout import BoxLayout
 import subprocess
 import os
-
-from numpy import empty
+from sympy import cancel
 
 
 class MyPanel(TabbedPanel):
@@ -22,6 +25,14 @@ class MyPanel(TabbedPanel):
     compteur_fasta=0
     compteur_sbml=0
     text_input = ObjectProperty(text)
+
+    def print_ids(self):
+        print(self.ids)
+    
+
+    def print_files(self):
+        print(self.files)
+    
 
     def dismiss_popup(self):
         self._popup.dismiss()
@@ -40,7 +51,6 @@ class MyPanel(TabbedPanel):
                             size_hint=(0.9, 0.9))
         self._popup.open()
 
-
     def load(self, path, filename):
         
         with open(os.path.join(path, filename[0])) as stream:
@@ -48,15 +58,17 @@ class MyPanel(TabbedPanel):
 
         
         self.check_format(filename,self.files,self.format)
-        print(self.files)
-        if self.module=="blast" and len(self.files)==4:
-            self.launch_blasting(self.files)
-        if self.module=="mpwting" and len(self.files)==3:
-            self.launch_mpwting(self.files)
-        if self.module=="main" and len(self.files)==6:
-            self.launch_main(self.files)
+        """ print(self.files) """
         
-            
+        self.check_format(filename,self.files,self.format)
+        
+    def go_module(self,go_module):
+        if go_module=="blast" and len(self.files)==4:
+            self.launch_blasting(self.files)
+        if go_module=="mpwting" and len(self.files)==3:
+            self.launch_mpwting(self.files)
+        if go_module=="main" and len(self.files)==6:
+            self.launch_main(self.files)
 
          
 
@@ -125,7 +137,6 @@ class MyPanel(TabbedPanel):
                 self._popup.open()
                 Clock.schedule_once(self.dismiss_popup_dt, 1)   
 
-                    
 
     
     def launch_blasting(self,files):
@@ -157,31 +168,48 @@ class MyPanel(TabbedPanel):
         else :
             print('command : fail')
         self.files.clear()
-
-    #pas fini
-    def show_clear(self):
-        content = Choice(yes=self.clear_files, cancel=self.dismiss_popup)
-        self._popup = Popup(title="Clear file", content=content,
-                            size_hint=(0.4, 0.4))
-        self._popup.open()
     
     def clear_files(self):
         self.files.clear()
-        
+        self._popup.dismiss()
 
+
+    def show_clear(self):
+        content = Choice(cancel=self.dismiss_popup, test = self.clear_files)
+        self._popup = Popup(title="Clear file", content=content,
+                            size_hint=(0.4, 0.4))
+        self._popup.open()
+
+    def show_param(self):
+        content = Parametres(cancel= self.dismiss_popup)
+        self._popup = Popup(title="Enter Parameters", content=content,
+                            size_hint=(1,1))
+        self._popup.open()
+    
+        
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
 
 class Choice(FloatLayout):
-    yes = ObjectProperty(None)
     cancel = ObjectProperty(None)
+    test = ObjectProperty(None)
+    
+    
 
+    
+
+
+class Parametres(BoxLayout):
+
+    cancel = ObjectProperty(None)
+        
+        
 class MyApp(App):
+    
     def build(self):
         return MyPanel()
-
-
+    
 
 if __name__ == '__main__':
 	MyApp().run()
