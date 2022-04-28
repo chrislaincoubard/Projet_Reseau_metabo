@@ -1,3 +1,5 @@
+import time
+
 from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
@@ -19,36 +21,34 @@ class TI(TextInput):
             app.dropdown.open(self)
         return super().on_touch_down(touch)
 
-    # def on_text(self,value):
-    #     print(f"The widget, {self}, has a value of {value}" )
-        # self.dropdown.clear_widgets()
-        # for meta in self.graph.data["metabolites"]:
-        #     if self.ti.text in meta["id"]:
-        #         btn = Button(text=meta["id"], size_hint_y=None, height=44,
-        #                      on_release=lambda btn: print(btn.text))  # bind every btn to a print statement
-        #         btn.text = meta["id"]
-        #         btn.bind(on_release=lambda btn: self.dropdown.select(btn.text))
-        #         self.dropdown.add_widget(btn)
 
 class Test(App):
+    graph = New_Graph.Graph("actinidia_chinensis_merged.json")
+    ti = TI(text='', font_size=30, size_hint_y=0.15, multiline=False)
+
+    def update_keyword_meta(self, graph_instance,keyword):
+        graph_instance.meta_keyword_update(keyword)
 
 
     def calc(self, instance, text):
         print(text)
-        # self.dropdown.clear_widgets()
-        # for meta in self.graph.data["metabolites"]:
-        #     if self.ti.text in meta["id"]:
-        #         btn = Button(text=meta["id"], size_hint_y=None, height=44,
-        #                      on_release=lambda btn: print(btn.text))  # bind every btn to a print statement
-        #         btn.text = meta["id"]
-        #         btn.bind(on_release=lambda btn: self.dropdown.select(btn.text))
-        #         self.dropdown.add_widget(btn)
+        self.dropdown.clear_widgets()
+        for meta in Test.graph.data["metabolites"]:
+            if self.ti.text in meta["id"]:
+                btn = Button(text=meta["id"], size_hint_y=None, height=44,
+                             on_release=lambda btn: print(btn.text))  # bind every btn to a print statement
+                btn.text = meta["id"]
+                btn.bind(on_release=lambda btn: self.dropdown.select(btn.text))
+                self.dropdown.add_widget(btn)
 
-    def print_data(self,graph):
-        print(f"keyword {graph.meta_keyword}, Meta {graph.Metabolites}, Reac {graph.Reaction}, nodes_M {graph.nodes_metabolites}, nodes_R {graph.nodes_reactions}")
+    def print_datas(self,graph):
+        graph.print_data()
+
+    def append_test(self,graph):
+        graph.Metabolites.append("Salute a tosu")
 
     def build(self):
-        graph = New_Graph.Graph("actinidia_chinensis_merged.json")
+
         box = GridLayout(cols=3, rows=3)
         label1 = Label(text = "Label 1")
         label1.size_hint=(0.3,0.3)
@@ -59,35 +59,39 @@ class Test(App):
         btn = Button(text = 'PRINT THE_LIST', center_x = 0.5, center_y = 0.5)
         btn2 = TextInput(text = 'Show Graph', multiline=False)
         btn3 = Button(text = "New Graph" )
+        btn4 = Button(text = "Test update data")
 
 
 
-        ti = TI(text='', font_size=30, size_hint_y=0.15, multiline=False)
-        ti.bind(on_text_validate = lambda ti: print(ti.text))
-        ti.bind(text= self.calc)
 
-        btn.bind(on_release= lambda btn: self.print_data(graph))
+        Test.ti.bind(on_text_validate = lambda ti: Test.graph.meta_keyword.append(ti.text))
+        Test.ti.bind(text= self.calc)
+
+        btn.bind(on_release= lambda btn: self.print_datas(Test.graph))
         btn.size_hint=(0.3,0.3)
         btn2.size_hint=(0.3,0.3)
         btn3.size_hint=(0.3,0.3)
-        btn2.bind(on_text_validate=lambda btn2: graph.create_Graph(btn2.text))
-        btn3.bind(on_release = lambda btn3: graph.clear_data())
+        btn4.size_hint=(0.3,0.3)
+        btn2.bind(on_text_validate=lambda btn2: Test.graph.create_Graph(btn2.text))
+        btn3.bind(on_release = lambda btn3: Test.graph.clear_data())
+        btn4.bind(on_release = lambda btn3: Test.graph.meta_keyword.append("Salute a tosu"))
         box.add_widget(label1)
         box.add_widget(label2)
         box.add_widget(label3)
         box.add_widget(btn)
         box.add_widget(btn2)
         box.add_widget(btn3)
-        box.add_widget(ti)
+        box.add_widget(btn4)
+        box.add_widget(Test.ti)
 
         self.dropdown = DropDown()  # Create the dropdown once and keep a reference to it
-        self.dropdown.bind(on_select=lambda instance, x: setattr(ti, 'text', x))
+        self.dropdown.bind(on_select=lambda instance, x: setattr(Test.ti, 'text', x))
 
-        for meta in graph.data["metabolites"]:  # create the buttons once
+        for meta in Test.graph.data["metabolites"]:  # create the buttons once
             btn = Button(text=meta["id"], size_hint_y=None, height=44,
-                         on_release=lambda btn: print(btn.text))  # bind every btn to a print statement
+                         on_press=lambda btn: print(btn.text))  # bind every btn to a print statement
             btn.text = meta["id"]
-            btn.bind(on_release=lambda btn: self.dropdown.select(btn.text), on_press=lambda btn :graph.meta_keyword_update(btn.text))
+            btn.bind(on_release=lambda btn: self.dropdown.select(btn.text), on_press=lambda btn :Test.graph.meta_keyword.append(btn.text))
             self.dropdown.add_widget(btn)
         return box
 
