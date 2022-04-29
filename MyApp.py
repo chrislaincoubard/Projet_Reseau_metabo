@@ -8,13 +8,13 @@ from kivy.properties import ObjectProperty
 from kivy.uix.popup import Popup
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
-from kivy.uix.tabbedpanel import TabbedPanel
+from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelHeader,TabbedPanelItem
 from kivy.uix.widget import Widget
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 import subprocess
 import os
-from sympy import cancel
+
 
 
 class MyPanel(TabbedPanel):
@@ -22,9 +22,14 @@ class MyPanel(TabbedPanel):
     format=""
     module="blast"
     ancien_module=""
+    parametre={"i":50,"d":30,"ev":10^100,"c":20,"bs":300}
+    defaut={"i":50,"d":30,"ev":10^100,"c":20,"bs":300}
     compteur_fasta=0
     compteur_sbml=0
     text_input = ObjectProperty(text)
+    tp = TabbedPanelItem()
+    th = TabbedPanelHeader(text='graph')
+    tp.add_widget(th)
 
     def print_ids(self):
         print(self.ids)
@@ -73,12 +78,12 @@ class MyPanel(TabbedPanel):
          
 
     def check_format(self, filename,files,format):
-        the_format=True
+        the_format=False
         check = filename[0][-4:]
         compteur=0
         print(check)
         name=""
-        if len(files) > 0 :
+        if files :
             for i in files:
                 if i[-4:]==".faa":
                     compteur+=1
@@ -98,9 +103,12 @@ class MyPanel(TabbedPanel):
                     Clock.schedule_once(self.dismiss_popup_dt, 1)
                     the_format=False
                     print("et la")
+                else:
+                    the_format=True
         else:
             if check == format:      
                 files.append(filename)
+                the_format=False
                 self.dismiss_popup()
                 print("b")
                 self._popup = Popup(title='Information',content=Label(text='Chargement Réussi'),size_hint=(0.5,0.5))
@@ -179,12 +187,17 @@ class MyPanel(TabbedPanel):
         self._popup = Popup(title="Clear file", content=content,
                             size_hint=(0.4, 0.4))
         self._popup.open()
-
+        
     def show_param(self):
         content = Parametres(cancel= self.dismiss_popup)
         self._popup = Popup(title="Enter Parameters", content=content,
                             size_hint=(1,1))
         self._popup.open()
+    
+    
+    
+
+
     
         
 class LoadDialog(FloatLayout):
@@ -195,23 +208,42 @@ class Choice(FloatLayout):
     cancel = ObjectProperty(None)
     test = ObjectProperty(None)
     
-    
-
-    
-
 
 class Parametres(BoxLayout):
-
+    
     cancel = ObjectProperty(None)
+    def add_value(self,param):
+        valeur=self.ids['test'].text
+        if valeur=="":
+            MyPanel.parametre[param] = MyPanel.defaut(param)
+        else:
+            value=float(valeur)
+            if param=="ev" and value<=1 and value>=0:
+                MyPanel.parametre['ev'] = value
+            if param=="i" and value<=100 and value>=0:
+                MyPanel.parametre['i'] = value
+            if param=="d" and value<=100 and value>=0:
+                MyPanel.parametre['d'] = value
+            if param=="c" and value<=100 and value>=0:
+                MyPanel.parametre['c'] = value
+            if param=="bs" and value<=1000 and value>=0:
+                MyPanel.parametre['bs'] = value
+            
+            else:
+                self._popup = Popup(title='Erreur',content=Label(text="La valeur entrée n'est pas comprise dans l'intervalle "),size_hint=(0.5,0.5))
+                self._popup.open()
+            
         
         
 class MyApp(App):
     
     def build(self):
+       
         return MyPanel()
     
 
 if __name__ == '__main__':
 	MyApp().run()
+   
 
   

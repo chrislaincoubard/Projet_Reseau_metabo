@@ -202,7 +202,7 @@
             size_hint: (0.1,0.1)
         TextInput:
             multiline : False
-            on_text_validate : 
+            on_text_validate : root.add_value("i")
             text : ""
             pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
             size_hint: (0.1,0.1)
@@ -212,7 +212,7 @@
             size_hint: (0.1,0.1)
         TextInput:
             multiline : False
-            on_text_validate : 
+            on_text_validate : root.add_value("d")
             text : ""
             pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
             size_hint: (0.1,0.1)
@@ -222,7 +222,7 @@
             size_hint: (0.1,0.1)
         TextInput:
             multiline : False
-            on_text_validate : 
+            on_text_validate : root.add_value("ev")
             text : ""
             pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
             size_hint: (0.1,0.1)
@@ -232,8 +232,8 @@
             size_hint: (0.1,0.1)
         TextInput:
             multiline : False
-            on_text_validate : 
             text : ""
+            on_text_validate : root.add_value("c")
             pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
             size_hint: (0.1,0.1)
         Label :
@@ -241,21 +241,21 @@
             pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
             size_hint: (0.1,0.1)
         TextInput:
+            id:test
             multiline : False
-            on_text_validate : 
+            on_text_validate : root.add_value("bs")
             text : ""
             pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
             size_hint: (0.1,0.1)
         Button :
             text : "cancel"
             on_release : root.cancel()
-            pos_hint: {"center_x" : 0.3,"center_y" : 0}
+            pos_hint: {"center_x" : 0.3,"center_y" : 0.1}
         Button :
             text : "Submit"
-            pos_hint: {"center_x" : 0.7,"center_y" : 0}
+            pos_hint: {"center_x" : 0.7,"center_y" : 0.1}
 
             
-
 
 
 
