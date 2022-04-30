@@ -19,7 +19,6 @@ class MyPanel(TabbedPanel):
     files={"gff":"","sbml":"","fna":"","tsv":"","faa1":"","faa2":""}
     select=False
     format=""
-
     nomBouton=""
     clearFiles=False
     module="blast"
@@ -35,7 +34,28 @@ class MyPanel(TabbedPanel):
     
 
     def print_files(self):
-        print(self.files)
+        affiche=[]
+        liste_blast=["faa1","faa2","gff","sbml"]
+        liste_mpwting=["gff","fna","tsv"]
+        liste_main=["faa1","faa2","gff","sbml","fna","tsv"]
+
+        if self.module=="blast":
+            for extension in liste_blast:
+                affiche += [extension,self.files.get(extension)]
+            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n {affiche[1][0]} : {affiche[1][1]}\n {affiche[2][0]} : {affiche[2][1]}\n {affiche[3][0]} : {affiche[3][1]}"),size_hint=(0.5,0.5))
+           
+        elif self.module=="mpwting":
+            for extension in liste_mpwting:
+                affiche+= self.files.get(extension)
+            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n {affiche[1][0]} : {affiche[1][1]}\n {affiche[2][0]} : {affiche[2][1]}"),size_hint=(0.5,0.5))
+
+        else:
+            for extension in liste_main:
+                affiche+= self.files.get(extension)
+            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n {affiche[1][0]} : {affiche[1][1]}\n {affiche[2][0]} : {affiche[2][1]}\n {affiche[3][0]} : {affiche[3][1]} \n {affiche[4][0]} : {affiche[4][1]}\n {affiche[5][0]} : {affiche[5][1]}"),size_hint=(0.5,0.5))
+
+
+            
     
 
     def dismiss_popup(self):
@@ -91,24 +111,34 @@ class MyPanel(TabbedPanel):
          
 
     def check_format(self, filename):
-        extension=filename.split(".")
+        extension=filename[0].split(".")
+        print("wsh")
         if extension[1] == self.format:
+            print("ici")
             for key in self.files.keys():
-                if self.files[key] == self.nomBouton :
+                print("la")
+                print(key)
+                print(self.nomBouton, "cc c le bouton")
+                if key == self.nomBouton :
+                    print("et là")
                     if self.files.get(key)!="":
                         content = ChoiceFiles(cancel=self.dismiss_popup, test =ChoiceFiles.selectchoice)
                         self._popup = Popup(title="Replace files", content=content,size_hint=(0.4, 0.4))
                         self._popup.open()
-                    else:    
+                    else:
+                        print("re là")    
                         self.files[key]=filename
                     if self.select==True:
                         self.files[key]=filename
+        
                     
         else:
             self._popup = Popup(title='Erreur',content=Label(text='Mauvais Format,reesayez'),size_hint=(0.5,0.5))
             self._popup.open()
             Clock.schedule_once(self.dismiss_popup_dt, 1)
         self.select=False
+
+        print(self.files)
             
 
    
