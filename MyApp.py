@@ -21,7 +21,7 @@ class MyPanel(TabbedPanel):
     format=""
     nomBouton=""
     clearFiles=False
-    module="blast"
+    module="main"
     ancien_module=""
     parametre={"i":50,"d":30,"ev":10^100,"c":20,"bs":300}
     defaut={"i":50,"d":30,"ev":10^100,"c":20,"bs":300}
@@ -36,19 +36,19 @@ class MyPanel(TabbedPanel):
 
         if self.module=="blast":
             for extension in liste_blast:
-                affiche += [extension,self.files.get(extension)]
-            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n {affiche[1][0]} : {affiche[1][1]}\n {affiche[2][0]} : {affiche[2][1]}\n {affiche[3][0]} : {affiche[3][1]}"),size_hint=(0.5,0.5))
-           
+                affiche.append([extension,self.files.get(extension)])
+            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n\n {affiche[2][0]} : {affiche[2][1]}\n\n {affiche[3][0]} : {affiche[3][1]}",font_size='20sp'),size_hint=(0.5,0.5))
+            self._popup.open()
         elif self.module=="mpwting":
             for extension in liste_mpwting:
-                affiche+= self.files.get(extension)
-            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n {affiche[1][0]} : {affiche[1][1]}\n {affiche[2][0]} : {affiche[2][1]}"),size_hint=(0.5,0.5))
-
+                affiche.append([extension,self.files.get(extension)])
+            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n \n {affiche[2][0]} : {affiche[2][1]}",font_size='20sp'),size_hint=(0.5,0.5))
+            self._popup.open()
         else:
             for extension in liste_main:
-                affiche+= self.files.get(extension)
-            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n {affiche[1][0]} : {affiche[1][1]}\n {affiche[2][0]} : {affiche[2][1]}\n {affiche[3][0]} : {affiche[3][1]} \n {affiche[4][0]} : {affiche[4][1]}\n {affiche[5][0]} : {affiche[5][1]}"),size_hint=(0.5,0.5))    
-    
+                affiche.append([extension,self.files.get(extension)])
+            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n\n {affiche[2][0]} : {affiche[2][1]}\n\n {affiche[3][0]} : {affiche[3][1]} \n\n {affiche[4][0]} : {affiche[4][1]}\n\n {affiche[5][0]} : {affiche[5][1]}",font_size='20sp'),size_hint=(0.8,0.8))    
+            self._popup.open()
 
     def dismiss_popup(self):
         self._popup.dismiss()
