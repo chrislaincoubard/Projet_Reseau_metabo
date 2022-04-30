@@ -35,6 +35,24 @@
                 on_press: root.clear_files()
                 on_release: root.cancel()
 
+<ChoiceFiles>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        Label:
+            text: 'Voulez-vous remplacer le fichiers?'
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "No"
+                on_release: root.cancel()
+            Button:
+                text: "Yes"
+                on_press: root.selectchoice()
+                on_release: root.cancel()
+
             
 
 <MyPanel>:

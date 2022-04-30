@@ -25,14 +25,9 @@ class MyPanel(TabbedPanel):
     ancien_module=""
     parametre={"i":50,"d":30,"ev":10^100,"c":20,"bs":300}
     defaut={"i":50,"d":30,"ev":10^100,"c":20,"bs":300}
-    
+    nomFichier=""
     text_input = ObjectProperty(text)
     
-
-    def print_ids(self):
-        print(self.ids)
-    
-
     def print_files(self):
         affiche=[]
         liste_blast=["faa1","faa2","gff","sbml"]
@@ -52,10 +47,7 @@ class MyPanel(TabbedPanel):
         else:
             for extension in liste_main:
                 affiche+= self.files.get(extension)
-            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n {affiche[1][0]} : {affiche[1][1]}\n {affiche[2][0]} : {affiche[2][1]}\n {affiche[3][0]} : {affiche[3][1]} \n {affiche[4][0]} : {affiche[4][1]}\n {affiche[5][0]} : {affiche[5][1]}"),size_hint=(0.5,0.5))
-
-
-            
+            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n {affiche[1][0]} : {affiche[1][1]}\n {affiche[2][0]} : {affiche[2][1]}\n {affiche[3][0]} : {affiche[3][1]} \n {affiche[4][0]} : {affiche[4][1]}\n {affiche[5][0]} : {affiche[5][1]}"),size_hint=(0.5,0.5))    
     
 
     def dismiss_popup(self):
@@ -80,13 +72,12 @@ class MyPanel(TabbedPanel):
         self._popup.open()
 
 
-
     def load(self, path, filename):
         
         with open(os.path.join(path, filename[0])) as stream:
             self.text_input.text = stream.read()
-        
-        self.check_format(filename)
+        self.nomFichier=filename[0]
+        self.check_format()
         
         
     def go_module(self):
@@ -108,10 +99,8 @@ class MyPanel(TabbedPanel):
                 self.launch_main(self.files)
         
 
-         
-
-    def check_format(self, filename):
-        extension=filename[0].split(".")
+    def check_format(self,):
+        extension=self.nomFichier.split(".")
         print("wsh")
         if extension[1] == self.format:
             print("ici")
@@ -127,21 +116,21 @@ class MyPanel(TabbedPanel):
                         self._popup.open()
                     else:
                         print("re là")    
-                        self.files[key]=filename
-                    if self.select==True:
-                        self.files[key]=filename
-        
+                        self.files[key]=self.nomFichier
+                        self.dismiss_popup
                     
         else:
             self._popup = Popup(title='Erreur',content=Label(text='Mauvais Format,reesayez'),size_hint=(0.5,0.5))
             self._popup.open()
             Clock.schedule_once(self.dismiss_popup_dt, 1)
         self.select=False
-
+        self.dismiss_popup
         print(self.files)
+        print(self.nomBouton)
+        print(self.nomFichier)
             
-
-   
+    def changefiles(self):
+        self.files[self.nomBouton]=self.nomFichier
         
 
 
@@ -194,11 +183,7 @@ class MyPanel(TabbedPanel):
         self._popup.open()
     
     
-    
-
-
-    
-        
+      
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
@@ -218,8 +203,9 @@ class ChoiceFiles(FloatLayout):
     test = ObjectProperty(None)
 
     def selectchoice(self):
-        MyPanel.select=True
-    
+        MyPanel.changefiles
+        
+        
     
         
         
