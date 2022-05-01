@@ -29,6 +29,7 @@ class MyPanel(TabbedPanel):
     filesName=""
     text_input = ObjectProperty(text)
     verifie_replace=False
+    the_load_check=False
     
     def print_files(self):
         affiche=[]
@@ -76,18 +77,15 @@ class MyPanel(TabbedPanel):
                             size_hint=(0.9, 0.9))
         self._popup.open()
 
-
     def load(self, path, filename):
-        
+        self.the_load_check=False
         with open(os.path.join(path, filename[0])) as stream:
             self.text_input.text = stream.read()
         self.filesName=filename[0]
         verifie=self.check_format()
         if verifie or self.verifie_replace:
-            print("je suis là")
+            self.dismiss_popup()
             self.verifie_replace=False
-            self.dismiss_popup
-        
         
     def go_module(self):
         check_value=True
@@ -106,37 +104,27 @@ class MyPanel(TabbedPanel):
                     check_value=False
             if check_value:
                 self.launch_main(self.files)
-        
 
     def check_format(self):
         good_format=False
         extension=self.filesName.split(".")
-        print("wsh")
         if extension[1] == self.format:
-            print("ici")
             for key in self.files.keys():
-                print("la")
-                print(key)
-                print(self.buttonName, "cc c le bouton")
                 if key == self.buttonName :
-                    print("et là")
                     if self.files.get(key)!="":
                         content = ChoiceFiles(cancel=self.dismiss_popup, test =ChoiceFiles.selectchoice)
                         self._popup = Popup(title="Replace files", content=content,size_hint=(0.4, 0.4))
                         self._popup.open()
 
                     else:
-                        print("re là")    
                         self.files[key]=self.filesName
                         good_format=True
                     
         else:
-            self._popup = Popup(title='Erreur',content=Label(text='Wrong format, try again'),size_hint=(0.5,0.5))
+            self._popup = Popup(title='Error',content=Label(text='Wrong format, try again'),size_hint=(0.5,0.5))
             self._popup.open()
             Clock.schedule_once(self.dismiss_popup_dt, 1)
-
         return(good_format)
-
             
     def changefiles(self):
         self.files[self.buttonName]=self.filesName
@@ -171,29 +159,22 @@ class MyPanel(TabbedPanel):
         else :
             print('command : fail')
         self.files.clear()
-    
-    
-
 
     def show_clear(self):
         content = Choice(cancel=self.dismiss_popup, test = Choice.clear_files)
-        self._popup = Popup(title="Clear file", content=content,
-                            size_hint=(0.4, 0.4))
+        self._popup = Popup(title="Clear file", content=content,size_hint=(0.4, 0.4))
         self._popup.open()
-
-
 
     def show_param(self):
         content = Parameters(cancel= self.dismiss_popup)
-        self._popup = Popup(title="Enter Parameters", content=content,
-                            size_hint=(1,1))
+        self._popup = Popup(title="Enter Parameters", content=content,size_hint=(1,1))
         self._popup.open()
     
-    
-      
+         
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
+
 
 class Choice(FloatLayout):
     cancel = ObjectProperty(None)
@@ -205,18 +186,14 @@ class ChoiceFiles(FloatLayout):
     test = ObjectProperty(None)
 
     def selectchoice(self):
-        MyPanel.changefiles
-        
-        
+        MyPanel.changefiles()
     
 
 class Parameters(BoxLayout):
-    
     cancel = ObjectProperty(None)
+
     def add_value(self,param,id):
-        
         valeur=self.ids[id].text
-        print(valeur)
         if valeur!="":
             value=float(valeur)
             if param=="ev" and value<=1 and value>=0:
@@ -229,21 +206,17 @@ class Parameters(BoxLayout):
                 MyPanel.parametre['c'] = value
             elif param=="bs" and value<=1000 and value>=0:
                 MyPanel.parametre['bs'] = value
-            
             else:
-                self._popup = Popup(title='Erreur',content=Label(text="La valeur entrée n'est pas comprise dans l'intervalle "),size_hint=(0.5,0.5))
-                self._popup.open()
-                
+                self._popup = Popup(title='Error',content=Label(text="La valeur entrée n'est pas comprise dans l'intervalle "),size_hint=(0.5,0.5))
+                self._popup.open()          
 
     def reset(self):
-        MyPanel.parametre.update(MyPanel.defaut)
-            
+        MyPanel.parametre.update(MyPanel.defaut)           
         
         
 class MyApp(App):
     
     def build(self):
-       
         return MyPanel()
     
 
