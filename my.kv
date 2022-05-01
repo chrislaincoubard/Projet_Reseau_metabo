@@ -16,7 +16,7 @@
 
             Button:
                 text: "Load"
-                on_release: root.load(filechooser.path, filechooser.selection)
+                on_press: root.load(filechooser.path, filechooser.selection)
 <Choice>:
     BoxLayout:
         size: root.size
@@ -29,7 +29,7 @@
             height: 30
             Button:
                 text: "No"
-                on_release: root.cancel()
+                on_press: root.cancel()
             Button:
                 text: "Yes"
                 on_press: root.clear_files()
@@ -47,7 +47,7 @@
             height: 30
             Button:
                 text: "No"
-                on_release: root.cancel()
+                on_press: root.cancel()
             Button:
                 text: "Yes"
                 on_press: root.selectchoice()
@@ -204,84 +204,94 @@
                 
 <Button>:
     size_hint: 0.27,0.12  
-    font_size : 20
-    color : 1,1,1
-    background_color : "#E11E1E"
+    font_size: 20
+    color: 1,1,1
+    background_color: "#E11E1E"
 
-<Parametres>:
+<Parameters>:
     BoxLayout:
         orientation:"vertical"
         size: root.size
         pos: root.pos
-        Label :
-            font_size : 20
-            text : "Don't forget to press enter to save each parameter "
-            pos_hint: {"center_x" : 0.5,"center_y" : 0.1}
-            size_hint: (0.1,0.1)
-        Label :
-            text : "blast's identity percentage tolerated"
-            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-            size_hint: (0.1,0.1)
-        TextInput:
-            id: input1
-            multiline : False
-            on_text_validate : root.add_value("i","input1")
-            text : ""
-            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-            size_hint: (0.1,0.1)
-        Label :
-            text : "tolerated length difference between the two aligned sequences"
-            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-            size_hint: (0.1,0.1)
-        TextInput:
-            id:input2
-            multiline : False
-            on_text_validate : root.add_value("d","input2")
-            text : ""
-            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-            size_hint: (0.1,0.1)
-        Label :
-            text : "blast's e-value threshold value"
-            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-            size_hint: (0.1,0.1)
-        TextInput:
-            id:input3
-            multiline : False
-            on_text_validate : root.add_value("ev","input3")
-            text : ""
-            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-            size_hint: (0.1,0.1)
-        Label :
-            text : "minimum sequence coverage tolerated"
-            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-            size_hint: (0.1,0.1)
-        TextInput:
-            id:input4
-            multiline : False
-            text : ""
-            on_text_validate : root.add_value("c","input4")
-            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-            size_hint: (0.1,0.1)
-        Label :
-            text : "blast's bit-score threshold value"
-            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-            size_hint: (0.1,0.1)
-        TextInput:
-            id:input5
-            multiline : False
-            on_text_validate : root.add_value("bs","input5")
-            text : ""
-            pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-            size_hint: (0.1,0.1)
-        Button :
-            text : "Return"
-            on_release : root.cancel()
-            pos_hint: {"center_x" : 0.3,"center_y" : 0.0}
-        Button :
-            text : "Reset"
-            on_press : root.reset()
-            on_press : root.cancel()
-            pos_hint: {"center_x" : 0.7,"center_y" : 0.1}
+        BoxLayout:
+            orientation:"vertical"
+            size_hint: (1,0.8)
+            Label:
+                font_size : 20
+                text : "Don't forget to press enter to save each parameter "
+                color:"#F00020"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.1}
+                size_hint: (0.1,0.1)
+            Label:
+                text : "blast's identity percentage tolerated"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                size_hint: (0.1,0.1)
+            TextInput:
+                id: input1
+                multiline : False
+                on_text_validate : root.add_value("i","input1")
+                text : ""
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                size_hint: (0.1,0.1)
+            Label:
+                text : "tolerated length difference between the two aligned sequences"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                size_hint: (0.1,0.1)
+            TextInput:
+                id:input2
+                multiline : False
+                on_text_validate : root.add_value("d","input2")
+                text : ""
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                size_hint: (0.1,0.1)
+            Label:
+                text : "blast's e-value threshold value"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                size_hint: (0.1,0.1)
+            TextInput:
+                id:input3
+                multiline : False
+                on_text_validate : root.add_value("ev","input3")
+                text : ""
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                size_hint: (0.1,0.1)
+            Label:
+                text : "minimum sequence coverage tolerated"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                size_hint: (0.1,0.1)
+            TextInput:
+                id:input4
+                multiline : False
+                text : ""
+                on_text_validate : root.add_value("c","input4")
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                size_hint: (0.1,0.1)
+            Label:
+                text : "blast's bit-score threshold value"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                size_hint: (0.1,0.1)
+            TextInput:
+                id:input5
+                multiline : False
+                on_text_validate : root.add_value("bs","input5")
+                text : ""
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                size_hint: (0.1,0.1)
+        FloatLayout:
+            size_hint: (1,0.2)
+            Button:
+                text : "Return"
+                on_release : root.cancel()
+                pos_hint: {"center_x" : 0.3,"center_y" : 0.3}
+                size_hint: (0.3,0.4)
+            Button:
+                text : "Reset"
+                on_press : root.reset()
+                on_press : root.cancel()
+                pos_hint: {"center_x" : 0.7,"center_y" : 0.3}
+                size_hint: (0.3,0.4)
+        
+
 
             
 

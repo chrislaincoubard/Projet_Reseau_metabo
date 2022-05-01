@@ -1,4 +1,5 @@
 
+from sys import get_coroutine_origin_tracking_depth
 from kivy.clock import Clock
 from cgitb import text
 from kivy.app import App
@@ -19,14 +20,15 @@ class MyPanel(TabbedPanel):
     files={"gff":"","sbml":"","fna":"","tsv":"","faa1":"","faa2":""}
     select=False
     format=""
-    nomBouton=""
+    buttonName=""
     clearFiles=False
     module="main"
-    ancien_module=""
+    old_module=""
     parametre={"i":50,"d":30,"ev":10^100,"c":20,"bs":300}
     defaut={"i":50,"d":30,"ev":10^100,"c":20,"bs":300}
-    nomFichier=""
+    filesName=""
     text_input = ObjectProperty(text)
+    verifie_replace=False
     
     def print_files(self):
         affiche=[]
@@ -37,18 +39,21 @@ class MyPanel(TabbedPanel):
         if self.module=="blast":
             for extension in liste_blast:
                 affiche.append([extension,self.files.get(extension)])
-            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n\n {affiche[2][0]} : {affiche[2][1]}\n\n {affiche[3][0]} : {affiche[3][1]}",font_size='20sp'),size_hint=(0.5,0.5))
+            self._popup = Popup(title='Files',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n\n {affiche[2][0]} : {affiche[2][1]}\n\n {affiche[3][0]} : {affiche[3][1]}",font_size='20sp'),size_hint=(0.5,0.5))
             self._popup.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 3)
         elif self.module=="mpwting":
             for extension in liste_mpwting:
                 affiche.append([extension,self.files.get(extension)])
-            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n \n {affiche[2][0]} : {affiche[2][1]}",font_size='20sp'),size_hint=(0.5,0.5))
+            self._popup = Popup(title='Files',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n \n {affiche[2][0]} : {affiche[2][1]}",font_size='20sp'),size_hint=(0.5,0.5))
             self._popup.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 3)
         else:
             for extension in liste_main:
                 affiche.append([extension,self.files.get(extension)])
-            self._popup = Popup(title='Fichiers',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n\n {affiche[2][0]} : {affiche[2][1]}\n\n {affiche[3][0]} : {affiche[3][1]} \n\n {affiche[4][0]} : {affiche[4][1]}\n\n {affiche[5][0]} : {affiche[5][1]}",font_size='20sp'),size_hint=(0.8,0.8))    
+            self._popup = Popup(title='Files',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n\n {affiche[2][0]} : {affiche[2][1]}\n\n {affiche[3][0]} : {affiche[3][1]} \n\n {affiche[4][0]} : {affiche[4][1]}\n\n {affiche[5][0]} : {affiche[5][1]}",font_size='20sp'),size_hint=(0.8,0.8))    
             self._popup.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 3)
 
     def dismiss_popup(self):
         self._popup.dismiss()
@@ -56,12 +61,12 @@ class MyPanel(TabbedPanel):
     def dismiss_popup_dt(self, dt):
         self._popup.dismiss()
 
-    def show_load(self,text,extension,textbis):
-        self.nomBouton=text
+    def show_load(self,textName,extension,textModule):
+        self.buttonName=textName
         self.format=extension
-        self.ancien_module=self.module
-        self.module=textbis
-        if self.module!=self.ancien_module:
+        self.old_module=self.module
+        self.module=textModule
+        if self.module!=self.old_module:
             for key in self.files.keys():
                 self.files[key] = ""
 
@@ -76,8 +81,12 @@ class MyPanel(TabbedPanel):
         
         with open(os.path.join(path, filename[0])) as stream:
             self.text_input.text = stream.read()
-        self.nomFichier=filename[0]
-        self.check_format()
+        self.filesName=filename[0]
+        verifie=self.check_format()
+        if verifie or self.verifie_replace:
+            print("je suis là")
+            self.verifie_replace=False
+            self.dismiss_popup
         
         
     def go_module(self):
@@ -99,41 +108,39 @@ class MyPanel(TabbedPanel):
                 self.launch_main(self.files)
         
 
-    def check_format(self,):
-        extension=self.nomFichier.split(".")
+    def check_format(self):
+        good_format=False
+        extension=self.filesName.split(".")
         print("wsh")
         if extension[1] == self.format:
             print("ici")
             for key in self.files.keys():
                 print("la")
                 print(key)
-                print(self.nomBouton, "cc c le bouton")
-                if key == self.nomBouton :
+                print(self.buttonName, "cc c le bouton")
+                if key == self.buttonName :
                     print("et là")
                     if self.files.get(key)!="":
                         content = ChoiceFiles(cancel=self.dismiss_popup, test =ChoiceFiles.selectchoice)
                         self._popup = Popup(title="Replace files", content=content,size_hint=(0.4, 0.4))
                         self._popup.open()
+
                     else:
                         print("re là")    
-                        self.files[key]=self.nomFichier
-                        self.dismiss_popup
+                        self.files[key]=self.filesName
+                        good_format=True
                     
         else:
-            self._popup = Popup(title='Erreur',content=Label(text='Mauvais Format,reesayez'),size_hint=(0.5,0.5))
+            self._popup = Popup(title='Erreur',content=Label(text='Wrong format, try again'),size_hint=(0.5,0.5))
             self._popup.open()
             Clock.schedule_once(self.dismiss_popup_dt, 1)
-        self.select=False
-        self.dismiss_popup
-        print(self.files)
-        print(self.nomBouton)
-        print(self.nomFichier)
+
+        return(good_format)
+
             
     def changefiles(self):
-        self.files[self.nomBouton]=self.nomFichier
-        
-
-
+        self.files[self.buttonName]=self.filesName
+        self.verifie_replace=True
     
     def launch_blasting(self,files):
         cmd = f"python3 blasting.py {files[0]} {files[1]} {files[2]} {files[3]}"
@@ -177,7 +184,7 @@ class MyPanel(TabbedPanel):
 
 
     def show_param(self):
-        content = Parametres(cancel= self.dismiss_popup)
+        content = Parameters(cancel= self.dismiss_popup)
         self._popup = Popup(title="Enter Parameters", content=content,
                             size_hint=(1,1))
         self._popup.open()
@@ -191,12 +198,7 @@ class LoadDialog(FloatLayout):
 class Choice(FloatLayout):
     cancel = ObjectProperty(None)
     test = ObjectProperty(None)
-    
-    def clear_files(self):
-        for key in MyPanel.files.keys():
-            MyPanel.files[key] = ""
-        self._popup = Popup(title='Informations',content=Label(text='Liste de fichiers effacée'),size_hint=(0.5,0.5))
-        self._popup.open()
+
 
 class ChoiceFiles(FloatLayout):
     cancel = ObjectProperty(None)
@@ -207,11 +209,8 @@ class ChoiceFiles(FloatLayout):
         
         
     
-        
-        
-    
 
-class Parametres(BoxLayout):
+class Parameters(BoxLayout):
     
     cancel = ObjectProperty(None)
     def add_value(self,param,id):
@@ -234,6 +233,7 @@ class Parametres(BoxLayout):
             else:
                 self._popup = Popup(title='Erreur',content=Label(text="La valeur entrée n'est pas comprise dans l'intervalle "),size_hint=(0.5,0.5))
                 self._popup.open()
+                
 
     def reset(self):
         MyPanel.parametre.update(MyPanel.defaut)
