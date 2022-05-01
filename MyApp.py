@@ -4,16 +4,21 @@ from kivy.clock import Clock
 from cgitb import text
 from kivy.app import App
 from kivy.properties import ObjectProperty
+from kivy.properties import StringProperty
+from kivy.core.window import Window
 from kivy.uix.popup import Popup
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.tabbedpanel import TabbedPanel
 from kivy.uix.boxlayout import BoxLayout
-from functools import partial
+from kivy.uix.button import Button
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.gridlayout import GridLayout
+
 
 import subprocess
 import os
-
+Window.size=(1000,800)
 
 
 class MyPanel(TabbedPanel):
@@ -39,22 +44,42 @@ class MyPanel(TabbedPanel):
 
         if self.module=="blast":
             for extension in liste_blast:
-                affiche.append([extension,self.files.get(extension)])
-            self._popup = Popup(title='Files',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n\n {affiche[2][0]} : {affiche[2][1]}\n\n {affiche[3][0]} : {affiche[3][1]}",font_size='20sp'),size_hint=(0.5,0.5))
-            self._popup.open()
-            Clock.schedule_once(self.dismiss_popup_dt, 3)
+                name_files=self.files.get(extension).split("/")
+                affiche.append([extension,name_files[-1]])       
+            layout = GridLayout(cols=1,size_hint=(0.8,0.8))
+            popupLabel = Label(text = f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n \n {affiche[2][0]} : {affiche[2][1]} \n\n {affiche[3][0]} : {affiche[3][1]}",font_size='20sp')
+            closeButton = Button(text = "Exit")
+            layout.add_widget(popupLabel)
+            layout.add_widget(closeButton)       
+            popup = Popup(title ='Files',size_hint =(0.8,0.8)) 
+            popup.add_widget(layout) 
+            popup.open()   
+        
         elif self.module=="mpwting":
             for extension in liste_mpwting:
-                affiche.append([extension,self.files.get(extension)])
-            self._popup = Popup(title='Files',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n \n {affiche[2][0]} : {affiche[2][1]}",font_size='20sp'),size_hint=(0.5,0.5))
-            self._popup.open()
-            Clock.schedule_once(self.dismiss_popup_dt, 3)
+                name_files=self.files.get(extension).split("/")
+                affiche.append([extension,name_files[-1]])    
+            layout = GridLayout(cols=1,size_hint=(0.8,0.8))
+            popupLabel = Label(text = f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n \n {affiche[2][0]} : {affiche[2][1]}",font_size='20sp')
+            closeButton = Button(text = "Exit")
+            layout.add_widget(popupLabel)
+            layout.add_widget(closeButton)       
+            popup = Popup(title ='Files',size_hint =(0.8,0.8)) 
+            popup.add_widget(layout) 
+            popup.open()   
+            
         else:
             for extension in liste_main:
-                affiche.append([extension,self.files.get(extension)])
-            self._popup = Popup(title='Files',content=Label(text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n\n {affiche[2][0]} : {affiche[2][1]}\n\n {affiche[3][0]} : {affiche[3][1]} \n\n {affiche[4][0]} : {affiche[4][1]}\n\n {affiche[5][0]} : {affiche[5][1]}",font_size='20sp'),size_hint=(0.8,0.8))    
-            self._popup.open()
-            Clock.schedule_once(self.dismiss_popup_dt, 3)
+                name_files=self.files.get(extension).split("/")
+                affiche.append([extension,name_files[-1]])        
+            layout = GridLayout(cols=1,size_hint=(0.8,0.8))
+            popupLabel = Label(text =f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n\n {affiche[2][0]} : {affiche[2][1]}\n\n {affiche[3][0]} : {affiche[3][1]} \n\n {affiche[4][0]} : {affiche[4][1]}\n\n {affiche[5][0]} : {affiche[5][1]}",font_size='20sp')
+            closeButton = Button(text = "Exit")
+            layout.add_widget(popupLabel)
+            layout.add_widget(closeButton)       
+            popup = Popup(title ='Files',size_hint =(0.8,0.8)) 
+            popup.add_widget(layout) 
+            popup.open()
 
     def dismiss_popup(self):
         self._popup.dismiss()
@@ -160,10 +185,6 @@ class MyPanel(TabbedPanel):
             print('command : fail')
         self.files.clear()
 
-    def show_clear(self):
-        content = Choice(cancel=self.dismiss_popup, test = Choice.clear_files)
-        self._popup = Popup(title="Clear file", content=content,size_hint=(0.4, 0.4))
-        self._popup.open()
 
     def show_param(self):
         content = Parameters(cancel= self.dismiss_popup)
@@ -175,12 +196,8 @@ class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
 
-
-class Choice(FloatLayout):
+class Exit(FloatLayout):
     cancel = ObjectProperty(None)
-    test = ObjectProperty(None)
-
-
 class ChoiceFiles(FloatLayout):
     cancel = ObjectProperty(None)
     test = ObjectProperty(None)
@@ -193,23 +210,28 @@ class Parameters(BoxLayout):
     cancel = ObjectProperty(None)
 
     def add_value(self,param,id):
+        MyPanel.param=param
+        MyPanel.id=id
         valeur=self.ids[id].text
-        if valeur!="":
-            value=float(valeur)
-            if param=="ev" and value<=1 and value>=0:
-                MyPanel.parametre['ev'] = value
-            elif param=="i" and value<=100 and value>=0:
-                MyPanel.parametre['i'] = value
-            elif param=="d" and value<=100 and value>=0:
-                MyPanel.parametre['d'] = value
-            elif param=="c" and value<=100 and value>=0:
-                MyPanel.parametre['c'] = value
-            elif param=="bs" and value<=1000 and value>=0:
-                MyPanel.parametre['bs'] = value
-            else:
-                self._popup = Popup(title='Error',content=Label(text="La valeur entrée n'est pas comprise dans l'intervalle "),size_hint=(0.5,0.5))
-                self._popup.open()          
-
+        try:
+            if valeur!="":
+                value=float(valeur)
+                if param=="ev" and value<=1 and value>=0:
+                    MyPanel.parametre['ev'] = value
+                elif param=="i" and value<=100 and value>=0:
+                    MyPanel.parametre['i'] = value
+                elif param=="d" and value<=100 and value>=0:
+                    MyPanel.parametre['d'] = value
+                elif param=="c" and value<=100 and value>=0:
+                    MyPanel.parametre['c'] = value
+                elif param=="bs" and value<=1000 and value>=0:
+                    MyPanel.parametre['bs'] = value
+                else:
+                    self._popup = Popup(title='Error',content=Label(text="The entered value is not within the range"),size_hint=(0.5,0.5))
+                    self._popup.open()          
+        except:
+            self._popup = Popup(title='Error',content=Label(text="Value is not numeric "),size_hint=(0.5,0.5))
+            self._popup.open() 
     def reset(self):
         MyPanel.parametre.update(MyPanel.defaut)           
         

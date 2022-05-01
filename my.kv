@@ -17,23 +17,14 @@
             Button:
                 text: "Load"
                 on_press: root.load(filechooser.path, filechooser.selection)
-<Choice>:
-    BoxLayout:
-        size: root.size
-        pos: root.pos
-        orientation: "vertical"
-        Label:
-            text: 'Voulez-vous réinitialiser la liste de fichiers?'
-        BoxLayout:
-            size_hint_y: None
-            height: 30
-            Button:
-                text: "No"
-                on_press: root.cancel()
-            Button:
-                text: "Yes"
-                on_press: root.clear_files()
-                on_release: root.cancel()
+<Exit>:
+    auto_dismiss: False
+    Label:
+        id:name_label
+        text:""
+    Button:
+        text: 'Exit'
+        on_release: root.cancel()
 
 <ChoiceFiles>:
     BoxLayout:
@@ -57,12 +48,12 @@
 
 <MyPanel>:
     
-    do_default_tab : False
+    do_default_tab: False
+    size:(400,400)
+    TabbedPanelItem:
     
-    TabbedPanelItem :
-    
-        text : "Main"
-        font_size :  20
+        text: "Main"
+        font_size:  20
         FloatLayout:
 
             Button:
@@ -113,10 +104,10 @@
                 pos_hint: {"center_x" : 0.2,"center_y" : 0.2}
                 on_press : root.show_param()
             Button:
-                id : btn
-                size_hint: 0.12,0.12 
-                text:"print files "
-                pos_hint: {"center_x" : 0.9,"center_y" : 0.5}
+                id : btn 
+                size_hint:(0.18,0.07)
+                text:"View files "
+                pos_hint: {"center_x" : 0.9,"center_y" : 0.94}
                 on_press : root.print_files()
 
 
@@ -156,10 +147,10 @@
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.5}
                 on_press : root.go_module("blast")
             Button:
-                id : btn
-                size_hint: 0.12,0.12 
-                text:"print files "
-                pos_hint: {"center_x" : 0.9,"center_y" : 0.5}
+                id : btn 
+                size_hint:(0.18,0.07)
+                text:"View files "
+                pos_hint: {"center_x" : 0.9,"center_y" : 0.94}
                 on_press : root.print_files()
 
     TabbedPanelItem :
@@ -194,10 +185,10 @@
                 on_press : root.go_module("mpwting") 
             
             Button:
-                id : btn
-                size_hint: 0.12,0.12 
-                text:"print files "
-                pos_hint: {"center_x" : 0.9,"center_y" : 0.5}
+                id : btn 
+                size_hint:(0.18,0.07)
+                text:"View files "
+                pos_hint: {"center_x" : 0.9,"center_y" : 0.94}
                 on_press : root.print_files()
 
             
@@ -294,6 +285,5 @@
 
 
             
-
 
 
