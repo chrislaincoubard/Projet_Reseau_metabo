@@ -1,10 +1,7 @@
-
-from sys import get_coroutine_origin_tracking_depth
 from kivy.clock import Clock
 from cgitb import text
 from kivy.app import App
 from kivy.properties import ObjectProperty
-from kivy.properties import StringProperty
 from kivy.core.window import Window
 from kivy.uix.popup import Popup
 from kivy.uix.floatlayout import FloatLayout
@@ -12,10 +9,7 @@ from kivy.uix.label import Label
 from kivy.uix.tabbedpanel import TabbedPanel
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.gridlayout import GridLayout
-
-
 import subprocess
 import os
 Window.size=(1000,800)
@@ -48,12 +42,13 @@ class MyPanel(TabbedPanel):
                 affiche.append([extension,name_files[-1]])       
             layout = GridLayout(cols=1,size_hint=(0.8,0.8))
             popupLabel = Label(text = f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n \n {affiche[2][0]} : {affiche[2][1]} \n\n {affiche[3][0]} : {affiche[3][1]}",font_size='20sp')
-            closeButton = Button(text = "Exit")
+            closeButton = Button(text = "Exit",color="#F00020")
+            closeButton.bind(on_press=self.callback)
             layout.add_widget(popupLabel)
             layout.add_widget(closeButton)       
-            popup = Popup(title ='Files',size_hint =(0.8,0.8)) 
-            popup.add_widget(layout) 
-            popup.open()   
+            self._popup = Popup(title ='Files',size_hint =(0.8,0.8)) 
+            self._popup.add_widget(layout) 
+            self._popup.open()   
         
         elif self.module=="mpwting":
             for extension in liste_mpwting:
@@ -61,12 +56,13 @@ class MyPanel(TabbedPanel):
                 affiche.append([extension,name_files[-1]])    
             layout = GridLayout(cols=1,size_hint=(0.8,0.8))
             popupLabel = Label(text = f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n \n {affiche[2][0]} : {affiche[2][1]}",font_size='20sp')
-            closeButton = Button(text = "Exit")
+            closeButton = Button(text = "Exit",color="#F00020")
+            closeButton.bind(on_press=self.callback)
             layout.add_widget(popupLabel)
             layout.add_widget(closeButton)       
-            popup = Popup(title ='Files',size_hint =(0.8,0.8)) 
-            popup.add_widget(layout) 
-            popup.open()   
+            self._popup = Popup(title ='Files',size_hint =(0.8,0.8)) 
+            self._popup.add_widget(layout) 
+            self._popup.open()   
             
         else:
             for extension in liste_main:
@@ -74,12 +70,18 @@ class MyPanel(TabbedPanel):
                 affiche.append([extension,name_files[-1]])        
             layout = GridLayout(cols=1,size_hint=(0.8,0.8))
             popupLabel = Label(text =f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n\n {affiche[2][0]} : {affiche[2][1]}\n\n {affiche[3][0]} : {affiche[3][1]} \n\n {affiche[4][0]} : {affiche[4][1]}\n\n {affiche[5][0]} : {affiche[5][1]}",font_size='20sp')
-            closeButton = Button(text = "Exit")
+            closeButton = Button(text = "Exit",color="#F00020")
+            closeButton.bind(on_press=self.callback)
             layout.add_widget(popupLabel)
             layout.add_widget(closeButton)       
-            popup = Popup(title ='Files',size_hint =(0.8,0.8)) 
-            popup.add_widget(layout) 
-            popup.open()
+            self._popup = Popup(title ='Files',size_hint =(0.8,0.8)) 
+            self._popup.add_widget(layout) 
+            self._popup.open()
+
+    def callback(self,instance):
+        if instance.state=="down":
+            self.dismiss_popup()
+            
 
     def dismiss_popup(self):
         self._popup.dismiss()
@@ -196,8 +198,6 @@ class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
 
-class Exit(FloatLayout):
-    cancel = ObjectProperty(None)
 class ChoiceFiles(FloatLayout):
     cancel = ObjectProperty(None)
     test = ObjectProperty(None)

@@ -12,21 +12,16 @@
             height: 30
             Button:
                 text: "Cancel"
+                background_color:"#F00020"
                 on_release: root.cancel()
 
             Button:
                 text: "Load"
+                background_color:"#34C924"
                 on_press: root.load(filechooser.path, filechooser.selection)
-<Exit>:
-    auto_dismiss: False
-    Label:
-        id:name_label
-        text:""
-    Button:
-        text: 'Exit'
-        on_release: root.cancel()
 
 <ChoiceFiles>:
+    auto_dismiss:False
     BoxLayout:
         size: root.size
         pos: root.pos
@@ -38,9 +33,11 @@
             height: 30
             Button:
                 text: "No"
+                background_color:"#F00020"
                 on_press: root.cancel()
             Button:
                 text: "Yes"
+                background_color:"#78c679"
                 on_press: root.selectchoice()
                 on_release: root.cancel()
 
@@ -95,11 +92,13 @@
             Button:
                 id : btn7
                 text:"Run"
+                background_color:"#a1d99b"
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.2}
                 on_press : root.go_module("main")
 
             Button:
                 id : btn
+                background_color:"#CECECE"
                 text:"Parameters"
                 pos_hint: {"center_x" : 0.2,"center_y" : 0.2}
                 on_press : root.show_param()
@@ -107,6 +106,7 @@
                 id : btn 
                 size_hint:(0.18,0.07)
                 text:"View files "
+                background_color:"#fcbba1"
                 pos_hint: {"center_x" : 0.9,"center_y" : 0.94}
                 on_press : root.print_files()
 
@@ -144,12 +144,20 @@
             Button:
                 id : btn
                 text:"Run "
-                pos_hint: {"center_x" : 0.7,"center_y" : 0.5}
+                background_color:"#a1d99b"
+                pos_hint: {"center_x" : 0.7,"center_y" : 0.6}
                 on_press : root.go_module("blast")
+            Button:
+                id : btn
+                background_color:"#CECECE"
+                text:"Parameters"
+                pos_hint: {"center_x" : 0.7,"center_y" : 0.4}
+                on_press : root.show_param()
             Button:
                 id : btn 
                 size_hint:(0.18,0.07)
                 text:"View files "
+                background_color:"#fcbba1"
                 pos_hint: {"center_x" : 0.9,"center_y" : 0.94}
                 on_press : root.print_files()
 
@@ -181,6 +189,7 @@
             Button:
                 id : btn
                 text:"Run"
+                background_color:"#a1d99b"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
                 on_press : root.go_module("mpwting") 
             
@@ -188,6 +197,7 @@
                 id : btn 
                 size_hint:(0.18,0.07)
                 text:"View files "
+                background_color:"#fcbba1"
                 pos_hint: {"center_x" : 0.9,"center_y" : 0.94}
                 on_press : root.print_files()
 
@@ -198,6 +208,7 @@
     font_size: 20
     color: 1,1,1
     background_color: "#E11E1E"
+    
 
 <Parameters>:
     BoxLayout:
@@ -273,12 +284,14 @@
             Button:
                 text : "Return"
                 on_release : root.cancel()
+                background_color:"#fcbba1"
                 pos_hint: {"center_x" : 0.3,"center_y" : 0.3}
                 size_hint: (0.3,0.4)
             Button:
                 text : "Reset"
                 on_press : root.reset()
                 on_press : root.cancel()
+                background_color:"#fcbba1"
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.3}
                 size_hint: (0.3,0.4)
         
