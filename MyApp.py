@@ -12,7 +12,7 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.recycleview import RecycleView
-import New_Graph
+import Graph
 import subprocess
 import os
 Window.size=(1000,800)
