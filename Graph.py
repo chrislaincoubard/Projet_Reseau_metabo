@@ -206,21 +206,4 @@ class Graph:
 
 
 
-if __name__ == '__main__':
-
-    g = Graph("actinidia_chinensis_merged.json")
-    # g.meta_keyword_update("ADP_c")
-    # g.meta_keyword_update("CPD-8843_c")
-    g.meta_keyword_update("GTP_c")
-    # g.reac_keyword_update('RXN-1727')
-    # g.search_metabolites()
-    # g.search_reactions()
-    # g.create_nodes_metabolites(g.Metabolites)
-    # g.create_nodes_reactions(g.Reaction)
-    # g.create_edges(g.Reaction)
-    g.create_Graph("gui")
-    # g.show_graph("My_graph.html")
-    # g.save_graph_json("test_recherche.json")
-    # g.load_graph()
-
 
