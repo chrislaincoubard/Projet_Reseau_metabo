@@ -10,13 +10,16 @@ from kivy.uix.tabbedpanel import TabbedPanel
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.textinput import TextInput
+from kivy.uix.recycleview import RecycleView
+import New_Graph
 import subprocess
 import os
 Window.size=(1000,800)
 
 
 class MyPanel(TabbedPanel):
-    files={"gff":"","sbml":"","fna":"","tsv":"","faa1":"","faa2":""}
+    files={"gff":"","sbml":"","fna":"","tsv":"","faa1":"","faa2":"","json":""}
     select=False
     format=""
     buttonName=""
@@ -29,6 +32,7 @@ class MyPanel(TabbedPanel):
     text_input = ObjectProperty(text)
     verifie_replace=False
     the_load_check=False
+    graph = New_Graph.Graph("")
     
     def print_files(self):
         affiche=[]
@@ -113,6 +117,9 @@ class MyPanel(TabbedPanel):
         if verifie or self.verifie_replace:
             self.dismiss_popup()
             self.verifie_replace=False
+        extension = filename[0].split(".")
+        if extension[1] == "json":
+            self.graph.load_file(filename[0])
         
     def go_module(self):
         check_value=True
@@ -192,6 +199,25 @@ class MyPanel(TabbedPanel):
         content = Parameters(cancel= self.dismiss_popup)
         self._popup = Popup(title="Enter Parameters", content=content,size_hint=(1,1))
         self._popup.open()
+
+    def toggle_react_list(self):
+        if self.ids["Reac_list"].opacity == 0:
+            self.ids["Reac_list"].opacity = 1
+        else:
+            self.ids["Reac_list"].opacity = 0
+
+    def clear_graph_data(self):
+        self.graph.clear_data()
+
+    def update_keyword(self, btn):
+        self.ids["TI_Metab"].text = btn.text
+        self.graph.meta_keyword_update(btn.text)
+
+    def show_graph(self):
+        self.graph.create_Graph(self.ids["TI_graph"].text)
+
+    def save_graph(self):
+        self.graph.save_graph_json(self.ids["TI_save"].text)
     
          
 class LoadDialog(FloatLayout):
@@ -233,17 +259,78 @@ class Parameters(BoxLayout):
             self._popup = Popup(title='Error',content=Label(text="Value is not numeric "),size_hint=(0.5,0.5))
             self._popup.open() 
     def reset(self):
-        MyPanel.parametre.update(MyPanel.defaut)           
-        
+        MyPanel.parametre.update(MyPanel.defaut)
+
+class TI_meta(TextInput):
+
+    def on_text(self, instance, value):
+        self.parent.ids["Meta_list"].data = [{"text" : meta["id"], "root_widget" : self.parent.ids["Meta_list"]}for meta in MyPanel.graph.data["metabolites"] if value.upper() in meta["id"].upper()]
+
+
+
+class TI_reac(TextInput):
+    def on_text(self, instance, value):
+        self.parent.ids["Reac_list"].data = [{"text" : reac["id"], "root_widget" : self.parent.ids["Reac_list"]}for reac in MyPanel.graph.data["reactions"] if value.upper() in reac["id"].upper()]
+
+class Box_reac(BoxLayout):
+    def toggle_reac_list(self):
+        if self.ids["Reac_list"].opacity == 0:
+            self.ids["Reac_list"].opacity = 1
+            if MyPanel.graph.data:
+                self.ids["Reac_list"].data = [{"text" : meta["id"], "root_widget" : self.ids["Reac_list"]}for meta in MyPanel.graph.data["reactions"]]
+        else :
+            self.ids["Reac_list"].opacity = 0
+
+
+class Box_meta(BoxLayout):
+
+    def toggle_meta_list(self):
+        if self.ids["Meta_list"].opacity == 0:
+            self.ids["Meta_list"].opacity = 1
+            if MyPanel.graph.data:
+                self.ids["Meta_list"].data = [{"text" : meta["id"], "root_widget" : self.ids["Meta_list"]}for meta in MyPanel.graph.data["metabolites"]]
+        else :
+            self.ids["Meta_list"].opacity = 0
+
+
+
+class Meta_list_buttons(Button):
+    root_widget = ObjectProperty()
+
+    def on_release(self, **kwargs):
+        super().on_release()
+        self.root_widget.btn_callback(self)
+
+
+class Meta_List(RecycleView):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if MyPanel.graph.data:
+            self.data = [{"text" : meta["id"], 'root_widget' : self } for meta in MyPanel.graph.data["metabolites"]]
+
+    def btn_callback(self, btn):
+        self.parent.ids["TI_Metab"].text = btn.text
+        MyPanel.graph.meta_keyword_update(btn.text)
+
+class Reac_list_buttons(Button):
+    root_widget = ObjectProperty()
+
+    def on_release(self, **kwargs):
+        super().on_release()
+        self.root_widget.btn_callback(self)
+
+class Reac_List(RecycleView):
+    def __init__(self, **kwargs):
+        super(Reac_List, self).__init__(**kwargs)
+        if MyPanel.graph.data:
+            self.data = [{"text" : reac["id"], 'root_widget' : self } for reac in MyPanel.graph.data["reactions"]]
+
+    def btn_callback(self, btn):
+        self.parent.ids["TI_reac"].text = btn.text
+        MyPanel.graph.reac_keyword_update(btn.text)
         
 class MyApp(App):
     
     def build(self):
         return MyPanel()
-    
-
-if __name__ == '__main__':
-	MyApp().run()
-   
-
-  
