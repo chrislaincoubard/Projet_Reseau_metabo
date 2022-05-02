@@ -16,11 +16,20 @@ class Graph:
 
     #open the reference file and stores the data as attribute.
     def Load_json(self, file):
+        if file != "":
+            with open(file, "r") as json_file:
+                self.data = json.load(json_file)
+
+    def __init__(self, file=None):
+        if file != None :
+            self.Load_json(file)
+        else :
+            data = []
+
+    def load_file(self, file):
         with open(file, "r") as json_file:
             self.data = json.load(json_file)
 
-    def __init__(self, file):
-        self.Load_json(file)
 
     def clear_data(self):
         self.Metabolites.clear()
@@ -29,10 +38,14 @@ class Graph:
         self.G.clear()
         self.nodes_reactions.clear()
         self.nodes_metabolites.clear()
+        self.meta_keyword.clear()
+        self.reac_keyword.clear()
 
     def print_data(self):
-        print("\nmetabolites not sorted", self.data["metabolites"])
-        print("\nreaction not sorted", self.data['reactions'])
+        print("\nmetabolites", self.Metabolites)
+        print("\nreaction", self.Reaction)
+        print("\nmeta_keyword", self.meta_keyword)
+        print("\nreac_keyword", self.reac_keyword)
 
     def meta_keyword_update(self,keyword):
         if keyword not in self.meta_keyword:
@@ -51,7 +64,7 @@ class Graph:
             if "name" in item:
                 del item["name"]
             self.nodes_metabolites.append((item['id'], item))
-        print("\nmetabolites sorted for networkX ", self.nodes_metabolites)
+
 
     def create_nodes_reactions(self, data):
         for item in data:
@@ -62,7 +75,7 @@ class Graph:
             if "name" in item:
                 del item["name"]
             self.nodes_reactions.append((item['id'], item))
-        print("\nreaction sorted for networkX", self.nodes_reactions)
+
 
     def create_edges(self, type):
         for reaction in type:
@@ -105,12 +118,6 @@ class Graph:
 
     # ------------------ Functions to load and save graphs ------------------- #
 
-    def load_graph(self,name):
-        self.create_nodes_metabolites(self.data["metabolites"])
-        self.create_nodes_reactions(self.data["reactions"])
-        self.create_edges(self.data["reactions"])
-        self.create_Graph(name)
-
     def save_graph_json(self, name):
         tot_dico = {}
         meta = []
@@ -134,18 +141,32 @@ class Graph:
     # ------------------ Functions to show graph ----------------------------- #
 
     def create_Graph(self,name):
-        self.search_metabolites()
-        self.search_reactions()
-        self.create_nodes_metabolites(self.Metabolites)
-        self.create_nodes_reactions(self.Reaction)
-        self.create_edges(self.Reaction)
-        self.G.add_nodes_from(self.nodes_metabolites)
-        self.G.add_nodes_from(self.nodes_reactions)
-        self.G.add_edges_from(self.edges)
-        if "html" in name :
-            self.show_graph(name)
+        # create or show graph depending if a search has been made
+        if self.meta_keyword or self.reac_keyword :
+            self.search_metabolites()
+            self.search_reactions()
+            self.create_nodes_metabolites(self.Metabolites)
+            self.create_nodes_reactions(self.Reaction)
+            self.create_edges(self.Reaction)
+            self.G.add_nodes_from(self.nodes_metabolites)
+            self.G.add_nodes_from(self.nodes_reactions)
+            self.G.add_edges_from(self.edges)
+            if "html" in name:
+                self.show_graph(name)
+            else :
+                self.show_graph(name+".html")
         else :
-            self.show_graph(name+".html")
+            self.create_nodes_metabolites(self.data["metabolites"])
+            self.create_nodes_reactions(self.data["reactions"])
+            self.create_edges(self.data["reactions"])
+            self.G.add_nodes_from(self.nodes_metabolites)
+            self.G.add_nodes_from(self.nodes_reactions)
+            self.G.add_edges_from(self.edges)
+            if "html" in name :
+                self.show_graph(name)
+            else :
+                self.show_graph(name+".html")
+
 
     def show_graph(self, name):
         nt = Network("1000px", "1000px")
@@ -197,8 +218,9 @@ if __name__ == '__main__':
     # g.create_nodes_metabolites(g.Metabolites)
     # g.create_nodes_reactions(g.Reaction)
     # g.create_edges(g.Reaction)
-    g.create_Graph()
+    g.create_Graph("gui")
     # g.show_graph("My_graph.html")
     # g.save_graph_json("test_recherche.json")
     # g.load_graph()
+
 
