@@ -12,7 +12,7 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.recycleview import RecycleView
-import Graph
+import New_Graph
 import subprocess
 import os
 Window.size=(1000,800)
@@ -310,8 +310,9 @@ class Meta_List(RecycleView):
             self.data = [{"text" : meta["id"], 'root_widget' : self } for meta in MyPanel.graph.data["metabolites"]]
 
     def btn_callback(self, btn):
-        self.parent.ids["TI_Metab"].text = btn.text
-        MyPanel.graph.meta_keyword_update(btn.text)
+        if self.opacity == 1:
+            self.parent.ids["TI_Metab"].text = btn.text
+            MyPanel.graph.meta_keyword_update(btn.text)
 
 class Reac_list_buttons(Button):
     root_widget = ObjectProperty()
@@ -327,8 +328,9 @@ class Reac_List(RecycleView):
             self.data = [{"text" : reac["id"], 'root_widget' : self } for reac in MyPanel.graph.data["reactions"]]
 
     def btn_callback(self, btn):
-        self.parent.ids["TI_reac"].text = btn.text
-        MyPanel.graph.reac_keyword_update(btn.text)
+        if self.opacity == 1:
+            self.parent.ids["TI_reac"].text = btn.text
+            MyPanel.graph.reac_keyword_update(btn.text)
         
 class MyApp(App):
     
