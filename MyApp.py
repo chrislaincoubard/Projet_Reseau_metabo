@@ -32,7 +32,7 @@ class MyPanel(TabbedPanel):
     text_input = ObjectProperty(text)
     verifie_replace=False
     the_load_check=False
-    graph = New_Graph.Graph("")
+    graph = Graph.Graph("")
     
     def print_files(self):
         affiche=[]
