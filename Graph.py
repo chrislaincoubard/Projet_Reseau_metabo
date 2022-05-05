@@ -24,7 +24,7 @@ class Graph:
         if file != None :
             self.Load_json(file)
         else :
-            data = []
+            self.data = []
 
     def load_file(self, file):
         with open(file, "r") as json_file:
@@ -134,6 +134,15 @@ class Graph:
             reac.append(item)
         tot_dico["metabolites"] = meta
         tot_dico["reactions"] = reac
+        if "." in name:
+            extension = name.split('.')
+            if "json" == extension[1]:
+                self.show_graph(name)
+            else:
+                extension[1] = ".json"
+                self.show_graph(extension[0] + extension[1])
+        else:
+            self.show_graph(name + ".json")
         with open(name, 'w') as f:
             f.write(json.dumps(tot_dico))
 
@@ -150,10 +159,15 @@ class Graph:
             self.G.add_nodes_from(self.nodes_metabolites)
             self.G.add_nodes_from(self.nodes_reactions)
             self.G.add_edges_from(self.edges)
-            if "html" in name:
-                self.show_graph(name)
-            else :
-                self.show_graph(name+".html")
+            if "." in name:
+                extension = name.split('.')
+                if "html" == extension[1]:
+                    self.show_graph(name)
+                else:
+                    extension[1] = ".html"
+                    self.show_graph(extension[0] + extension[1])
+            else:
+                self.show_graph(name + ".html")
         else :
             self.create_nodes_metabolites(self.data["metabolites"])
             self.create_nodes_reactions(self.data["reactions"])
@@ -161,10 +175,15 @@ class Graph:
             self.G.add_nodes_from(self.nodes_metabolites)
             self.G.add_nodes_from(self.nodes_reactions)
             self.G.add_edges_from(self.edges)
-            if "html" in name :
-                self.show_graph(name)
-            else :
-                self.show_graph(name+".html")
+            if "." in name:
+                extension = name.split('.')
+                if "html" == extension[1]:
+                    self.show_graph(name)
+                else:
+                    extension[1] = ".html"
+                    self.show_graph(extension[0] + extension[1])
+            else:
+                self.show_graph(name + ".html")
 
 
     def show_graph(self, name):
