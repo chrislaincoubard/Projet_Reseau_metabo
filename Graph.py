@@ -86,7 +86,6 @@ class Graph:
                     self.edges.append([metabolite, reaction["id"]])
 
     #search for metabolites based on list of metabo ID
-    #Does not work --> Forgot to add all the remainging metabolites.
     def search_metabolites(self):
         if not self.meta_keyword :
             return None
@@ -96,9 +95,9 @@ class Graph:
                 if key in item["metabolites"] and item not in self.Reaction:
                     self.Reaction.append(item)
                     temp_meta = item["metabolites"]
-            for item in self.data["metabolites"]:
-                if item["id"] in temp_meta.keys() and item not in self.Metabolites:
-                    self.Metabolites.append(item)
+                for item in self.data["metabolites"]:
+                    if item["id"] in temp_meta.keys() and item not in self.Metabolites:
+                        self.Metabolites.append(item)
         self.meta_keyword.clear()
 
     #search for reactions based on list of reaction ID
