@@ -20,27 +20,6 @@
                 background_color:"#34C924"
                 on_press: root.load(filechooser.path, filechooser.selection)
 
-<ChoiceFiles>:
-    auto_dismiss:False
-    BoxLayout:
-        size: root.size
-        pos: root.pos
-        orientation: "vertical"
-        Label:
-            text: 'Voulez-vous remplacer le fichiers?'
-        BoxLayout:
-            size_hint_y: None
-            height: 30
-            Button:
-                text: "No"
-                background_color:"#F00020"
-                on_press: root.cancel()
-            Button:
-                text: "Yes"
-                background_color:"#78c679"
-                on_press: root.selectchoice()
-                on_release: root.cancel()
-
             
 
 <MyPanel>:
@@ -223,7 +202,8 @@
                     size_hint : 1,0.3
                     on_release : root.show_load("json","json","graph")
                 Label :
-                    text : "2) Input name to show\n graph without extension \n saved as html file"
+                    text : "2) Input name to show graph without extension saved as html file"
+                    text_size:self.size
                 TextInput :
                     id : TI_graph
                     text : "graph.html"
@@ -231,8 +211,8 @@
                     on_text_validate : root.show_graph()
                     size_hint : 1,0.3
                 Label :
-                    text : "3) Input name\n to save graph\n show the graph\n before saving\n saved as json file"
-
+                    text : "3) Input name to save graph show the graph before saving saved as json file"
+                    text_size:self.size
                 TextInput :
                     id : TI_save
                     text : "Save_graph.json"
@@ -240,8 +220,8 @@
                     multiline : False
                     on_text_validate : root.save_graph()
                 Label :
-                    text : "Clear data before\n generating new graph"
-
+                    text : "Clear data before generating new graph"
+                    text_size:self.size
                 Button :
                     text : "Clear data"
                     size_hint : 1,0.3
