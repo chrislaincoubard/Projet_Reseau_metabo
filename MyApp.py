@@ -3,7 +3,6 @@ from kivy.clock import Clock
 from cgitb import text
 from kivy.app import App
 from kivy.properties import ObjectProperty
-from kivy.properties import StringProperty
 
 from kivy.core.window import Window
 from kivy.uix.popup import Popup
@@ -28,10 +27,12 @@ class MyPanel(TabbedPanel):
     buttonName=""
     module=""
     old_module=""
-    parametre={"i":50,"d":30,"ev":0,"c":20,"bs":300}
-    defaut={"i":50,"d":30,"ev":0,"c":20,"bs":300}
+    parametre={"i":50,"d":30,"ev":0,"c":20,"bs":300,"nom": "draft"}
+    defaut={"i":50,"d":30,"ev":0,"c":20,"bs":300,"nom": "draft"}
     filesName=""
     text_input = ObjectProperty(text)
+    input=False
+    mainDirectory=""
     graph = Graph.Graph("")
     
             
@@ -50,6 +51,7 @@ class MyPanel(TabbedPanel):
         if self.module!=self.old_module:
             for key in self.files.keys():
                 self.files[key] = ""
+            self.parametre.update(self.defaut)
         content = LoadDialog(load=self.load, cancel=self.dismiss_popup)
         self._popup = Popup(title="Load file", content=content,
                             size_hint=(0.9, 0.9))
@@ -68,9 +70,6 @@ class MyPanel(TabbedPanel):
 
 
     def check_format(self):
-        print("fraiste",self.files)
-        print(self.filesName)
-        print(self.buttonName)
         good_format=False
         extension=self.filesName.split(".")
         if extension[1] == self.format:
@@ -95,38 +94,70 @@ class MyPanel(TabbedPanel):
             self._popup1 = Popup(title='Error',content=Label(text='Wrong format, try again'),size_hint=(0.5,0.5))
             self._popup1.open()
             Clock.schedule_once(self.dismiss_popup_dt, 1)
-        print(self.files)
         return (good_format)
-        
-            
+
+    def choosedirectory(self):
+        self._popup=Popup(title="Choose  a main directory", content = DirectoryName(cancel=self.dismiss_popup))
+        self._popup.open()
+    
+    def temp_dir(self):
+        os.mkdir("temp_dir")
+        for key in self.files.keys():
+            os.system(f"cp {self.files[key]} temp_dir")
+
     def go_module(self):
         check_value=True
+        if  self.mainDirectory=="":
+            check_value=False
+            self._popup1 = Popup(title='Error',content=Label(text='Please enter a main directoryt'),size_hint=(0.5,0.5))
+            self._popup1.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 1)
+        
         if self.module=="blast" and self.files.get("faa1")!="" and self.files.get("faa2")!="" and self.files.get("gff")!="" and self.files.get("sbml")!="":
             if self.files.get("faa1")==self.files.get("faa2"):
                 check_value=False
+                self._popup1 = Popup(title='Error',content=Label(text='Fasta files must be different'),size_hint=(0.5,0.5))
+                self._popup1.open()
+                Clock.schedule_once(self.dismiss_popup_dt, 1)
             if check_value:
                 self.launch_module()
+        else:
+            self._popup1 = Popup(title='Error',content=Label(text='Please load all necessary files'),size_hint=(0.5,0.5))
+            self._popup1.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 1)
         if self.module=="mpwting" and self.files.get("tsv")!="" and self.files.get("fna")!="" and self.files.get("gff")!="":
             self.launch_module()
+        else:
+            self._popup1 = Popup(title='Error',content=Label(text='Please load all necessary files'),size_hint=(0.5,0.5))
+            self._popup1.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 1)
         if self.module=="main" :
             for values in self.files.values():
                 if values=="":
                     check_value=False
+                else:
+                    self._popup1 = Popup(title='Error',content=Label(text='Please load all necessary files'),size_hint=(0.5,0.5))
+                    self._popup1.open()
+                    Clock.schedule_once(self.dismiss_popup_dt, 1)
                 if self.files.get("faa1")==self.files.get("faa2"):
+                    self._popup1 = Popup(title='Error',content=Label(text='Fasta files must be different'),size_hint=(0.5,0.5))
+                    self._popup1.open()
+                    Clock.schedule_once(self.dismiss_popup_dt, 1)
                     check_value=False
             if check_value:
                 self.launch_module()
 
     def launch_module(self):
         if self.module == "blast":
-            cmd = f"python3 /Users/gauthierdelrot/Documents/M1bioinfo/Projet/Projet_Reseau_metabo-main/blasting.py -n draft -m {self.files['sbml']} -mfaa {self.files['faa1']} -sfaa {self.files['faa2']} -sgff {self.files['gff']} {self.files['sbml']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs'] }"
+            cmd = f"python3 blasting.py {self.main_directory} -n {self.parametre['nom']} -m {self.files['sbml']} -mfaa {self.files['faa1']} -sfaa {self.files['faa2']} -sgff {self.files['gff']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs']}"
         if self.module == "mpwting":
-            cmd = f"python3 {self.module}.py {self.filesName[0]} {self.filesName[1]} {self.filesName[2]} {self.filesName[3]}"
+            cmd = f"python3 "
         if self.module == "main":
-            cmd = f"python3 {self.module}.py {self.filesName[0]} {self.filesName[1]} {self.filesName[2]} {self.filesName[3]}"
-        print(cmd)
+            self.temp_dir()
+            cmd = f"python3 main.py {self.main_directory} -m {self.files['sbml']} -mfaa {self.files['faa1']} -sfaa {self.files['faa2']} -sgff {self.files['gff']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs']} "
         p = subprocess.Popen(cmd, shell = True)
         p.wait()
+        os.system("rm -rf ./temp_dir/")
         if p.returncode == 0 :
             print('command : success')
         else :
@@ -173,7 +204,7 @@ class MyPanel(TabbedPanel):
                 affiche.append([extension,name_files[-1]])        
             layout = GridLayout(cols=1,size_hint=(0.8,0.8))
             popupLabel = Label(text =f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n\n {affiche[2][0]} : {affiche[2][1]}\n\n {affiche[3][0]} : {affiche[3][1]} \n\n {affiche[4][0]} : {affiche[4][1]}\n\n {affiche[5][0]} : {affiche[5][1]}",font_size='20sp')
-            closeButton = Button(text = "Exit",color="#F00020")
+            closeButton = Button(text = "Exit",color="#F00020") 
             closeButton.bind(on_press=self.callback)
             layout.add_widget(popupLabel)
             layout.add_widget(closeButton)       
@@ -184,7 +215,7 @@ class MyPanel(TabbedPanel):
     def callback(self,instance):
         if instance.state=="down":
             self.dismiss_popup()
-
+            self.input=True
     def show_param(self):
         content = Parameters(cancel= self.dismiss_popup)
         self._popup = Popup(title="Enter Parameters", content=content,size_hint=(1,1))
@@ -213,7 +244,18 @@ class MyPanel(TabbedPanel):
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
-    
+
+
+class DirectoryName(BoxLayout):
+    cancel = ObjectProperty(None)
+
+    def add_directory(self,inputname):
+        
+        valeur=self.ids[inputname].text
+        if valeur != "":
+            MyPanel.mainDirectory= valeur
+        
+            
 
 class Parameters(BoxLayout):
     cancel = ObjectProperty(None)
@@ -222,6 +264,8 @@ class Parameters(BoxLayout):
         
         valeur=self.ids[id].text
         
+        if id == "input6":
+            MyPanel.parametre[param] = value
         try:
             if valeur!="":
                 value=float(valeur)
@@ -322,3 +366,5 @@ class MyApp(App):
     
     def build(self):
         return MyPanel()
+if __name__ == '__main__':
+	MyApp().run()
