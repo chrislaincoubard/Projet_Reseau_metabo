@@ -248,13 +248,15 @@ class Parameters(BoxLayout):
 class TI_meta(TextInput):
 
     def on_text(self, instance, value):
-        self.parent.ids["Meta_list"].data = [{"text" : meta["id"], "root_widget" : self.parent.ids["Meta_list"]}for meta in MyPanel.graph.data["metabolites"] if value.upper() in meta["id"].upper()]
+        if self.parent.ids["Meta_list"].data :
+            self.parent.ids["Meta_list"].data = [{"text" : meta["id"], "root_widget" : self.parent.ids["Meta_list"]}for meta in MyPanel.graph.data["metabolites"] if value.upper() in meta["id"].upper()]
 
 
 
 class TI_reac(TextInput):
     def on_text(self, instance, value):
-        self.parent.ids["Reac_list"].data = [{"text" : reac["id"], "root_widget" : self.parent.ids["Reac_list"]}for reac in MyPanel.graph.data["reactions"] if value.upper() in reac["id"].upper()]
+        if self.parent.ids["Reac_list"].data :
+            self.parent.ids["Reac_list"].data = [{"text" : reac["id"], "root_widget" : self.parent.ids["Reac_list"]}for reac in MyPanel.graph.data["reactions"] if value.upper() in reac["id"].upper()]
 
 class Box_reac(BoxLayout):
     def toggle_reac_list(self):
