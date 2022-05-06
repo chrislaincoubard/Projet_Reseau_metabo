@@ -15,7 +15,7 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.recycleview import RecycleView
-#import Graph
+import Graph
 import subprocess
 import os
 Window.size=(1000,800)
@@ -32,9 +32,7 @@ class MyPanel(TabbedPanel):
     defaut={"i":50,"d":30,"ev":0,"c":20,"bs":300}
     filesName=""
     text_input = ObjectProperty(text)
-
-    
-    #graph = Graph.Graph("")
+    graph = Graph.Graph("")
     
             
 
