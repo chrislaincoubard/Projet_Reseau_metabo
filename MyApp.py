@@ -14,7 +14,7 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.recycleview import RecycleView
-#import Graph
+import Graph
 import subprocess
 import os
 Window.size=(1000,800)
@@ -33,7 +33,7 @@ class MyPanel(TabbedPanel):
     text_input = ObjectProperty(text)
     input=False
     mainDirectory=""
-    #graph = Graph.Graph("")
+    graph = Graph.Graph("")
     
             
 
@@ -364,6 +364,3 @@ class MyApp(App):
     
     def build(self):
         return MyPanel()
-
-if __name__ == '__main__':
-    MyApp().run()
