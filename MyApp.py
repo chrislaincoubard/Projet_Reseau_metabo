@@ -22,7 +22,7 @@ Window.size=(1000,800)
 
 class MyPanel(TabbedPanel):
     
-    files={"gff":"","sbml":"","fna":"","tsv":"","faa1":"","faa2":"","json":""}
+    files={"gff":"","sbml":"","fna":"","tsv":"","faaM":"","faaS":"","json":""}
     format=""
     buttonName=""
     module=""
