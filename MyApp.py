@@ -121,10 +121,10 @@ class MyPanel(TabbedPanel):
                 Clock.schedule_once(self.dismiss_popup_dt, 1)
             if check_value:
                 self.launch_module()
-        else:
-            self._popup1 = Popup(title='Error',content=Label(text='Please load all necessary files'),size_hint=(0.5,0.5))
-            self._popup1.open()
-            Clock.schedule_once(self.dismiss_popup_dt, 1)
+            else:
+                self._popup1 = Popup(title='Error',content=Label(text='Please load all necessary files'),size_hint=(0.5,0.5))
+                self._popup1.open()
+                Clock.schedule_once(self.dismiss_popup_dt, 1)
         if self.module=="mpwting" and self.files.get("tsv")!="" and self.files.get("fna")!="" and self.files.get("gff")!="":
             self.launch_module()
         else:
@@ -135,7 +135,6 @@ class MyPanel(TabbedPanel):
             for values in self.files.values():
                 if values=="":
                     check_value=False
-                else:
                     self._popup1 = Popup(title='Error',content=Label(text='Please load all necessary files'),size_hint=(0.5,0.5))
                     self._popup1.open()
                     Clock.schedule_once(self.dismiss_popup_dt, 1)
