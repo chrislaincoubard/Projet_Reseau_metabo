@@ -14,7 +14,7 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.recycleview import RecycleView
-import Graph
+#import Graph
 import subprocess
 import os
 Window.size=(1000,800)
@@ -33,7 +33,7 @@ class MyPanel(TabbedPanel):
     text_input = ObjectProperty(text)
     input=False
     mainDirectory=""
-    graph = Graph.Graph("")
+    #graph = Graph.Graph("")
     
             
 
@@ -97,7 +97,7 @@ class MyPanel(TabbedPanel):
         return (good_format)
 
     def choosedirectory(self):
-        self._popup=Popup(title="Choose  a main directory", content = DirectoryName(cancel=self.dismiss_popup))
+        self._popup=Popup(title="Choose  a main directory", content = DirectoryName(cancel=self.dismiss_popup),size_hint=(0.5,0.5))
         self._popup.open()
     
     def temp_dir(self):
@@ -248,13 +248,11 @@ class LoadDialog(FloatLayout):
 
 class DirectoryName(BoxLayout):
     cancel = ObjectProperty(None)
-
+    
     def add_directory(self,inputname):
-        
         valeur=self.ids[inputname].text
         if valeur != "":
             MyPanel.mainDirectory= valeur
-        
             
 
 class Parameters(BoxLayout):
@@ -366,5 +364,6 @@ class MyApp(App):
     
     def build(self):
         return MyPanel()
+
 if __name__ == '__main__':
-	MyApp().run()
+    MyApp().run()

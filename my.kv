@@ -1,4 +1,3 @@
-#:import sys os
 <LoadDialog>:
     BoxLayout:
         size: root.size
@@ -6,7 +5,7 @@
         orientation: "vertical"
         FileChooserIconView:
             id: filechooser
-            path : sys.path.expanduser('~')
+            path : "/Users"
 
         BoxLayout:
             size_hint_y: None
@@ -19,36 +18,32 @@
             Button:
                 text: "Load"
                 background_color:"#34C924"
-                on_press: root.load(filechooser.path, filechooser.selection)
-
-            
+                on_press: root.load(filechooser.path, filechooser.selection)     
 
 <MyPanel>:
-    
+
     do_default_tab: False
     size:(400,400)
     TabbedPanelItem:
-    
         text: "Main"
         font_size:  20
         FloatLayout:
-
             Button:
                 id : sbmlMain
                 text:"Choose .sbml file"
                 pos_hint: {"center_x" : 0.2,"center_y" : 0.8}
                 on_press : root.show_load("sbml","sbml","main")
             Button:
-                id : faa1Main
-                text:"Choose .faa file"
+                id : faaSMain
+                text:"Choose .faa subject file"
                 pos_hint: {"center_x" : 0.2,"center_y" : 0.6}
-                on_press : root.show_load("faa1","faa","main")
+                on_press : root.show_load("faaS","faa","main")
 
             Button:
-                id : faa2Main
-                text:"Choose .faa file "
+                id : faaMMain
+                text:"Choose .faa model file "
                 pos_hint: {"center_x" : 0.2,"center_y" : 0.4}
-                on_press : root.show_load("faa2","faa","main")
+                on_press : root.show_load("faaM","faa","main")
             
             
             Button:
@@ -74,7 +69,7 @@
                 text:"Run"
                 background_color:"#a1d99b"
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.2}
-                on_press : root.go_module("main")
+                on_press : root.go_module()
 
             Button:
                 id : btn
@@ -95,7 +90,7 @@
                 text:"Set main directory"
                 background_color:"#fcbba1"
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.94}
-                on_press : root.choose_directory()
+                on_press : root.choosedirectory()
 
     TabbedPanelItem :
     
@@ -110,16 +105,16 @@
                 pos_hint: {"center_x" : 0.3,"center_y" : 0.8}
                 on_press : root.show_load("sbml","sbml","blast")
             Button:
-                id : faa1Blast
-                text:"Choose .faa file"
+                id : faaSBlast
+                text:"Choose .faa subject file"
                 pos_hint: {"center_x" : 0.3,"center_y" : 0.6}
-                on_press : root.show_load("faa1","faa","blast")
+                on_press : root.show_load("faaS","faa","blast")
 
             Button:
-                id : faa2Blast
-                text:"Choose .faa file"
+                id : faaMBlast
+                text:"Choose .faa model file"
                 pos_hint: {"center_x" : 0.3,"center_y" : 0.4}
-                on_press : root.show_load("faa2","faa","blast")
+                on_press : root.show_load("faaM","faa","blast")
             
             Button:
                 id : gffBlast
@@ -132,7 +127,7 @@
                 text:"Run "
                 background_color:"#a1d99b"
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.6}
-                on_press : root.go_module("blast")
+                on_press : root.go_module()
             Button:
                 id : btn
                 background_color:"#CECECE"
@@ -152,7 +147,8 @@
                 text:"Set main directory"
                 background_color:"#fcbba1"
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.94}
-                on_press : root.choose_directory()
+                on_press : root.choosedirectory()
+
     TabbedPanelItem :
     
         text : "MPWTing"
@@ -183,167 +179,18 @@
                 text:"Run"
                 background_color:"#a1d99b"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-                on_press : root.go_module("mpwting") 
+                on_press : root.go_module() 
             
             Button:
-                id : btn 
+                id: btn 
                 size_hint:(0.18,0.07)
                 text:"View files "
                 background_color:"#fcbba1"
                 pos_hint: {"center_x" : 0.9,"center_y" : 0.94}
-                on_press : root.print_files()
-
-    TabbedPanelItem :
-        text : "Graphs"
-        font_size : 20
-        id : graph_panel
-
-        GridLayout :
-            cols:3
-            id : Grid
-
-            Box_meta:
-
-            Box_reac:
-
-            BoxLayout :
-                size_hint_x : 0.2
-                orientation : "vertical"
-                background_color : "#E11E1E"
-                Button :
-                    text : "1) load file"
-                    size_hint : 1,0.3
-                    on_release : root.show_load("json","json","graph")
-                Label :
-                    text : "2) Input name to show graph without extension saved as html file"
-                    text_size:self.size
-                TextInput :
-                    id : TI_graph
-                    text : "graph.html"
-                    multiline : False
-                    on_text_validate : root.show_graph()
-                    size_hint : 1,0.3
-                Label :
-                    text : "3) Input name to save graph show the graph before saving saved as json file"
-                    text_size:self.size
-                TextInput :
-                    id : TI_save
-                    text : "Save_graph.json"
-                    size_hint : 1,0.3
-                    multiline : False
-                    on_text_validate : root.save_graph()
-                Label :
-                    text : "Clear data before generating new graph"
-                    text_size:self.size
-                Button :
-                    text : "Clear data"
-                    size_hint : 1,0.3
-                    on_release : root.clear_graph_data()
-                    
-<DirectoryName>:
-    BoxLayout:
-        orientation:"vertical"
-        size: root.size
-        pos: root.pos
-        BoxLayout:
-            orientation:"vertical"
-            size_hint: (1,0.8)
-            Label:
-                text : "Enter directory file"
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-                size_hint: (0.1,0.1)
-            TextInput:
-                id:inputdirec
-                multiline : False
-                text : ""
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-                size_hint: (0.1,0.1)
-        FloatLayout:
-            size_hint: (1,0.2)
-            Button:
-                text : "Validate"
-                on_press:root.add_directory("inputdirec")
-                on_release : root.cancel()
-                background_color:"#fcbba1"
-                pos_hint: {"center_x" : 0.3,"center_y" : 0.3}
-                size_hint: (0.3,0.4)
+                on_press: root.print_files()
+    
             
-
-<Box_reac>
-    orientation : "vertical"
-    size_hint_x : 0.4
-
-    Button :
-        size_hint_x : 1
-        text : "hide/show reaction list"
-        on_release : root.toggle_reac_list()
-
-    Label :
-        text : "Click metabolites in list to add to graph"
-        size_hint_y : 0.2
-
-    Reac_List :
-        opacity : 0
-        id : Reac_list
-
-    TI_reac :
-        id : TI_reac
-        multiline : False
-        size_hint_y : 0.2
-        size_hint_x : 1
-        on_text_validate :
-
-<Box_meta>:
-    orientation : "vertical"
-    size_hint_x : 0.4
-
-    Button :
-        size_hint_x : 1
-        text : "hide/show metabolites list"
-        on_release : root.toggle_meta_list()
-
-    Label :
-        text : "Click reaction in list to add to graph"
-        size_hint_y : 0.2
-
-    Meta_List :
-        opacity : 0
-        id : Meta_list
-
-    TI_meta :
-        id : TI_Metab
-        text : ""
-        size_hint_y : 0.2
-        size_hint_x : 1
-
-<Meta_List>:
-    viewclass : "Meta_list_buttons"
-    RecycleBoxLayout :
-        default_size : None, 50
-        default_size_hint : 1, None
-        size_hint_y : None
-        height : self.minimum_height
-        orientation : "vertical"
-
-<Reac_List>:
-    viewclass : "Reac_list_buttons"
-    RecycleBoxLayout :
-        default_size : None, 50
-        default_size_hint : 1, None
-        size_hint_y : None
-        height : self.minimum_height
-        orientation : "vertical"
-
-<TI_meta>:
-    id : TI_meta
-    size_hint : 0.3,0.3
-    pos_hint : {"center_x" : 0.5, "top" : 1}
-
-<TI_reac>:
-    id : TI_react
-    size_hint : 0.3,0.3
-    pos_hint : {"center_x" : 0.5, "top" : 1}
-
+                
 <Button>:
     size_hint: 0.27,0.12  
     font_size: 20
@@ -367,6 +214,7 @@
                 size_hint: (0.1,0.1)
             Label:
                 text : "blast's identity percentage tolerated ([0-100])"
+                
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
                 size_hint: (0.1,0.1)
             TextInput:
@@ -431,7 +279,6 @@
                 text : ""
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
                 size_hint: (0.1,0.1)
-            
         FloatLayout:
             size_hint: (1,0.2)
             Button:
@@ -448,7 +295,34 @@
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.3}
                 size_hint: (0.3,0.4)
         
-
+<DirectoryName>:
+    BoxLayout:
+        orientation:"vertical"
+        size: root.size
+        pos: root.pos
+        BoxLayout:
+            orientation:"vertical"
+            size_hint: (1,1)
+            Label:
+                text : "Enter directory file"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+                size_hint: (0.1,0.1)
+            TextInput:
+                id:inputdirec
+                multiline : False
+                text : ""
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
+                size_hint: (0.4,0.1)
+        FloatLayout:
+            size_hint: (1,0.3)
+            Button:
+                text : "Validate"
+                on_press:root.add_directory("inputdirec")
+                on_release : root.cancel()
+                background_color:"#fcbba1"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
+                size_hint: (0.3,0.4)
+            
 
             
 
