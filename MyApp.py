@@ -113,47 +113,55 @@ class MyPanel(TabbedPanel):
             self._popup1.open()
             Clock.schedule_once(self.dismiss_popup_dt, 1)
         
-        if self.module=="blast" and self.files.get("faa1")!="" and self.files.get("faa2")!="" and self.files.get("gff")!="" and self.files.get("sbml")!="":
-            if self.files.get("faa1")==self.files.get("faa2"):
-                check_value=False
-                self._popup1 = Popup(title='Error',content=Label(text='Fasta files must be different'),size_hint=(0.5,0.5))
+        if self.module=="blast" :
+            if self.files.get("faaS")!="" and self.files.get("faaM")!="" and self.files.get("gff")!="" and self.files.get("sbml")!="":
+                if self.files.get("faaS")==self.files.get("faaM"):
+                    check_value=False
+                    self._popup1 = Popup(title='Error',content=Label(text='Fasta files must be different'),size_hint=(0.5,0.5))
+                    self._popup1.open()
+                    Clock.schedule_once(self.dismiss_popup_dt, 1)
+            
+            else:
+                self._popup1 = Popup(title='Error',content=Label(text='Please load all necessary files'),size_hint=(0.5,0.5))
                 self._popup1.open()
                 Clock.schedule_once(self.dismiss_popup_dt, 1)
+                check_value=False
             if check_value:
+                self.launch_module()
+        if self.module=="mpwting":
+            if self.files.get("tsv")!="" and self.files.get("fna")!="" and self.files.get("gff")!="":
                 self.launch_module()
             else:
                 self._popup1 = Popup(title='Error',content=Label(text='Please load all necessary files'),size_hint=(0.5,0.5))
                 self._popup1.open()
                 Clock.schedule_once(self.dismiss_popup_dt, 1)
-        if self.module=="mpwting" and self.files.get("tsv")!="" and self.files.get("fna")!="" and self.files.get("gff")!="":
-            self.launch_module()
-        else:
-            self._popup1 = Popup(title='Error',content=Label(text='Please load all necessary files'),size_hint=(0.5,0.5))
-            self._popup1.open()
-            Clock.schedule_once(self.dismiss_popup_dt, 1)
-        if self.module=="main" :
-            for values in self.files.values():
-                if values=="":
-                    check_value=False
-                    self._popup1 = Popup(title='Error',content=Label(text='Please load all necessary files'),size_hint=(0.5,0.5))
-                    self._popup1.open()
-                    Clock.schedule_once(self.dismiss_popup_dt, 1)
-                if self.files.get("faa1")==self.files.get("faa2"):
+        if self.module=="main":
+            if self.files.get("faaS")!="" and self.files.get("faaM")!="" and self.files.get("gff")!="" and self.files.get("sbml")!="" and self.files.get("fna")!="" and self.files.get("tsv")!="":
+                
+                if self.files.get("faaM")==self.files.get("faaS"):
                     self._popup1 = Popup(title='Error',content=Label(text='Fasta files must be different'),size_hint=(0.5,0.5))
                     self._popup1.open()
                     Clock.schedule_once(self.dismiss_popup_dt, 1)
                     check_value=False
+            else:
+                self._popup1 = Popup(title='Error',content=Label(text='Please load all necessary files'),size_hint=(0.5,0.5))
+                self._popup1.open()
+                Clock.schedule_once(self.dismiss_popup_dt, 1)
+                check_value=False
+            
             if check_value:
                 self.launch_module()
+            
+              
 
     def launch_module(self):
         if self.module == "blast":
-            cmd = f"python3 blasting.py {self.main_directory} -n {self.parametre['nom']} -m {self.files['sbml']} -mfaa {self.files['faa1']} -sfaa {self.files['faa2']} -sgff {self.files['gff']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs']}"
+            cmd = f"python3 blasting.py {self.mainDirectory} -n {self.parametre['nom']} -m {self.files['sbml']} -mfaa {self.files['faaM']} -sfaa {self.files['faaS']} -sgff {self.files['gff']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs']}"
         if self.module == "mpwting":
             cmd = f"python3 "
         if self.module == "main":
             self.temp_dir()
-            cmd = f"python3 main.py {self.main_directory} -m {self.files['sbml']} -mfaa {self.files['faa1']} -sfaa {self.files['faa2']} -sgff {self.files['gff']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs']} "
+            cmd = f"python3 main.py {self.mainDirectory} -m {self.files['sbml']} -mfaa {self.files['faaM']} -sfaa {self.files['faaS']} -sgff {self.files['gff']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs']} "
         p = subprocess.Popen(cmd, shell = True)
         p.wait()
         os.system("rm -rf ./temp_dir/")
@@ -165,9 +173,9 @@ class MyPanel(TabbedPanel):
 
     def print_files(self):
         affiche=[]
-        liste_blast=["faa1","faa2","gff","sbml"]
+        liste_blast=["faaM","faaS","gff","sbml"]
         liste_mpwting=["gff","fna","tsv"]
-        liste_main=["faa1","faa2","gff","sbml","fna","tsv"]
+        liste_main=["faaM","faaS","gff","sbml","fna","tsv"]
 
         if self.module=="blast":
             for extension in liste_blast:
