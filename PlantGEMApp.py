@@ -246,6 +246,19 @@ class MyPanel(TabbedPanel):
 
     def save_graph(self):
         self.graph.save_graph_json(self.ids["TI_save"].text)
+        
+    def print_keyword(self):
+        layout = GridLayout(cols=1, size_hint=(0.8, 0.8))
+        popupLabel = Label(
+            text=f"current metabolites searched : {self.graph.meta_keyword}\n current reactions searched : {self.graph.reac_keyword}",
+            font_size='20sp')
+        closeButton = Button(text="Exit", color="#F00020")
+        closeButton.bind(on_press=self.callback)
+        layout.add_widget(popupLabel)
+        layout.add_widget(closeButton)
+        self._popup = Popup(title='Files', size_hint=(0.8, 0.8))
+        self._popup.add_widget(layout)
+        self._popup.open()
     
          
 class LoadDialog(FloatLayout):
