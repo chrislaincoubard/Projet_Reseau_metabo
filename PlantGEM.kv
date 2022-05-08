@@ -210,6 +210,10 @@
                     text : "1) load file"
                     size_hint : 1,0.3
                     on_release : root.show_load("json","json","graph")
+                Button :
+                    text : "See current search"
+                    size_hint : 1,0.3
+                    on_release : root.print_keyword()    
                 Label :
                     text : "2) Input name to show\n graph without extension \n saved as html file"
                 TextInput :
