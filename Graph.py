@@ -4,9 +4,9 @@ import time
 from pyvis.network import Network
 
 class Graph:
-    data = []
-    Metabolites = [] #fill with search (needed only when creating a graph de novo
-    Reaction = [] #fill with search
+    data = [] #data from Json used to initialize the graph 
+    Metabolites = [] #Metabolites added from search
+    Reaction = [] #Reaction added from search
     nodes_metabolites = []
     nodes_reactions = []
     edges = []
@@ -25,12 +25,8 @@ class Graph:
             self.Load_json(file)
         else :
             self.data = []
-
-    def load_file(self, file):
-        with open(file, "r") as json_file:
-            self.data = json.load(json_file)
-
-
+            
+    #clear data from current instance, used for GUI implementation where only one graphe instance is used.
     def clear_data(self):
         self.Metabolites.clear()
         self.Reaction.clear()
@@ -41,12 +37,6 @@ class Graph:
         self.meta_keyword.clear()
         self.reac_keyword.clear()
 
-    def print_data(self):
-        print("\nmetabolites", self.Metabolites)
-        print("\nreaction", self.Reaction)
-        print("\nmeta_keyword", self.meta_keyword)
-        print("\nreac_keyword", self.reac_keyword)
-
     def meta_keyword_update(self,keyword):
         if keyword not in self.meta_keyword:
             self.meta_keyword.append(keyword)
@@ -55,28 +45,33 @@ class Graph:
         if keyword not in self.reac_keyword:
             self.reac_keyword.append(keyword)
 
-
+    #create the list of nodes for the graph. 
+    #All info from Json file are added as nodes attributes + graphical attributes for visualization
+    #Name key deleted from dictionnary because it causes conflict with netwrokx graph creation
+    
     def create_nodes_metabolites(self, data):
         for item in data:
-            item["size"] = 20
-            item["group"] = 2
-            item["title"] = item["id"]
+            item["size"] = 20 #Size of the node
+            item["group"] = 2 #Group of the node (to differentiate metabolites from reactions
+            item["title"] = item["id"] #Message displayed when node is hoverede by mouse
             if "name" in item:
                 del item["name"]
             self.nodes_metabolites.append((item['id'], item))
 
-
+    
+    #Similar to create_nodes_reactions
     def create_nodes_reactions(self, data):
         for item in data:
             item["size"] = 50
             item["group"] = 1
-            # self.title_reactions(data)
             item["title"] = item["gene_reaction_rule"].replace(" or ", " <br>")
             if "name" in item:
                 del item["name"]
             self.nodes_reactions.append((item['id'], item))
 
-
+    
+    #edges creating by creating a 2-tuple for each edge.
+    #Tuple means = (starting_node, ending node)
     def create_edges(self, type):
         for reaction in type:
             for metabolite, stoech in reaction["metabolites"].items():
@@ -86,6 +81,7 @@ class Graph:
                     self.edges.append([metabolite, reaction["id"]])
 
     #search for metabolites based on list of metabo ID
+    #add all the reactions connected to the searched metabolites and all the metabolites associated with the reactions.
     def search_metabolites(self):
         if not self.meta_keyword :
             return None
@@ -101,6 +97,7 @@ class Graph:
         self.meta_keyword.clear()
 
     #search for reactions based on list of reaction ID
+    #Add all the reactions and the meatbolites involved in them
     def search_reactions(self):
         if not self.reac_keyword:
             return None
@@ -115,8 +112,10 @@ class Graph:
                     self.Metabolites.append(item)
         self.reac_keyword.clear()
 
-    # ------------------ Functions to load and save graphs ------------------- #
-
+    # ------------------ Function to save graphs ------------------- #
+    
+    #Remove the graphical attribute from nodes
+    #Keep the structure from the initial JSON file
     def save_graph_json(self, name):
         tot_dico = {}
         meta = []
@@ -150,7 +149,7 @@ class Graph:
 
     def create_Graph(self,name):
         # create or show graph depending if a search has been made
-        if self.meta_keyword or self.reac_keyword :
+        if self.meta_keyword or self.reac_keyword : #if searched has been made.
             self.search_metabolites()
             self.search_reactions()
             self.create_nodes_metabolites(self.Metabolites)
@@ -168,7 +167,7 @@ class Graph:
                     self.show_graph(extension[0] + extension[1])
             else:
                 self.show_graph(name + ".html")
-        else :
+        else : #create graphe from all JSON if no search was made
             self.create_nodes_metabolites(self.data["metabolites"])
             self.create_nodes_reactions(self.data["reactions"])
             self.create_edges(self.data["reactions"])
@@ -189,10 +188,9 @@ class Graph:
     def show_graph(self, name):
         nt = Network("1000px", "1000px")
         nt.from_nx(self.G)
-        # nt.show_buttons() # show buttons must be turned off if non-default paramaters are set
         nt.toggle_hide_edges_on_drag(True)
         nt.set_edge_smooth("dynamic")
-
+        #Set_graphical options to allow good representation of graph
         nt.set_options("""
         var options = {
         "nodes": {
