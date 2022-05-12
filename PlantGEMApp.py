@@ -162,9 +162,19 @@ class MyPanel(TabbedPanel):
             if check_value:
                 self.launch_module()
             
-              
+    def module_merge(self):
+        self.module="merge"
+        if  self.mainDirectory=="":
+            self._popup1 = Popup(title='Error',content=Label(text='Please enter a main directoryt'),size_hint=(0.5,0.5))
+            self._popup1.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 1)
+        else:
+            self.launch_module()        
 
     def launch_module(self):
+        if self.module=="merge":
+            print("")
+            #commande gotié
         if self.module == "blast":
             cmd = f"python3 blasting.py {self.mainDirectory} -n {self.parametre['nom']} -m {self.files['sbml']} -mfaa {self.files['faaM']} -sfaa {self.files['faaS']} -sgff {self.files['gff']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs']}"
         if self.module == "mpwting":

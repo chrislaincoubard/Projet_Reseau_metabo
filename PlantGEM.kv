@@ -189,6 +189,24 @@
                 background_color:"#fcbba1"
                 pos_hint: {"center_x" : 0.9,"center_y" : 0.94}
                 on_press: root.print_files()
+
+    TabbedPanelItem:
+        text: "Merging"
+        font_size:  20
+        FloatLayout:
+            Button:
+                id : merge
+                text:"Merge files"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
+                on_press : root.module_merge()
+            Button:
+                id : btn 
+                size_hint:(0.18,0.07)
+                text:"Set main directory with BLAST and MPWT results"
+                background_color:"#fcbba1"
+                pos_hint: {"center_x" : 0.7,"center_y" : 0.94}
+                on_press : root.choosedirectory()
+            
     TabbedPanelItem :
         text : "Graphs"
         font_size : 20
@@ -448,5 +466,4 @@
             
 
             
-
 
