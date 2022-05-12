@@ -22,41 +22,44 @@ Window.size=(1000,800)
 
 class MyPanel(TabbedPanel):
     
-    files={"gff":"","sbml":"","fna":"","tsv":"","faaM":"","faaS":"","json":""}
-    format=""
-    buttonName=""
-    module=""
-    old_module=""
-    parametre={"i":50,"d":30,"ev":0,"c":20,"bs":300,"nom": "draft"}
-    defaut={"i":50,"d":30,"ev":0,"c":20,"bs":300,"nom": "draft"}
-    filesName=""
+    files={"gff":"","sbml":"","fna":"","tsv":"","faaM":"","faaS":"","json":""} #dictionary to store file names according to format
+    format="" #takes the value of the extension expected by the clicked button
+    buttonName="" #takes the value of the button id of the clicked button
+    module="" #takes the value of the modulus of the clicked button
+    old_module="" #takes the value of the modulus of the previous clicked button
+    parametre={"i":50,"d":30,"ev":0,"c":20,"bs":300,"nom": "draft"} #dictionary to store values parameters of module
+    defaut={"i":50,"d":30,"ev":0,"c":20,"bs":300,"nom": "draft"} #dictionary to store default values parameters of module
+    filesName="" #take the path of the loaded file
     text_input = ObjectProperty(text)
     input=False
-    mainDirectory=""
+    mainDirectory="" #take the path of the main directory
     graph = Graph.Graph("")
     
             
-
+    #close a pop-up
     def dismiss_popup(self):
         self._popup.dismiss()
 
+    #close a pop-up after dt time
     def dismiss_popup_dt(self, dt):
         self._popup1.dismiss()
 
+    #open the load dialog
     def show_load(self,textName,extension,textModule):
         self.buttonName=textName
         self.format=extension
         self.old_module=self.module
         self.module=textModule
-        if self.module!=self.old_module:
+        if self.module!=self.old_module: #delete files and restore settings if user changes module
             for key in self.files.keys():
                 self.files[key] = ""
             self.parametre.update(self.defaut)
-        content = LoadDialog(load=self.load, cancel=self.dismiss_popup)
+        content = LoadDialog(load=self.load, cancel=self.dismiss_popup) #define the content of the pop-up
         self._popup = Popup(title="Load file", content=content,
                             size_hint=(0.9, 0.9))
         self._popup.open()
 
+    #get the path of the uploaded file 
     def load(self, path, filename):
         with open(os.path.join(path, filename[0])) as stream:
             self.text_input.text = stream.read()
@@ -68,7 +71,10 @@ class MyPanel(TabbedPanel):
         if extension[1] == "json":
             self.graph.load_file(filename[0])
 
-
+    """check if the extension of the uploaded file is the extension expected by the clicked button
+    if the extension is the good , the path id added to the dictionnary files at the corresponding key,
+    else the function alerts the user of his error.
+    If a file already exists for the extension then it is replaced """
     def check_format(self):
         good_format=False
         extension=self.filesName.split(".")
@@ -105,13 +111,17 @@ class MyPanel(TabbedPanel):
         for key in self.files.keys():
             os.system(f"cp {self.files[key]} temp_dir")
 
+
+    """ check if the main directory exists and if the all necessary files are downloaded for the module.
+    if is true , the module is run , else the function alerts the user of his error"""
     def go_module(self):
         check_value=True
-        if  self.mainDirectory=="":
-            check_value=False
-            self._popup1 = Popup(title='Error',content=Label(text='Please enter a main directoryt'),size_hint=(0.5,0.5))
-            self._popup1.open()
-            Clock.schedule_once(self.dismiss_popup_dt, 1)
+        if self.module=="blast" or self.module=="main":
+            if  self.mainDirectory=="":
+                check_value=False
+                self._popup1 = Popup(title='Error',content=Label(text='Please enter a main directoryt'),size_hint=(0.5,0.5))
+                self._popup1.open()
+                Clock.schedule_once(self.dismiss_popup_dt, 1)
         
         if self.module=="blast" :
             if self.files.get("faaS")!="" and self.files.get("faaM")!="" and self.files.get("gff")!="" and self.files.get("sbml")!="":
@@ -171,11 +181,12 @@ class MyPanel(TabbedPanel):
             print('command : fail')
         self.files.clear()
 
+    #informs the user of the files already downloaded
     def print_files(self):
         affiche=[]
-        liste_blast=["faaM","faaS","gff","sbml"]
-        liste_mpwting=["gff","fna","tsv"]
-        liste_main=["faaM","faaS","gff","sbml","fna","tsv"]
+        liste_blast=["faaM","faaS","gff","sbml"] #list of the necessary files for blast module
+        liste_mpwting=["gff","fna","tsv"] #list of the necessary files for mpwt module
+        liste_main=["faaM","faaS","gff","sbml","fna","tsv"] #list of the necessary files for main module
 
         if self.module=="blast":
             for extension in liste_blast:
@@ -223,6 +234,8 @@ class MyPanel(TabbedPanel):
         if instance.state=="down":
             self.dismiss_popup()
             self.input=True
+
+    #open the settings dialog
     def show_param(self):
         content = Parameters(cancel= self.dismiss_popup)
         self._popup = Popup(title="Enter Parameters", content=content,size_hint=(1,1))
@@ -259,13 +272,13 @@ class MyPanel(TabbedPanel):
         self._popup = Popup(title='Files', size_hint=(0.8, 0.8))
         self._popup.add_widget(layout)
         self._popup.open()
-    
-         
+
+#define the object load dialog        
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
 
-
+#define the object choice folder dialog
 class DirectoryName(BoxLayout):
     cancel = ObjectProperty(None)
     
@@ -274,10 +287,12 @@ class DirectoryName(BoxLayout):
         if valeur != "":
             MyPanel.mainDirectory= valeur
             
-
+#define the object settings dialog
 class Parameters(BoxLayout):
     cancel = ObjectProperty(None)
 
+    """check if the value in textinput is in the interval, if is true the value of the dictionnary parameter is replace,
+    else the function alerts the user of his error"""
     def add_value(self,param,id):
         
         valeur=self.ids[id].text
@@ -303,7 +318,8 @@ class Parameters(BoxLayout):
         except:
             self._popup = Popup(title='Error',content=Label(text="Value is not numeric "),size_hint=(0.5,0.5))
             self._popup.open() 
-   
+            
+   # replace the value in parameter with default values
     def reset(self):
         MyPanel.parametre.update(MyPanel.defaut)
 
