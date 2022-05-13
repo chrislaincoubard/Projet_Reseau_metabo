@@ -106,6 +106,7 @@ class MyPanel(TabbedPanel):
         self._popup=Popup(title="Choose  a main directory", content = DirectoryName(cancel=self.dismiss_popup),size_hint=(0.5,0.5))
         self._popup.open()
     
+    #create a temporary directory "temp_dir" with all the files uploaded
     def temp_dir(self):
         os.mkdir("temp_dir")
         for key in self.files.keys():
@@ -161,7 +162,7 @@ class MyPanel(TabbedPanel):
             
             if check_value:
                 self.launch_module()
-            
+    #displays an error popup if the maindirectory is empty        
     def module_merge(self):
         self.module="merge"
         if  self.mainDirectory=="":
@@ -169,12 +170,12 @@ class MyPanel(TabbedPanel):
             self._popup1.open()
             Clock.schedule_once(self.dismiss_popup_dt, 1)
         else:
-            self.launch_module()        
+            self.launch_module()      
 
+    """check the current module and launches Command Line Interface related to the module using subprocess library"""
     def launch_module(self):
         if self.module=="merge":
-            print("")
-            #commande gotié
+            cmd = f"python3 merging.py {self.mainDirectory}"
         if self.module == "blast":
             cmd = f"python3 blasting.py {self.mainDirectory} -n {self.parametre['nom']} -m {self.files['sbml']} -mfaa {self.files['faaM']} -sfaa {self.files['faaS']} -sgff {self.files['gff']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs']}"
         if self.module == "mpwting":
