@@ -407,7 +407,7 @@ class Reac_List(RecycleView):
             self.parent.ids["TI_reac"].text = btn.text
             MyPanel.graph.reac_keyword_update(btn.text)
         
-class MyApp(App):
+class PlantGEMApp(App):
     
     def build(self):
         return MyPanel()
