@@ -69,7 +69,7 @@ class MyPanel(TabbedPanel):
             self.dismiss_popup()
         extension = filename[0].split(".")
         if extension[1] == "json":
-            self.graph.load_file(filename[0])
+            self.graph.Load_json(filename[0])
 
     """check if the extension of the uploaded file is the extension expected by the clicked button
     if the extension is the good , the path id added to the dictionnary files at the corresponding key,
