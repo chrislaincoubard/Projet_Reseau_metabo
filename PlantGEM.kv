@@ -6,11 +6,10 @@
         orientation: "vertical"
         FileChooserIconView:
             id: filechooser
+            dirselect : True
             path : sys.path.expanduser('~')
 
         BoxLayout:
-            size_hint_y: None
-            height: 30
             Button:
                 text: "Cancel"
                 background_color:"#F00020"
@@ -19,12 +18,14 @@
             Button:
                 text: "Load"
                 background_color:"#34C924"
-                on_press: root.load(filechooser.path, filechooser.selection)     
+                on_press: root.load(filechooser.path, filechooser.selection)
 
 <MyPanel>:
 
     do_default_tab: False
     size:(400,400)
+    tab_pos : "top_mid"
+    on_current_tab : root.on_tab_change(self.current_tab)
     TabbedPanelItem:
         text: "Main"
         font_size:  20
@@ -33,37 +34,37 @@
                 id : sbmlMain
                 text:"Choose .sbml file"
                 pos_hint: {"center_x" : 0.2,"center_y" : 0.8}
-                on_press : root.show_load("sbml","sbml","main")
+                on_press : root.show_load("sbml","sbml")
             Button:
                 id : faaSMain
                 text:"Choose .faa subject file"
                 pos_hint: {"center_x" : 0.2,"center_y" : 0.6}
-                on_press : root.show_load("faaS","faa","main")
+                on_press : root.show_load("faaS","faa")
 
             Button:
                 id : faaMMain
                 text:"Choose .faa model file "
                 pos_hint: {"center_x" : 0.2,"center_y" : 0.4}
-                on_press : root.show_load("faaM","faa","main")
+                on_press : root.show_load("faaM","faa")
             
             
             Button:
                 id : fnaMain
                 text:"Choose .fna file"
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.8}
-                on_press : root.show_load("fna","fna","main")
+                on_press : root.show_load("fna","fna")
             
             Button:
                 id : tsvMain
                 text:"Choose .tsv file "
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.6}
-                on_press : root.show_load("tsv","tsv","main")
+                on_press : root.show_load("tsv","tsv")
             
             Button:
                 id : gffMain
                 text:"Choose .gff file "
                 pos_hint: {"center_x" : 0.7,"center_y" : 0.4}
-                on_press : root.show_load("gff","gff","main")
+                on_press : root.show_load("gff","gff")
             
             Button:
                 id : btn7
@@ -104,24 +105,24 @@
                 id : sbmlBlast
                 text:"Choose .sbml file"
                 pos_hint: {"center_x" : 0.3,"center_y" : 0.8}
-                on_press : root.show_load("sbml","sbml","blast")
+                on_press : root.show_load("sbml","sbml")
             Button:
                 id : faaSBlast
                 text:"Choose .faa subject file"
                 pos_hint: {"center_x" : 0.3,"center_y" : 0.6}
-                on_press : root.show_load("faaS","faa","blast")
+                on_press : root.show_load("faaS","faa")
 
             Button:
                 id : faaMBlast
                 text:"Choose .faa model file"
                 pos_hint: {"center_x" : 0.3,"center_y" : 0.4}
-                on_press : root.show_load("faaM","faa","blast")
+                on_press : root.show_load("faaM","faa")
             
             Button:
                 id : gffBlast
                 text:"Choose .gff file"
                 pos_hint: {"center_x" : 0.3,"center_y" : 0.2}
-                on_press : root.show_load("gff","gff","blast")
+                on_press : root.show_load("gff","gff")
             
             Button:
                 id : btn
@@ -161,19 +162,19 @@
                 id : fnaMpwting
                 text:"Choose .fna file"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.6}
-                on_press : root.show_load("fna","fna","mpwting")
+                on_press : root.show_load("fna","fna")
             
             Button:
                 id : tsvMpwting
                 text:"Choose .tsv file"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.4}
-                on_press : root.show_load("tsv","tsv","mpwting")
+                on_press : root.show_load("tsv","tsv")
             
             Button:
                 id : gffMpwting
                 text:"Choose .gff file"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
-                on_press : root.show_load("gff","gff","mpwting")
+                on_press : root.show_load("gff","gff")
             
             Button:
                 id : btn
@@ -227,7 +228,7 @@
                 Button :
                     text : "1) load file"
                     size_hint : 1,0.3
-                    on_release : root.show_load("json","json","graph")
+                    on_release : root.show_load("json","json")
                 Button :
                     text : "See current search"
                     size_hint : 1,0.3
