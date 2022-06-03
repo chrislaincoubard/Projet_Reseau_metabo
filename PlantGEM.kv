@@ -10,13 +10,17 @@
             path : sys.path.expanduser('~')
 
         BoxLayout:
+            size_hint_y: None
+            height : 100
             Button:
                 text: "Cancel"
+                size_hint_y : 0.5
                 background_color:"#F00020"
                 on_release: root.cancel()
 
             Button:
                 text: "Load"
+                size_hint_y : 0.5
                 background_color:"#34C924"
                 on_press: root.load(filechooser.path, filechooser.selection)
 
@@ -27,136 +31,150 @@
     tab_pos : "top_mid"
     on_current_tab : root.on_tab_change(self.current_tab)
     TabbedPanelItem:
+        id : Main
         text: "Main"
         font_size:  20
         FloatLayout:
+            id : Main
+
+            Label :
+                id : files_main
+                text : "Currently selected files :\n\ngff :\n\nsbml :\n\nfna :\n\ntsv :\n\nfaaM :\n\nfaaS :"
+                pos_hint : {"center_x" : 0.15, "center_y" : 0.6}
+                text_size : cm(6), None
+                halign: 'center'
+                valign: 'middle'
+                font_size : 18
+
             Button:
                 id : sbmlMain
                 text:"Choose .sbml file"
-                pos_hint: {"center_x" : 0.2,"center_y" : 0.8}
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
                 on_press : root.show_load("sbml","sbml")
             Button:
                 id : faaSMain
                 text:"Choose .faa subject file"
-                pos_hint: {"center_x" : 0.2,"center_y" : 0.6}
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.6}
                 on_press : root.show_load("faaS","faa")
 
             Button:
                 id : faaMMain
                 text:"Choose .faa model file "
-                pos_hint: {"center_x" : 0.2,"center_y" : 0.4}
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.4}
                 on_press : root.show_load("faaM","faa")
             
             
             Button:
                 id : fnaMain
                 text:"Choose .fna file"
-                pos_hint: {"center_x" : 0.7,"center_y" : 0.8}
+                pos_hint: {"center_x" : 0.8,"center_y" : 0.8}
                 on_press : root.show_load("fna","fna")
             
             Button:
                 id : tsvMain
                 text:"Choose .tsv file "
-                pos_hint: {"center_x" : 0.7,"center_y" : 0.6}
+                pos_hint: {"center_x" : 0.8,"center_y" : 0.6}
                 on_press : root.show_load("tsv","tsv")
             
             Button:
                 id : gffMain
                 text:"Choose .gff file "
-                pos_hint: {"center_x" : 0.7,"center_y" : 0.4}
+                pos_hint: {"center_x" : 0.8,"center_y" : 0.4}
                 on_press : root.show_load("gff","gff")
             
             Button:
                 id : btn7
                 text:"Run"
                 background_color:"#a1d99b"
-                pos_hint: {"center_x" : 0.7,"center_y" : 0.2}
+                pos_hint: {"center_x" : 0.8,"center_y" : 0.15}
                 on_press : root.go_module()
 
             Button:
                 id : btn
                 background_color:"#CECECE"
                 text:"Parameters"
-                pos_hint: {"center_x" : 0.2,"center_y" : 0.2}
+                pos_hint: {"center_x" : 0.2,"center_y" : 0.15}
                 on_press : root.show_param()
+
             Button:
-                id : btn 
-                size_hint:(0.18,0.07)
-                text:"View files "
-                background_color:"#fcbba1"
-                pos_hint: {"center_x" : 0.9,"center_y" : 0.94}
-                on_press : root.print_files()
-            Button:
-                id : btn 
-                size_hint:(0.18,0.07)
+                id : btn
                 text:"Set main directory"
                 background_color:"#fcbba1"
-                pos_hint: {"center_x" : 0.7,"center_y" : 0.94}
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.15}
                 on_press : root.choosedirectory()
 
     TabbedPanelItem :
-    
+        id : BLASTing
         text : "BLASTing"
         font_size :  20
 
         FloatLayout:
+            Label :
+                id : files_blast
+                text : "Currently selected files :\n\ngff :\n\nsbml :\n\nfaaM :\n\nfaaS :"
+                pos_hint : {"center_x" : 0.15, "center_y" : 0.7}
+                text_size : cm(6), None
+                halign: 'center'
+                valign: 'middle'
+                font_size : 18
 
             Button:
                 id : sbmlBlast
                 text:"Choose .sbml file"
-                pos_hint: {"center_x" : 0.3,"center_y" : 0.8}
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
                 on_press : root.show_load("sbml","sbml")
             Button:
                 id : faaSBlast
                 text:"Choose .faa subject file"
-                pos_hint: {"center_x" : 0.3,"center_y" : 0.6}
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.55}
                 on_press : root.show_load("faaS","faa")
 
             Button:
                 id : faaMBlast
                 text:"Choose .faa model file"
-                pos_hint: {"center_x" : 0.3,"center_y" : 0.4}
+                pos_hint: {"center_x" : 0.8,"center_y" : 0.8}
                 on_press : root.show_load("faaM","faa")
             
             Button:
                 id : gffBlast
                 text:"Choose .gff file"
-                pos_hint: {"center_x" : 0.3,"center_y" : 0.2}
+                pos_hint: {"center_x" : 0.8,"center_y" : 0.55}
                 on_press : root.show_load("gff","gff")
             
             Button:
                 id : btn
                 text:"Run "
                 background_color:"#a1d99b"
-                pos_hint: {"center_x" : 0.7,"center_y" : 0.6}
+                pos_hint: {"center_x" : 0.2,"center_y" : 0.15}
                 on_press : root.go_module()
             Button:
                 id : btn
                 background_color:"#CECECE"
                 text:"Parameters"
-                pos_hint: {"center_x" : 0.7,"center_y" : 0.4}
+                pos_hint: {"center_x" : 0.8,"center_y" : 0.15}
                 on_press : root.show_param()
+
             Button:
-                id : btn 
-                size_hint:(0.18,0.07)
-                text:"View files "
-                background_color:"#fcbba1"
-                pos_hint: {"center_x" : 0.9,"center_y" : 0.94}
-                on_press : root.print_files()
-            Button:
-                id : btn 
-                size_hint:(0.18,0.07)
+                id : btn
                 text:"Set main directory"
                 background_color:"#fcbba1"
-                pos_hint: {"center_x" : 0.7,"center_y" : 0.94}
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.15}
                 on_press : root.choosedirectory()
 
     TabbedPanelItem :
-    
+        id : MPWTing
         text : "MPWTing"
         font_size :  20
 
         FloatLayout:
+            Label :
+                id : files_mpwt
+                text : "Currently selected files :\n\ngff :\n\nfna :\n\ntsv :"
+                pos_hint : {"center_x" : 0.15, "center_y" : 0.7}
+                text_size : cm(6), None
+                halign: 'center'
+                valign: 'middle'
+                font_size : 18
 
             Button:
                 id : fnaMpwting
@@ -181,17 +199,10 @@
                 text:"Run"
                 background_color:"#a1d99b"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
-                on_press : root.go_module() 
-            
-            Button:
-                id: btn 
-                size_hint:(0.18,0.07)
-                text:"View files "
-                background_color:"#fcbba1"
-                pos_hint: {"center_x" : 0.9,"center_y" : 0.94}
-                on_press: root.print_files()
+                on_press : root.go_module()
 
     TabbedPanelItem:
+        id : Merging
         text: "Merging"
         font_size:  20
         FloatLayout:
@@ -209,6 +220,7 @@
                 on_press : root.choosedirectory()
             
     TabbedPanelItem :
+        id : Graphs
         text : "Graphs"
         font_size : 20
         id : graph_panel

@@ -1,4 +1,3 @@
-
 from kivy.clock import Clock
 from cgitb import text
 from kivy.app import App
@@ -42,7 +41,9 @@ class MyPanel(TabbedPanel):
             self.files[key] = ""
         self.module = tab.text
         self.parametre.update(self.defaut)
-        print(self.module)
+        self.ids["files_main"].text = "Currently selected files :\n\ngff :\n\nsbml :\n\nfna :\n\ntsv :\n\nfaaM :\n\nfaaS :"
+        self.ids["files_blast"].text = "Currently selected files :\n\ngff :\n\nsbml :\n\nfaaM :\n\nfaaS :"
+        self.ids["files_mpwt"].text = "Currently selected files :\n\ngff :\n\nfna :\n\ntsv :"
 
     # close a pop-up
     def dismiss_popup(self):
@@ -52,10 +53,33 @@ class MyPanel(TabbedPanel):
     def dismiss_popup_dt(self, dt):
         self._popup1.dismiss()
 
+    def loaded_files(self, module):
 
+        if module == "Main":
+            self.ids["files_main"].text = "Currently selected files :\n\n"
+            for item in self.files.items():
+                if item[0] != "json":
+                    path = item[1].split("\\")
+                    name = path[-1]
+                    self.ids["files_main"].text += f"{item[0]} : {name}\n\n"
+        if module == "BLASTing":
+            self.ids["files_blast"].text = "Currently selected files :\n\n"
+            for item in self.files.items():
+                if item[0] == "faaM" or item[0] == "faaS" or item[0] == "gff" or item[0] == "sbml":
+                    path = item[1].split("\\")
+                    name = path[-1]
+                    self.ids["files_blast"].text += f"{item[0]} : {name}\n\n"
+        if module == "MPWTing":
+            self.ids["files_mpwt"].text = "Currently selected files :\n\n"
+            for item in self.files.items():
+                if item[0] == "gff" or item[0] == "fna" or item[0] == "tsv":
+                    path = item[1].split("\\")
+                    name = path[-1]
+                    self.ids["files_mpwt"].text += f"{item[0]} : {name}\n\n"
 
     # open the load dialog
     def show_load(self, textName, extension):
+
         self.buttonName = textName
         self.format = extension
         content = LoadDialog(load=self.load_file, cancel=self.dismiss_popup)  # define the content of the pop-up
@@ -79,6 +103,7 @@ class MyPanel(TabbedPanel):
             if verifie:
                 self.dismiss_popup()
             extension = filename[0].split(".")
+            self.loaded_files(self.module)
             if extension[1] == "json":
                 self.graph.Load_json(filename[0])
         else:
@@ -138,61 +163,54 @@ class MyPanel(TabbedPanel):
 
     def go_module(self):
         check_value = True
-        print("self module", self.module)
+        message = ""
+        empty_dict = all(x == "" for x in self.files.values())
         if self.module == "BLASTing" or self.module == "Main":
-            if self.mainDirectory == "":
+            if self.mainDirectory == "" and empty_dict:
                 check_value = False
-                self._popup1 = Popup(title='Error', content=Label(text='Please enter a main directory'),
-                                     size_hint=(0.5, 0.5))
-                self._popup1.open()
-                Clock.schedule_once(self.dismiss_popup_dt, 1)
+                message += "Please enter a main directory\n\n"
 
         if self.module == "BLASTing":
             if self.files.get("faaS") != "" and self.files.get("faaM") != "" and self.files.get(
                     "gff") != "" and self.files.get("sbml") != "":
                 if self.files.get("faaS") == self.files.get("faaM"):
                     check_value = False
-                    self._popup1 = Popup(title='Error', content=Label(text='Fasta files must be different'),
-                                         size_hint=(0.5, 0.5))
-                    self._popup1.open()
-                    Clock.schedule_once(self.dismiss_popup_dt, 1)
-
+                    message += "Fasta files must be different\n\n"
             else:
-                self._popup1 = Popup(title='Error', content=Label(text='Please load all necessary files'),
-                                     size_hint=(0.5, 0.5))
-                self._popup1.open()
-                Clock.schedule_once(self.dismiss_popup_dt, 1)
+                message += "Please load all necessary files\n\n"
+
                 check_value = False
             if check_value:
                 self.launch_module()
+            else:
+                self._popup1 = Popup(title='Error', content=Label(text=message),
+                                     size_hint=(0.5, 0.5))
+                self._popup1.open()
+                Clock.schedule_once(self.dismiss_popup_dt, 1)
         if self.module == "MPWTing":
             if self.files.get("tsv") != "" and self.files.get("fna") != "" and self.files.get("gff") != "":
                 self.launch_module()
             else:
-                self._popup1 = Popup(title='Error', content=Label(text='Please load all necessary files'),
-                                     size_hint=(0.5, 0.5))
-                self._popup1.open()
-                Clock.schedule_once(self.dismiss_popup_dt, 1)
+                message += "Please load all necessary files\n\n"
+
         if self.module == "Main":
             if self.files.get("faaS") != "" and self.files.get("faaM") != "" and self.files.get(
                     "gff") != "" and self.files.get("sbml") != "" and self.files.get("fna") != "" and self.files.get(
                 "tsv") != "":
-
                 if self.files.get("faaM") == self.files.get("faaS"):
-                    self._popup1 = Popup(title='Error', content=Label(text='Fasta files must be different'),
-                                         size_hint=(0.5, 0.5))
-                    self._popup1.open()
-                    Clock.schedule_once(self.dismiss_popup_dt, 1)
+                    message += "Fasta files must be different\n\n"
                     check_value = False
             else:
-                self._popup1 = Popup(title='Error', content=Label(text='Please load all necessary files'),
-                                     size_hint=(0.5, 0.5))
-                self._popup1.open()
-                Clock.schedule_once(self.dismiss_popup_dt, 1)
+                message += "Please load all necessary files\n\n"
                 check_value = False
 
             if check_value:
                 self.launch_module()
+            else:
+                self._popup1 = Popup(title='Error', content=Label(text=message),
+                                     size_hint=(0.5, 0.5))
+                self._popup1.open()
+                Clock.schedule_once(self.dismiss_popup_dt, 2)
 
     # displays an error popup if the maindirectory is empty
     def module_merge(self):
