@@ -35,7 +35,7 @@ class MyPanel(TabbedPanel):
     text_input = ObjectProperty(text)
     input = False
     mainDirectory = ""  # take the path of the main directory
-    compartment = ""
+    compartment = []
     graph = Graph.Graph("")
 
     def on_tab_change(self, tab):
@@ -43,7 +43,8 @@ class MyPanel(TabbedPanel):
             self.files[key] = ""
         self.module = tab.text
         self.parametre.update(self.defaut)
-        self.ids["files_main"].text = "Currently selected files :\n\ngff :\n\nsbml :\n\nfna :\n\ntsv :\n\nfaaM :\n\nfaaS :"
+        self.ids[
+            "files_main"].text = "Currently selected files :\n\ngff :\n\nsbml :\n\nfna :\n\ntsv :\n\nfaaM :\n\nfaaS :"
         self.ids["files_blast"].text = "Currently selected files :\n\ngff :\n\nsbml :\n\nfaaM :\n\nfaaS :"
         self.ids["files_mpwt"].text = "Currently selected files :\n\ngff :\n\nfna :\n\ntsv :"
 
@@ -54,6 +55,9 @@ class MyPanel(TabbedPanel):
     # close a pop-up after dt time
     def dismiss_popup_dt(self, dt):
         self._popup1.dismiss()
+
+    def print_compartment(self):
+        print(self.graph.compartment)
 
     def loaded_files(self, module):
         if module == "Main":
@@ -245,7 +249,6 @@ class MyPanel(TabbedPanel):
             print('command : fail')
         self.files.clear()
 
-
     def callback(self, instance):
         if instance.state == "down":
             self.dismiss_popup()
@@ -257,18 +260,18 @@ class MyPanel(TabbedPanel):
         self._popup = Popup(title="Enter Parameters", content=content, size_hint=(1, 1))
         self._popup.open()
 
-    def toggle_react_list(self):
-        if self.ids["Reac_list"].opacity == 0:
-            self.ids["Reac_list"].opacity = 1
+    def toggle_compartment_list(self):
+        if self.ids["compartment_list"].opacity == 0:
+            self.ids["compartment_list"].opacity = 1
+            if MyPanel.graph.data :
+                self.ids["compartment_list"].data = [{"text": compartment, "root_widget": self.ids["compartment_list"]} for compartment in
+                                              MyPanel.graph.data["compartments"]]
         else:
-            self.ids["Reac_list"].opacity = 0
+            self.ids["compartment_list"].opacity = 0
 
     def clear_graph_data(self):
         self.graph.clear_data()
 
-    def update_keyword(self, btn):
-        self.ids["TI_Metab"].text = btn.text
-        self.graph.meta_keyword_update(btn.text)
 
     def show_graph(self):
         self.graph.create_Graph(self.ids["TI_graph"].text)
@@ -288,6 +291,7 @@ class MyPanel(TabbedPanel):
         self._popup = Popup(title='Files', size_hint=(0.8, 0.8))
         self._popup.add_widget(layout)
         self._popup.open()
+
 
 
 # define the object load dialog
@@ -316,7 +320,6 @@ class Parameters(BoxLayout):
     def add_value(self, param, id):
 
         valeur = self.ids[id].text
-
         if id == "input6":
             MyPanel.parametre[param] = value
         try:
@@ -363,7 +366,6 @@ class TI_reac(TextInput):
                                                  value.upper() in reac["id"].upper()]
 
 
-
 class Box_reac(BoxLayout):
     def toggle_reac_list(self):
         if self.ids["Reac_list"].opacity == 0:
@@ -387,6 +389,14 @@ class Box_meta(BoxLayout):
             self.ids["Meta_list"].opacity = 0
 
 
+class Compartment_buttons(Button):
+    root_widget = ObjectProperty()
+
+    def on_release(self):
+        super().on_release()
+        self.root_widget.btn_callback(self)
+
+
 class Meta_list_buttons(Button):
     root_widget = ObjectProperty()
 
@@ -402,10 +412,16 @@ class Meta_List(RecycleView):
         if MyPanel.graph.data:
             self.data = [{"text": meta["id"], 'root_widget': self} for meta in MyPanel.graph.data["metabolites"]]
 
+    def selected_keyword(self):
+        message = f"Currently in search :\nMetabolites : {', '.join(MyPanel.graph.meta_keyword)}\nReactions : " \
+                  f"{', '.join(MyPanel.graph.reac_keyword)}\nCompartments : {', '.join(MyPanel.graph.compartment)}"
+        App.get_running_app().root.ids["keywords"].text = message
+
     def btn_callback(self, btn):
         if self.opacity == 1:
             self.parent.ids["TI_Metab"].text = btn.text
             MyPanel.graph.meta_keyword_update(btn.text)
+            self.selected_keyword()
 
 
 class Reac_list_buttons(Button):
@@ -422,10 +438,33 @@ class Reac_List(RecycleView):
         if MyPanel.graph.data:
             self.data = [{"text": reac["id"], 'root_widget': self} for reac in MyPanel.graph.data["reactions"]]
 
+    def selected_keyword(self):
+        message = f"Currently in search :\nMetabolites : {', '.join(MyPanel.graph.meta_keyword)}\nReactions : " \
+                  f"{', '.join(MyPanel.graph.reac_keyword)}\nCompartments : {', '.join(MyPanel.graph.compartment)}"
+        App.get_running_app().root.ids["keywords"].text = message
+
     def btn_callback(self, btn):
         if self.opacity == 1:
             self.parent.ids["TI_reac"].text = btn.text
             MyPanel.graph.reac_keyword_update(btn.text)
+            self.selected_keyword()
+
+
+class Compartment_List(RecycleView):
+    def __int__(self, **kwargs):
+        super(Compartment_List, self).__init__(**kwargs)
+        if MyPanel.graph.data:
+            self.data = [{"text": reac["id"], 'root_widget': self} for reac in MyPanel.graph.data["reactions"]]
+
+    def selected_keyword(self):
+        message = f"Currently in search :\nMetabolites : {', '.join(MyPanel.graph.meta_keyword)}\nReactions : " \
+                  f"{', '.join(MyPanel.graph.reac_keyword)}\nCompartments : {', '.join(MyPanel.graph.compartment)}"
+        App.get_running_app().root.ids["keywords"].text = message
+
+    def btn_callback(self, btn):
+        if self.opacity == 1:
+            MyPanel.graph.compartment_update(btn.text)
+            self.selected_keyword()
 
 
 class PlantGEMApp(App):

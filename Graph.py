@@ -7,6 +7,7 @@ class Graph:
     data = []  # data from Json used to initialize the graph
     Metabolites = []  # Metabolites added from search
     Reaction = []  # Reaction added from search
+    compartment = []
     nodes_metabolites = []
     nodes_reactions = []
     edges = []
@@ -36,6 +37,7 @@ class Graph:
         self.nodes_metabolites.clear()
         self.meta_keyword.clear()
         self.reac_keyword.clear()
+        self.compartment.clear()
 
     def meta_keyword_update(self, keyword):
         if keyword not in self.meta_keyword:
@@ -44,6 +46,10 @@ class Graph:
     def reac_keyword_update(self, keyword):
         if keyword not in self.reac_keyword:
             self.reac_keyword.append(keyword)
+
+    def compartment_update(self, keyword):
+        if keyword not in self.compartment :
+            self.compartment.append(keyword)
 
     # create the list of nodes for the graph.
     # All info from Json file are added as nodes attributes + graphical attributes for visualization
