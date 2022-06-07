@@ -13,6 +13,7 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.recycleview import RecycleView
+
 import Graph
 import subprocess
 import os
@@ -34,6 +35,7 @@ class MyPanel(TabbedPanel):
     text_input = ObjectProperty(text)
     input = False
     mainDirectory = ""  # take the path of the main directory
+    compartment = ""
     graph = Graph.Graph("")
 
     def on_tab_change(self, tab):
@@ -54,7 +56,6 @@ class MyPanel(TabbedPanel):
         self._popup1.dismiss()
 
     def loaded_files(self, module):
-
         if module == "Main":
             self.ids["files_main"].text = "Currently selected files :\n\n"
             for item in self.files.items():
@@ -165,6 +166,7 @@ class MyPanel(TabbedPanel):
         check_value = True
         message = ""
         empty_dict = all(x == "" for x in self.files.values())
+
         if self.module == "BLASTing" or self.module == "Main":
             if self.mainDirectory == "" and empty_dict:
                 check_value = False
@@ -178,7 +180,6 @@ class MyPanel(TabbedPanel):
                     message += "Fasta files must be different\n\n"
             else:
                 message += "Please load all necessary files\n\n"
-
                 check_value = False
             if check_value:
                 self.launch_module()
@@ -187,6 +188,7 @@ class MyPanel(TabbedPanel):
                                      size_hint=(0.5, 0.5))
                 self._popup1.open()
                 Clock.schedule_once(self.dismiss_popup_dt, 1)
+
         if self.module == "MPWTing":
             if self.files.get("tsv") != "" and self.files.get("fna") != "" and self.files.get("gff") != "":
                 self.launch_module()
@@ -203,7 +205,6 @@ class MyPanel(TabbedPanel):
             else:
                 message += "Please load all necessary files\n\n"
                 check_value = False
-
             if check_value:
                 self.launch_module()
             else:
@@ -244,60 +245,6 @@ class MyPanel(TabbedPanel):
             print('command : fail')
         self.files.clear()
 
-    # informs the user of the files already downloaded
-    def print_files(self):
-        affiche = []
-        liste_blast = ["faaM", "faaS", "gff", "sbml"]  # list of the necessary files for blast module
-        liste_mpwting = ["gff", "fna", "tsv"]  # list of the necessary files for mpwt module
-        liste_main = ["faaM", "faaS", "gff", "sbml", "fna", "tsv"]  # list of the necessary files for main module
-
-        if self.module == "BLASTing":
-            for extension in liste_blast:
-                name_files = self.files.get(extension).split("/")
-                affiche.append([extension, name_files[-1]])
-            layout = GridLayout(cols=1, size_hint=(0.8, 0.8))
-            popupLabel = Label(
-                text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n \n {affiche[2][0]} : {affiche[2][1]} \n\n {affiche[3][0]} : {affiche[3][1]}",
-                font_size='20sp')
-            closeButton = Button(text="Exit", color="#F00020")
-            closeButton.bind(on_press=self.callback)
-            layout.add_widget(popupLabel)
-            layout.add_widget(closeButton)
-            self._popup = Popup(title='Files', size_hint=(0.8, 0.8))
-            self._popup.add_widget(layout)
-            self._popup.open()
-
-        elif self.module == "MPWTing":
-            for extension in liste_mpwting:
-                name_files = self.files.get(extension).split("/")
-                affiche.append([extension, name_files[-1]])
-            layout = GridLayout(cols=1, size_hint=(0.8, 0.8))
-            popupLabel = Label(
-                text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n \n {affiche[2][0]} : {affiche[2][1]}",
-                font_size='20sp')
-            closeButton = Button(text="Exit", color="#F00020")
-            closeButton.bind(on_press=self.callback)
-            layout.add_widget(popupLabel)
-            layout.add_widget(closeButton)
-            self._popup = Popup(title='Files', size_hint=(0.8, 0.8))
-            self._popup.add_widget(layout)
-            self._popup.open()
-
-        else:
-            for extension in liste_main:
-                name_files = self.files.get(extension).split("/")
-                affiche.append([extension, name_files[-1]])
-            layout = GridLayout(cols=1, size_hint=(0.8, 0.8))
-            popupLabel = Label(
-                text=f"{affiche[0][0]} : {affiche[0][1]}\n\n {affiche[1][0]} : {affiche[1][1]}\n\n {affiche[2][0]} : {affiche[2][1]}\n\n {affiche[3][0]} : {affiche[3][1]} \n\n {affiche[4][0]} : {affiche[4][1]}\n\n {affiche[5][0]} : {affiche[5][1]}",
-                font_size='20sp')
-            closeButton = Button(text="Exit", color="#F00020")
-            closeButton.bind(on_press=self.callback)
-            layout.add_widget(popupLabel)
-            layout.add_widget(closeButton)
-            self._popup = Popup(title='Files', size_hint=(0.8, 0.8))
-            self._popup.add_widget(layout)
-            self._popup.open()
 
     def callback(self, instance):
         if instance.state == "down":
@@ -414,6 +361,7 @@ class TI_reac(TextInput):
             self.parent.ids["Reac_list"].data = [{"text": reac["id"], "root_widget": self.parent.ids["Reac_list"]} for
                                                  reac in MyPanel.graph.data["reactions"] if
                                                  value.upper() in reac["id"].upper()]
+
 
 
 class Box_reac(BoxLayout):
