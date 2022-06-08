@@ -226,7 +226,7 @@
         id : graph_panel
 
         GridLayout :
-            cols:4
+            cols : 4
             id : Grid
 
             BoxLayout :
@@ -263,9 +263,53 @@
                     valign : "middle"
                     halign : "center"
 
-            Box_meta:
+            BoxLayout:
+                orientation : "vertical"
+                size_hint_x : 0.3
 
-            Box_reac:
+                Button :
+                    size_hint_x : 1
+                    text : "hide/show metabolites list"
+                    on_release : root.toggle_meta_list()
+
+                Label :
+                    text : "Click reaction in list to add to graph"
+                    size_hint_y : 0.3
+
+                Meta_List :
+                    opacity : 0
+                    id : Meta_list
+
+                TI_meta :
+                    id : TI_Metab
+                    text : ""
+                    size_hint_y : None
+                    height : 50
+                    size_hint_x : 1
+
+            BoxLayout:
+                orientation : "vertical"
+                size_hint_x : 0.3
+
+                Button :
+                    size_hint_x : 1
+                    text : "hide/show reaction list"
+                    on_release : root.toggle_reac_list()
+
+                Label :
+                    text : "Click metabolites in list to add to graph"
+                    size_hint_y : 0.3
+
+                Reac_List :
+                    opacity : 0
+                    id : Reac_list
+
+                TI_reac :
+                    id : TI_reac
+                    multiline : False
+                    size_hint_y : None
+                    height : 50
+                    size_hint_x : 1
 
             BoxLayout :
                 size_hint_x : 0.2
@@ -292,12 +336,14 @@
                         text : "graph.html"
                         multiline : False
                         on_text_validate : root.show_graph()
-                        size_hint : 0.6,0.1
+                        size_hint : 0.6,None
+                        height : 50
                     Button :
                         id : submit_graph
                         text : "Draw Graph"
                         on_release : root.show_graph()
-                        size_hint : 0.4,0.1
+                        size_hint : 0.4,None
+                        height : 50
                         text_size : self.size
                         font_size : 16
                         halign : "center"
@@ -314,14 +360,16 @@
                     TextInput :
                         id : TI_save
                         text : "Save_graph.json"
-                        size_hint : 1,0.1
+                        size_hint : 1,None
+                        height : 50
                         multiline : False
                         on_text_validate : root.save_graph()
                     Button :
                         id : submit_graph
                         text : "Save json"
                         on_release : root.save_graph()
-                        size_hint : 0.4,0.1
+                        size_hint : 0.4,None
+                        height : 50
                         text_size : self.size
                         font_size : 16
                         halign : "center"
@@ -336,51 +384,6 @@
                     text : "Clear data"
                     size_hint : 1,0.3
                     on_release : root.clear_graph_data()
-<Box_reac>
-    orientation : "vertical"
-    size_hint_x : 0.3
-
-    Button :
-        size_hint_x : 1
-        text : "hide/show reaction list"
-        on_release : root.toggle_reac_list()
-
-    Label :
-        text : "Click metabolites in list to add to graph"
-        size_hint_y : 0.2
-
-    Reac_List :
-        opacity : 0
-        id : Reac_list
-
-    TI_reac :
-        id : TI_reac
-        multiline : False
-        size_hint_y : 0.2
-        size_hint_x : 1
-
-<Box_meta>:
-    orientation : "vertical"
-    size_hint_x : 0.3
-
-    Button :
-        size_hint_x : 1
-        text : "hide/show metabolites list"
-        on_release : root.toggle_meta_list()
-
-    Label :
-        text : "Click reaction in list to add to graph"
-        size_hint_y : 0.3
-
-    Meta_List :
-        opacity : 0
-        id : Meta_list
-
-    TI_meta :
-        id : TI_Metab
-        text : ""
-        size_hint_y : 0.2
-        size_hint_x : 1
 
 <Meta_List>:
     viewclass : "Meta_list_buttons"

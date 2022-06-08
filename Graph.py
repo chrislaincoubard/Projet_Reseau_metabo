@@ -140,14 +140,16 @@ class Graph:
         if "." in name:
             extension = name.split('.')
             if "json" == extension[1]:
-                self.show_graph(name)
+                with open(name, 'w') as f:
+                    f.write(json.dumps(tot_dico))
             else:
                 extension[1] = ".json"
-                self.show_graph(extension[0] + extension[1])
+                with open(extension[0] + extension[1], 'w') as f:
+                    f.write(json.dumps(tot_dico))
         else:
-            self.show_graph(name + ".json")
-        with open(name, 'w') as f:
-            f.write(json.dumps(tot_dico))
+            with open(name + ".json", 'w') as f:
+                f.write(json.dumps(tot_dico))
+
 
     # ------------------ Functions to show graph ----------------------------- #
 

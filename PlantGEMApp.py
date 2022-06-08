@@ -263,29 +263,30 @@ class MyPanel(TabbedPanel):
     def toggle_compartment_list(self):
         if self.ids["compartment_list"].opacity == 0:
             self.ids["compartment_list"].opacity = 1
-            if MyPanel.graph.data :
-                self.ids["compartment_list"].data = [{"text": compartment, "root_widget": self.ids["compartment_list"]} for compartment in
-                                              MyPanel.graph.data["compartments"]]
+            if MyPanel.graph.data:
+                self.ids["compartment_list"].data = [{"text": compartment, "root_widget": self.ids["compartment_list"]}
+                                                     for compartment in
+                                                     MyPanel.graph.data["compartments"]]
         else:
             self.ids["compartment_list"].opacity = 0
 
     def clear_graph_data(self):
+        self.ids["keywords"].text = "Currently in search :\n\nMetabolites :\n\nReactions:\n\nCompartment:\n"
         self.graph.clear_data()
 
-
     def show_graph(self):
-        if self.graph.data :
+        if self.graph.data:
             self.graph.create_Graph(self.ids["TI_graph"].text)
-        else :
+        else:
             self._popup1 = Popup(title='Error', content=Label(text="Please load a file first"),
                                  size_hint=(0.5, 0.5))
             self._popup1.open()
             Clock.schedule_once(self.dismiss_popup_dt, 2)
 
     def save_graph(self):
-        if self.graph.data :
+        if self.graph.data:
             self.graph.save_graph_json(self.ids["TI_save"].text)
-        else :
+        else:
             self._popup1 = Popup(title='Error', content=Label(text="Please draw a graph first"),
                                  size_hint=(0.5, 0.5))
             self._popup1.open()
@@ -303,6 +304,30 @@ class MyPanel(TabbedPanel):
         self._popup = Popup(title='Files', size_hint=(0.8, 0.8))
         self._popup.add_widget(layout)
         self._popup.open()
+
+    def toggle_meta_list(self):
+        if self.ids["Meta_list"].opacity == 0:
+            if self.graph.data :
+                if self.graph.compartment :
+                    self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for meta in
+                                                  self.graph.data["metabolites"] if
+                                                  meta["compartment"] in self.graph.compartment]
+
+                else :
+                    self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for meta in
+                                              self.graph.data["metabolites"]]
+            self.ids["Meta_list"].opacity = 1
+        else:
+            self.ids["Meta_list"].opacity = 0
+
+    def toggle_reac_list(self):
+        if self.ids["Reac_list"].opacity == 0:
+            self.ids["Reac_list"].opacity = 1
+            if MyPanel.graph.data:
+                self.ids["Reac_list"].data = [{"text": reac["id"], "root_widget": self.ids["Reac_list"]} for reac in
+                                              MyPanel.graph.data["reactions"]]
+        else:
+            self.ids["Reac_list"].opacity = 0
 
 
 
@@ -364,41 +389,18 @@ class Parameters(BoxLayout):
 class TI_meta(TextInput):
 
     def on_text(self, instance, value):
-        if self.parent.ids["Meta_list"].data:
-            self.parent.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.parent.ids["Meta_list"]} for
+        if App.get_running_app().root.ids["Meta_list"].data:
+            App.get_running_app().root.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": App.get_running_app().root.ids["Meta_list"]} for
                                                  meta in MyPanel.graph.data["metabolites"] if
                                                  value.upper() in meta["id"].upper()]
 
 
 class TI_reac(TextInput):
     def on_text(self, instance, value):
-        if self.parent.ids["Reac_list"].data:
-            self.parent.ids["Reac_list"].data = [{"text": reac["id"], "root_widget": self.parent.ids["Reac_list"]} for
+        if App.get_running_app().root.ids["Reac_list"].data:
+            App.get_running_app().root.ids["Reac_list"].data = [{"text": reac["id"], "root_widget": App.get_running_app().root.ids["Reac_list"]} for
                                                  reac in MyPanel.graph.data["reactions"] if
                                                  value.upper() in reac["id"].upper()]
-
-
-class Box_reac(BoxLayout):
-    def toggle_reac_list(self):
-        if self.ids["Reac_list"].opacity == 0:
-            self.ids["Reac_list"].opacity = 1
-            if MyPanel.graph.data:
-                self.ids["Reac_list"].data = [{"text": meta["id"], "root_widget": self.ids["Reac_list"]} for meta in
-                                              MyPanel.graph.data["reactions"]]
-        else:
-            self.ids["Reac_list"].opacity = 0
-
-
-class Box_meta(BoxLayout):
-
-    def toggle_meta_list(self):
-        if self.ids["Meta_list"].opacity == 0:
-            self.ids["Meta_list"].opacity = 1
-            if MyPanel.graph.data:
-                self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for meta in
-                                              MyPanel.graph.data["metabolites"]]
-        else:
-            self.ids["Meta_list"].opacity = 0
 
 
 class Compartment_buttons(Button):
@@ -431,7 +433,6 @@ class Meta_List(RecycleView):
 
     def btn_callback(self, btn):
         if self.opacity == 1:
-            self.parent.ids["TI_Metab"].text = btn.text
             MyPanel.graph.meta_keyword_update(btn.text)
             self.selected_keyword()
 
@@ -457,7 +458,6 @@ class Reac_List(RecycleView):
 
     def btn_callback(self, btn):
         if self.opacity == 1:
-            self.parent.ids["TI_reac"].text = btn.text
             MyPanel.graph.reac_keyword_update(btn.text)
             self.selected_keyword()
 
@@ -473,10 +473,17 @@ class Compartment_List(RecycleView):
                   f"{', '.join(MyPanel.graph.reac_keyword)}\n\nCompartments : {', '.join(MyPanel.graph.compartment)}"
         App.get_running_app().root.ids["keywords"].text = message
 
+    def update_meta_list(self):
+        if App.get_running_app().root.ids["Meta_list"].data:
+            App.get_running_app().root.ids["Meta_list"].data = [{"text": meta["id"], "root_widget":  App.get_running_app().root.ids["Meta_list"]} for
+                                                 meta in MyPanel.graph.data["metabolites"] if
+                                                 meta["compartment"] in MyPanel.graph.compartment]
+
     def btn_callback(self, btn):
         if self.opacity == 1:
             MyPanel.graph.compartment_update(btn.text)
             self.selected_keyword()
+            self.update_meta_list()
 
 
 class PlantGEMApp(App):
