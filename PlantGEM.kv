@@ -236,7 +236,7 @@
                 Label :
                     id : keywords
                     size_hint_y : 0.5
-                    text : "Currently in search :\nMetabolites :\nReactions:\nCompartment:\n"
+                    text : "Currently in search :\n\nMetabolites :\n\nReactions:\n\nCompartment:\n"
                     text_size : cm(4), None
                     valign : "middle"
                     haligne : "center"
@@ -244,6 +244,7 @@
                 Compartment_List :
                     id : compartment_list
                     opacity : 0
+                    size_hint_y : 0.4
 
                 Button :
                     id : open_cpt_list
@@ -333,7 +334,7 @@
 
                 Button :
                     text : "Clear data"
-                    size_hint : 1,0.2
+                    size_hint : 1,0.3
                     on_release : root.clear_graph_data()
 <Box_reac>
     orientation : "vertical"

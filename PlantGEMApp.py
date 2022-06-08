@@ -274,10 +274,22 @@ class MyPanel(TabbedPanel):
 
 
     def show_graph(self):
-        self.graph.create_Graph(self.ids["TI_graph"].text)
+        if self.graph.data :
+            self.graph.create_Graph(self.ids["TI_graph"].text)
+        else :
+            self._popup1 = Popup(title='Error', content=Label(text="Please load a file first"),
+                                 size_hint=(0.5, 0.5))
+            self._popup1.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 2)
 
     def save_graph(self):
-        self.graph.save_graph_json(self.ids["TI_save"].text)
+        if self.graph.data :
+            self.graph.save_graph_json(self.ids["TI_save"].text)
+        else :
+            self._popup1 = Popup(title='Error', content=Label(text="Please draw a graph first"),
+                                 size_hint=(0.5, 0.5))
+            self._popup1.open()
+            Clock.schedule_once(self.dismiss_popup_dt, 2)
 
     def print_keyword(self):
         layout = GridLayout(cols=1, size_hint=(0.8, 0.8))
@@ -413,8 +425,8 @@ class Meta_List(RecycleView):
             self.data = [{"text": meta["id"], 'root_widget': self} for meta in MyPanel.graph.data["metabolites"]]
 
     def selected_keyword(self):
-        message = f"Currently in search :\nMetabolites : {', '.join(MyPanel.graph.meta_keyword)}\nReactions : " \
-                  f"{', '.join(MyPanel.graph.reac_keyword)}\nCompartments : {', '.join(MyPanel.graph.compartment)}"
+        message = f"Currently in search :\n\nMetabolites : {', '.join(MyPanel.graph.meta_keyword)}\n\nReactions : " \
+                  f"{', '.join(MyPanel.graph.reac_keyword)}\n\nCompartments : {', '.join(MyPanel.graph.compartment)}"
         App.get_running_app().root.ids["keywords"].text = message
 
     def btn_callback(self, btn):
@@ -439,8 +451,8 @@ class Reac_List(RecycleView):
             self.data = [{"text": reac["id"], 'root_widget': self} for reac in MyPanel.graph.data["reactions"]]
 
     def selected_keyword(self):
-        message = f"Currently in search :\nMetabolites : {', '.join(MyPanel.graph.meta_keyword)}\nReactions : " \
-                  f"{', '.join(MyPanel.graph.reac_keyword)}\nCompartments : {', '.join(MyPanel.graph.compartment)}"
+        message = f"Currently in search :\n\nMetabolites : {', '.join(MyPanel.graph.meta_keyword)}\n\nReactions : " \
+                  f"{', '.join(MyPanel.graph.reac_keyword)}\n\nCompartments : {', '.join(MyPanel.graph.compartment)}"
         App.get_running_app().root.ids["keywords"].text = message
 
     def btn_callback(self, btn):
@@ -457,8 +469,8 @@ class Compartment_List(RecycleView):
             self.data = [{"text": reac["id"], 'root_widget': self} for reac in MyPanel.graph.data["reactions"]]
 
     def selected_keyword(self):
-        message = f"Currently in search :\nMetabolites : {', '.join(MyPanel.graph.meta_keyword)}\nReactions : " \
-                  f"{', '.join(MyPanel.graph.reac_keyword)}\nCompartments : {', '.join(MyPanel.graph.compartment)}"
+        message = f"Currently in search :\n\nMetabolites : {', '.join(MyPanel.graph.meta_keyword)}\n\nReactions : " \
+                  f"{', '.join(MyPanel.graph.reac_keyword)}\n\nCompartments : {', '.join(MyPanel.graph.compartment)}"
         App.get_running_app().root.ids["keywords"].text = message
 
     def btn_callback(self, btn):
