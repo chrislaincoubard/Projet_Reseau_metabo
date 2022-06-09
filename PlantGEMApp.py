@@ -27,7 +27,7 @@ class MyPanel(TabbedPanel):
     format = ""  # takes the value of the extension expected by the clicked button
     buttonName = ""  # takes the value of the button id of the clicked button
     module = ""  # takes the value of the modulus of the clicked button
-    parametre = {"i": 50, "d": 30, "ev": 0, "c": 20, "bs": 300,
+    parametre = {"i": 50.0, "d": 30.0, "ev": 0.0, "c": 20.0, "bs": 300.0,
                  "nom": "draft"}  # dictionary to store values parameters of module
     defaut = {"i": 50, "d": 30, "ev": 0, "c": 20, "bs": 300,
               "nom": "draft"}  # dictionary to store default values parameters of module
@@ -37,6 +37,7 @@ class MyPanel(TabbedPanel):
     mainDirectory = ""  # take the path of the main directory
     compartment = []
     graph = Graph.Graph("")
+    options = 1
 
     def on_tab_change(self, tab):
         for key in self.files.keys():
@@ -55,9 +56,6 @@ class MyPanel(TabbedPanel):
     # close a pop-up after dt time
     def dismiss_popup_dt(self, dt):
         self._popup1.dismiss()
-
-    def print_compartment(self):
-        print(self.graph.compartment)
 
     def loaded_files(self, module):
         if module == "Main":
@@ -93,10 +91,24 @@ class MyPanel(TabbedPanel):
         self._popup.open()
 
     def load_dir(self, path, dirname):
-        print("path", path)
-        print("dirname", dirname)
         self.mainDirectory = dirname[0]
-        print(self.mainDirectory)
+
+    def get_id(self, instance):
+        for id, widget in instance.parent.ids.items():
+            if widget.__self__ == instance:
+                return id
+
+
+    def change_option(self, instance):
+        id = self.get_id(instance)
+        if id == "default":
+            MyPanel.options = 1
+        if id == "option_select":
+            MyPanel.options = 2
+        if id == "no_physics":
+            MyPanel.options = 3
+        print("Hello")
+
 
     # get the path of the uploaded file
     def load_file(self, path, filename):
@@ -231,6 +243,7 @@ class MyPanel(TabbedPanel):
     """check the current module and launches Command Line Interface related to the module using subprocess library"""
 
     def launch_module(self):
+        cmd = ""
         if self.module == "Merging":
             cmd = f"python3 merging.py {self.mainDirectory}"
         if self.module == "BLASTing":
@@ -276,7 +289,7 @@ class MyPanel(TabbedPanel):
 
     def show_graph(self):
         if self.graph.data:
-            self.graph.create_Graph(self.ids["TI_graph"].text)
+            self.graph.create_Graph(self.ids["TI_graph"].text, self.options)
         else:
             self._popup1 = Popup(title='Error', content=Label(text="Please load a file first"),
                                  size_hint=(0.5, 0.5))
@@ -307,15 +320,21 @@ class MyPanel(TabbedPanel):
 
     def toggle_meta_list(self):
         if self.ids["Meta_list"].opacity == 0:
-            if self.graph.data :
-                if self.graph.compartment :
+            if self.graph.data:
+                if self.graph.compartment:
                     self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for meta in
                                                   self.graph.data["metabolites"] if
                                                   meta["compartment"] in self.graph.compartment]
 
-                else :
-                    self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for meta in
-                                              self.graph.data["metabolites"]]
+                else:
+                    if not self.ids["TI_meta"].text:
+                        self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for
+                                                      meta in
+                                                      self.graph.data["metabolites"]]
+                    else:
+                        self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for
+                                                      meta in self.graph.data["metabolites"] if
+                                                      self.ids["TI_meta"].text.upper() in meta["id"].upper()]
             self.ids["Meta_list"].opacity = 1
         else:
             self.ids["Meta_list"].opacity = 0
@@ -324,11 +343,24 @@ class MyPanel(TabbedPanel):
         if self.ids["Reac_list"].opacity == 0:
             self.ids["Reac_list"].opacity = 1
             if MyPanel.graph.data:
-                self.ids["Reac_list"].data = [{"text": reac["id"], "root_widget": self.ids["Reac_list"]} for reac in
-                                              MyPanel.graph.data["reactions"]]
+                if not self.ids["TI_reac"]:
+                    self.ids["Reac_list"].data = [{"text": reac["id"], "root_widget": self.ids["Reac_list"]} for reac in
+                                                  MyPanel.graph.data["reactions"]]
+                else:
+                    self.ids["Reac_list"].data = [{"text": reac["id"], "root_widget": self.ids["Reac_list"]} for reac in
+                                                  MyPanel.graph.data["reactions"] if
+                                                  self.ids["TI_reac"].text.upper() in reac["id"].upper()]
         else:
             self.ids["Reac_list"].opacity = 0
 
+    def select_options(self):
+        content = Physics(select=self.change_option)
+        self._popup = Popup(title="set options", content=content, size_hint=(0.7, 0.7))
+        self._popup.open()
+
+
+class Physics(BoxLayout):
+    select = ObjectProperty(None)
 
 
 # define the object load dialog
@@ -337,7 +369,7 @@ class LoadDialog(FloatLayout):
     cancel = ObjectProperty(None)
 
 
-# define the object choice folder dialog
+# define the object oice folder dialog
 class DirectoryName(BoxLayout):
     cancel = ObjectProperty(None)
 
@@ -358,19 +390,19 @@ class Parameters(BoxLayout):
 
         valeur = self.ids[id].text
         if id == "input6":
-            MyPanel.parametre[param] = value
+            MyPanel.parametre[param] = valeur
         try:
             if valeur != "":
                 value = float(valeur)
-                if param == "ev" and value <= 1 and value >= 0:
+                if param == "ev" and 1 >= value >= 0:
                     MyPanel.parametre['ev'] = value
-                elif param == "i" and value <= 100 and value >= 0:
+                elif param == "i" and 100 >= value >= 0:
                     MyPanel.parametre['i'] = value
-                elif param == "d" and value <= 100 and value >= 0:
+                elif param == "d" and 100 >= value >= 0:
                     MyPanel.parametre['d'] = value
-                elif param == "c" and value <= 100 and value >= 0:
+                elif param == "c" and 100 >= value >= 0:
                     MyPanel.parametre['c'] = value
-                elif param == "bs" and value <= 1000 and value >= 0:
+                elif param == "bs" and 1000 >= value >= 0:
                     MyPanel.parametre['bs'] = value
                 else:
                     self._popup = Popup(title='Error', content=Label(text="The entered value is not within the range"),
@@ -390,17 +422,19 @@ class TI_meta(TextInput):
 
     def on_text(self, instance, value):
         if App.get_running_app().root.ids["Meta_list"].data:
-            App.get_running_app().root.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": App.get_running_app().root.ids["Meta_list"]} for
-                                                 meta in MyPanel.graph.data["metabolites"] if
-                                                 value.upper() in meta["id"].upper()]
+            App.get_running_app().root.ids["Meta_list"].data = [
+                {"text": meta["id"], "root_widget": App.get_running_app().root.ids["Meta_list"]} for
+                meta in MyPanel.graph.data["metabolites"] if
+                value.upper() in meta["id"].upper()]
 
 
 class TI_reac(TextInput):
     def on_text(self, instance, value):
         if App.get_running_app().root.ids["Reac_list"].data:
-            App.get_running_app().root.ids["Reac_list"].data = [{"text": reac["id"], "root_widget": App.get_running_app().root.ids["Reac_list"]} for
-                                                 reac in MyPanel.graph.data["reactions"] if
-                                                 value.upper() in reac["id"].upper()]
+            App.get_running_app().root.ids["Reac_list"].data = [
+                {"text": reac["id"], "root_widget": App.get_running_app().root.ids["Reac_list"]} for
+                reac in MyPanel.graph.data["reactions"] if
+                value.upper() in reac["id"].upper()]
 
 
 class Compartment_buttons(Button):
@@ -475,9 +509,10 @@ class Compartment_List(RecycleView):
 
     def update_meta_list(self):
         if App.get_running_app().root.ids["Meta_list"].data:
-            App.get_running_app().root.ids["Meta_list"].data = [{"text": meta["id"], "root_widget":  App.get_running_app().root.ids["Meta_list"]} for
-                                                 meta in MyPanel.graph.data["metabolites"] if
-                                                 meta["compartment"] in MyPanel.graph.compartment]
+            App.get_running_app().root.ids["Meta_list"].data = [
+                {"text": meta["id"], "root_widget": App.get_running_app().root.ids["Meta_list"]} for
+                meta in MyPanel.graph.data["metabolites"] if
+                meta["compartment"] in MyPanel.graph.compartment]
 
     def btn_callback(self, btn):
         if self.opacity == 1:

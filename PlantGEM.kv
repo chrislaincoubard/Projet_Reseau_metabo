@@ -230,9 +230,15 @@
             id : Grid
 
             BoxLayout :
+
                 size_hint_x : 0.2
                 orientation : "vertical"
                 spacing : 30
+                Button :
+                    text : "1) load file"
+                    size_hint : 1,None
+                    height : 50
+                    on_release : root.show_load("json","json")
                 Label :
                     id : keywords
                     size_hint_y : 0.5
@@ -255,13 +261,14 @@
                     halign : "center"
 
                 Button :
-                    id : physics selection
+                    id : physics_selection
                     size_hint : 1,0.2
                     text : "placeholder for physics selection"
                     text_size : self.size
                     font_size : 14
                     valign : "middle"
                     halign : "center"
+                    on_release : root.select_options()
 
             BoxLayout:
                 orientation : "vertical"
@@ -281,7 +288,7 @@
                     id : Meta_list
 
                 TI_meta :
-                    id : TI_Metab
+                    id : TI_meta
                     text : ""
                     size_hint_y : None
                     height : 50
@@ -315,14 +322,6 @@
                 size_hint_x : 0.2
                 orientation : "vertical"
                 background_color : "#E11E1E"
-                Button :
-                    text : "1) load file"
-                    size_hint : 1,0.3
-                    on_release : root.show_load("json","json")
-                Button :
-                    text : "TEST"
-                    size_hint : 1,0.3
-                    on_release : root.print_compartment()
                 Label :
                     text : "2) Choose the name of the saved graph (html file)"
                     text_size : self.size
@@ -556,6 +555,19 @@
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
                 size_hint: (0.3,0.4)
             
+<Physics>:
+    Button :
+        id : default
+        text : "Default value"
+        on_release : root.select(self)
+    Button :
+        id : option_select
+        text : "Buttons selection"
+        on_release : root.select(self)
+    Button :
+        id : no_physics
+        text : "No physics"
+        on_release : root.select(self)
 
             
 

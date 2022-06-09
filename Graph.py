@@ -153,7 +153,7 @@ class Graph:
 
     # ------------------ Functions to show graph ----------------------------- #
 
-    def create_Graph(self, name):
+    def create_Graph(self, name,option=1):
         # create or show graph depending if a search has been made
         if self.meta_keyword or self.reac_keyword:  # if searched has been made.
             self.search_metabolites()
@@ -167,12 +167,12 @@ class Graph:
             if "." in name:
                 extension = name.split('.')
                 if "html" == extension[1]:
-                    self.show_graph(name)
+                    self.show_graph(name, option)
                 else:
                     extension[1] = ".html"
-                    self.show_graph(extension[0] + extension[1])
+                    self.show_graph(extension[0] + extension[1], option)
             else:
-                self.show_graph(name + ".html")
+                self.show_graph(name + ".html",option)
         else:  # create graphe from all JSON if no search was made
             self.create_nodes_metabolites(self.data["metabolites"])
             self.create_nodes_reactions(self.data["reactions"])
@@ -183,44 +183,75 @@ class Graph:
             if "." in name:
                 extension = name.split('.')
                 if "html" == extension[1]:
-                    self.show_graph(name)
+                    self.show_graph(name, option)
                 else:
                     extension[1] = ".html"
-                    self.show_graph(extension[0] + extension[1])
+                    self.show_graph(extension[0] + extension[1], option)
             else:
-                self.show_graph(name + ".html")
+                self.show_graph(name + ".html",option)
 
-    def show_graph(self, name):
+    def show_graph(self, name, option):
         nt = Network("1000px", "1000px")
         nt.from_nx(self.G)
         nt.toggle_hide_edges_on_drag(True)
         nt.set_edge_smooth("dynamic")
         # Set_graphical options to allow good representation of graph
-        nt.set_options("""
-        var options = {
-        "nodes": {
-            "borderWidthSelected": 5
-           },
-          "edges": {
-          "arrows": {
-            "to": {
-                "enabled": true,
-                "scaleFactor": 1.4
-            }
-        },
-            "color": {
-              "inherit": true
+        if option == 1:
+            nt.set_options("""
+            var options = {
+            "nodes": {
+                "borderWidthSelected": 5
+               },
+              "edges": {
+              "arrows": {
+                "to": {
+                    "enabled": true,
+                    "scaleFactor": 1.4
+                }
             },
-            "smooth": {
-              "forceDirection": "none"
+                "color": {
+                  "inherit": true
+                },
+                "smooth": {
+                  "forceDirection": "none"
+                }
+              },
+              "interaction": {
+                "hideEdgesOnDrag": true
+              },
+              "physics": {
+                "minVelocity": 0.75
+              }
             }
-          },
-          "interaction": {
-            "hideEdgesOnDrag": true
-          },
-          "physics": {
-            "minVelocity": 0.75
-          }
-        }
-        """)
+            """)
+        if option == 2:
+            nt.show_buttons(filter_=["physics"])
+        if option == 3:
+            nt.set_options("""
+                        var options = {
+                        "nodes": {
+                            "borderWidthSelected": 5
+                           },
+                          "edges": {
+                          "arrows": {
+                            "to": {
+                                "enabled": true,
+                                "scaleFactor": 1.4
+                            }
+                        },
+                            "color": {
+                              "inherit": true
+                            },
+                            "smooth": {
+                              "forceDirection": "none"
+                            }
+                          },
+                          "interaction": {
+                            "hideEdgesOnDrag": true
+                          },
+                          "physics": {
+                            "enabled": False
+                          }
+                        }
+                        """)
         nt.show(name)
