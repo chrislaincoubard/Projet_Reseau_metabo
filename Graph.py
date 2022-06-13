@@ -1,6 +1,7 @@
 import json
 import networkx as nx
 from pyvis.network import Network
+from utils import *
 
 
 class Graph:
@@ -8,6 +9,7 @@ class Graph:
     Metabolites = []  # Metabolites added from search
     Reaction = []  # Reaction added from search
     compartment = []
+    search_compartment = []
     nodes_metabolites = []
     nodes_reactions = []
     edges = []
@@ -20,6 +22,11 @@ class Graph:
         if file != "":
             with open(file, "r") as json_file:
                 self.data = json.load(json_file)
+            for comp in self.data["compartments"]:
+                comp = cobra_compatibility(comp)
+                self.compartment.append(comp)
+
+
 
     def __init__(self, file=None):
         if file is not None:
@@ -40,16 +47,31 @@ class Graph:
         self.compartment.clear()
 
     def meta_keyword_update(self, keyword):
+        keyword = cobra_compatibility(keyword)
         if keyword not in self.meta_keyword:
             self.meta_keyword.append(keyword)
+            return True
+        if keyword in self.meta_keyword:
+            self.meta_keyword.remove(keyword)
+            return False
 
     def reac_keyword_update(self, keyword):
+        keyword = cobra_compatibility(keyword)
         if keyword not in self.reac_keyword:
             self.reac_keyword.append(keyword)
+            return True
+        if keyword in self.reac_keyword:
+            self.reac_keyword.remove(keyword)
+            return False
 
     def compartment_update(self, keyword):
-        if keyword not in self.compartment :
-            self.compartment.append(keyword)
+        keyword = cobra_compatibility(keyword)
+        if keyword not in self.search_compartment :
+            self.search_compartment.append(keyword)
+            return True
+        if keyword in self.search_compartment :
+            self.search_compartment.remove(keyword)
+            return False
 
     # create the list of nodes for the graph.
     # All info from Json file are added as nodes attributes + graphical attributes for visualization
@@ -137,23 +159,12 @@ class Graph:
             reac.append(item)
         tot_dico["metabolites"] = meta
         tot_dico["reactions"] = reac
-        if "." in name:
-            extension = name.split('.')
-            if "json" == extension[1]:
-                with open(name, 'w') as f:
-                    f.write(json.dumps(tot_dico))
-            else:
-                extension[1] = ".json"
-                with open(extension[0] + extension[1], 'w') as f:
-                    f.write(json.dumps(tot_dico))
-        else:
-            with open(name + ".json", 'w') as f:
-                f.write(json.dumps(tot_dico))
-
+        with open(name, 'w') as f:
+            f.write(json.dumps(tot_dico))
 
     # ------------------ Functions to show graph ----------------------------- #
 
-    def create_Graph(self, name,option=1):
+    def create_Graph(self,name,option=1):
         # create or show graph depending if a search has been made
         if self.meta_keyword or self.reac_keyword:  # if searched has been made.
             self.search_metabolites()
@@ -164,31 +175,33 @@ class Graph:
             self.G.add_nodes_from(self.nodes_metabolites)
             self.G.add_nodes_from(self.nodes_reactions)
             self.G.add_edges_from(self.edges)
-            if "." in name:
-                extension = name.split('.')
-                if "html" == extension[1]:
-                    self.show_graph(name, option)
-                else:
-                    extension[1] = ".html"
-                    self.show_graph(extension[0] + extension[1], option)
-            else:
-                self.show_graph(name + ".html",option)
-        else:  # create graphe from all JSON if no search was made
+            # if "." in name:
+            #     extension = name.split('.')
+            #     if "html" == extension[1]:
+            #         self.show_graph(name, option)
+            #     else:
+            #         extension[1] = ".html"
+            #         self.show_graph(extension[0] + extension[1], option)
+            # else:
+            #     self.show_graph(name + ".html",option)
+            self.show_graph(name,option)
+        else:  # create graph from all JSON if no search was made
             self.create_nodes_metabolites(self.data["metabolites"])
             self.create_nodes_reactions(self.data["reactions"])
             self.create_edges(self.data["reactions"])
             self.G.add_nodes_from(self.nodes_metabolites)
             self.G.add_nodes_from(self.nodes_reactions)
             self.G.add_edges_from(self.edges)
-            if "." in name:
-                extension = name.split('.')
-                if "html" == extension[1]:
-                    self.show_graph(name, option)
-                else:
-                    extension[1] = ".html"
-                    self.show_graph(extension[0] + extension[1], option)
-            else:
-                self.show_graph(name + ".html",option)
+            # if "." in name:
+            #     extension = name.split('.')
+            #     if "html" == extension[1]:
+            #         self.show_graph(name, option)
+            #     else:
+            #         extension[1] = ".html"
+            #         self.show_graph(extension[0] + extension[1], option)
+            # else:
+            #     self.show_graph(name + ".html",option)
+            self.show_graph(name, option)
 
     def show_graph(self, name, option):
         nt = Network("1000px", "1000px")

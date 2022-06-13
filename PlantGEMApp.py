@@ -13,6 +13,7 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.recycleview import RecycleView
+from kivy.lang import Builder
 
 import Graph
 import subprocess
@@ -33,6 +34,7 @@ class MyPanel(TabbedPanel):
               "nom": "draft"}  # dictionary to store default values parameters of module
     filesName = ""  # take the path of the loaded file
     text_input = ObjectProperty(text)
+    type = ObjectProperty(None)
     input = False
     mainDirectory = ""  # take the path of the main directory
     compartment = []
@@ -95,9 +97,9 @@ class MyPanel(TabbedPanel):
 
     def get_id(self, instance):
         for id, widget in instance.parent.ids.items():
+            print(id, widget)
             if widget.__self__ == instance:
                 return id
-
 
     def change_option(self, instance):
         id = self.get_id(instance)
@@ -107,8 +109,6 @@ class MyPanel(TabbedPanel):
             MyPanel.options = 2
         if id == "no_physics":
             MyPanel.options = 3
-        print("Hello")
-
 
     # get the path of the uploaded file
     def load_file(self, path, filename):
@@ -279,7 +279,7 @@ class MyPanel(TabbedPanel):
             if MyPanel.graph.data:
                 self.ids["compartment_list"].data = [{"text": compartment, "root_widget": self.ids["compartment_list"]}
                                                      for compartment in
-                                                     MyPanel.graph.data["compartments"]]
+                                                     MyPanel.graph.compartment]
         else:
             self.ids["compartment_list"].opacity = 0
 
@@ -287,18 +287,46 @@ class MyPanel(TabbedPanel):
         self.ids["keywords"].text = "Currently in search :\n\nMetabolites :\n\nReactions:\n\nCompartment:\n"
         self.graph.clear_data()
 
-    def show_graph(self):
+    def pop_up_html(self, instance):
+        type = instance.type
+        if type == "html":
+            content = Save_dialog(save=self.show_graph, cancel=self.dismiss_popup, text = "graph.html")  # define the content of the pop-up
+            self._popup = Popup(title="Save html file", content=content,
+                                size_hint=(0.9, 0.9))
+            self._popup.open()
+        if type == "json":
+            content = Save_dialog(save=self.save_graph, cancel=self.dismiss_popup, text="graph.json")  # define the content of the pop-up
+            self._popup = Popup(title="Save html file", content=content,
+                                size_hint=(0.9, 0.9))
+            self._popup.open()
+
+
+    def show_graph(self, path, filename):
+        if "." in filename:
+            extension = filename.split('.')
+            if "html" != extension[1]:
+                filename = extension[0] + ".html"
+        else:
+            filename = filename + ".html"
+        complete_path = path + "/" + filename
         if self.graph.data:
-            self.graph.create_Graph(self.ids["TI_graph"].text, self.options)
+            self.graph.create_Graph(complete_path, self.options)
         else:
             self._popup1 = Popup(title='Error', content=Label(text="Please load a file first"),
                                  size_hint=(0.5, 0.5))
             self._popup1.open()
             Clock.schedule_once(self.dismiss_popup_dt, 2)
 
-    def save_graph(self):
+    def save_graph(self, path, filename):
+        if "." in filename:
+            extension = filename.split('.')
+            if "json" != extension[1]:
+                filename = extension[0] + ".html"
+        else:
+            filename = filename + ".html"
+        complete_path = path + "/" + filename
         if self.graph.data:
-            self.graph.save_graph_json(self.ids["TI_save"].text)
+            self.graph.save_graph_json(complete_path)
         else:
             self._popup1 = Popup(title='Error', content=Label(text="Please draw a graph first"),
                                  size_hint=(0.5, 0.5))
@@ -367,6 +395,12 @@ class Physics(BoxLayout):
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
+
+
+class Save_dialog(FloatLayout):
+    save = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+    text = ObjectProperty(None)
 
 
 # define the object oice folder dialog
@@ -462,7 +496,7 @@ class Meta_List(RecycleView):
 
     def selected_keyword(self):
         message = f"Currently in search :\n\nMetabolites : {', '.join(MyPanel.graph.meta_keyword)}\n\nReactions : " \
-                  f"{', '.join(MyPanel.graph.reac_keyword)}\n\nCompartments : {', '.join(MyPanel.graph.compartment)}"
+                  f"{', '.join(MyPanel.graph.reac_keyword)}\n\nCompartments : {', '.join(MyPanel.graph.search_compartment)}"
         App.get_running_app().root.ids["keywords"].text = message
 
     def btn_callback(self, btn):
@@ -487,7 +521,7 @@ class Reac_List(RecycleView):
 
     def selected_keyword(self):
         message = f"Currently in search :\n\nMetabolites : {', '.join(MyPanel.graph.meta_keyword)}\n\nReactions : " \
-                  f"{', '.join(MyPanel.graph.reac_keyword)}\n\nCompartments : {', '.join(MyPanel.graph.compartment)}"
+                  f"{', '.join(MyPanel.graph.reac_keyword)}\n\nCompartments : {', '.join(MyPanel.graph.search_compartment)}"
         App.get_running_app().root.ids["keywords"].text = message
 
     def btn_callback(self, btn):
@@ -500,14 +534,14 @@ class Compartment_List(RecycleView):
     def __int__(self, **kwargs):
         super(Compartment_List, self).__init__(**kwargs)
         if MyPanel.graph.data:
-            self.data = [{"text": reac["id"], 'root_widget': self} for reac in MyPanel.graph.data["reactions"]]
+            self.data = [{"text": comp["id"], 'root_widget': self} for comp in MyPanel.graph.data["compartment"]]
 
     def selected_keyword(self):
         message = f"Currently in search :\n\nMetabolites : {', '.join(MyPanel.graph.meta_keyword)}\n\nReactions : " \
-                  f"{', '.join(MyPanel.graph.reac_keyword)}\n\nCompartments : {', '.join(MyPanel.graph.compartment)}"
+                  f"{', '.join(MyPanel.graph.reac_keyword)}\n\nCompartments : {', '.join(MyPanel.graph.search_compartment)}"
         App.get_running_app().root.ids["keywords"].text = message
 
-    def update_meta_list(self):
+    def update_comp_list(self):
         if App.get_running_app().root.ids["Meta_list"].data:
             App.get_running_app().root.ids["Meta_list"].data = [
                 {"text": meta["id"], "root_widget": App.get_running_app().root.ids["Meta_list"]} for
@@ -518,7 +552,7 @@ class Compartment_List(RecycleView):
         if self.opacity == 1:
             MyPanel.graph.compartment_update(btn.text)
             self.selected_keyword()
-            self.update_meta_list()
+            self.update_comp_list()
 
 
 class PlantGEMApp(App):
