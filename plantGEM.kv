@@ -11,7 +11,7 @@
 
         BoxLayout:
             size_hint_y: None
-            height : 100
+            height : 70
             Button:
                 text: "Cancel"
                 size_hint_y : 0.5
@@ -35,7 +35,7 @@
             path : sys.path.expanduser('~')
         BoxLayout:
             size_hint_y: None
-            height : 100
+            height : 70
             spacing : 100
             Button:
                 text: "Cancel"
@@ -55,13 +55,37 @@
                 background_color:"#34C924"
                 on_press: root.save(filechooser.path, save_html.text)
 
+<Change_tab>:
+    FloatLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        Label :
+            text : "Changing tab will remove file selection"
+            pos_hint : {"center_x" : 0.5, "center_y" : 0.5}
+
+        Button:
+            text: "Cancel"
+            size_hint_y : 0.1
+            background_color:"#F00020"
+            on_release: root.cancel()
+            pos_hint : {"center_x" : 0.3, "center_y" : 0.4}
+
+        Button:
+            text: "OK"
+            size_hint_y : 0.1
+            background_color:"#34C924"
+            on_press: root.proceed()
+            pos_hint : {"center_x" : 0.7, "center_y" : 0.4}
+
 <MyPanel>:
 
     do_default_tab: False
     size:(400,400)
     tab_pos : "top_mid"
-    on_current_tab : root.on_tab_change(self.current_tab)
+    on_current_tab : root.on_tab_change()
     TabbedPanelItem:
+
         id : Main
         text: "Main"
         font_size:  20
@@ -249,7 +273,7 @@
                 background_color:"#fcbba1"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.7}
                 on_press : root.choosedirectory()
-            
+
     TabbedPanelItem :
         id : Graphs
         text : "Graphs"
@@ -257,49 +281,92 @@
         id : graph_panel
 
         GridLayout :
-            cols : 4
-            id : Grid
+            cols : 3
 
-            BoxLayout :
+            FloatLayout :
+                size_hint_x : 0.5
 
-                size_hint_x : 0.2
-                orientation : "vertical"
-                spacing : 30
-                Button :
-                    text : "1) load file"
-                    size_hint : 1,None
-                    height : 50
-                    on_release : root.show_load("json","json")
                 Label :
                     id : keywords
-                    size_hint_y : 0.5
                     text : "Currently in search :\n\nMetabolites :\n\nReactions:\n\nCompartment:\n"
                     text_size : cm(4), None
+                    size_hint_y : 0.3
                     valign : "middle"
                     haligne : "center"
+                    pos_hint : {"center_x" : 0.25, "center_y" : 0.6}
+
+                TooltipButtons :
+                    text : "1) load file"
+                    size_hint : None,None
+                    width : 175
+                    height : 70
+                    on_release : root.show_load("json","json")
+                    pos_hint: {"center_x" : 0.75,"center_y" : 0.8}
 
                 Compartment_List :
+                    pos_hint : {"center_x" : 0.25, "center_y" : 0.18}
                     id : compartment_list
                     opacity : 0
-                    size_hint_y : 0.4
+                    size_hint : None, 0.36
+                    width : 175
 
-                Button :
+
+                TooltipButtons :
                     id : open_cpt_list
-                    size_hint : 1,0.1
+                    size_hint : None, None
+                    width : 175
+                    height : 60
                     text : "Choose compartment"
+                    text_size : self.size
                     on_release : root.toggle_compartment_list()
                     valign : "middle"
                     halign : "center"
+                    pos_hint: {"center_x" : 0.25,"center_y" : 0.4}
 
-                Button :
+                TooltipButtons :
                     id : physics_selection
-                    size_hint : 1,0.2
+                    size_hint : None, None
+                    width : 175
+                    height : 70
                     text : "Physics Selection"
                     text_size : self.size
                     font_size : 20
                     valign : "middle"
                     halign : "center"
-                    on_release : root.select_options()
+                    on_release : root.show_bubble()
+                    pos_hint: {"center_x" : 0.25,"center_y" : 0.8}
+
+                TooltipButtons :
+                    type : "html"
+                    text : "Draw Graph"
+                    on_release : root.pop_up_html(self)
+                    size_hint : None, None
+                    width : 175
+                    height : 70
+                    text_size : self.size
+                    halign : "center"
+                    valign : "middle"
+                    pos_hint: {"center_x" : 0.75,"center_y" : 0.6}
+
+                TooltipButtons :
+                    type : "json"
+                    text : "Save json"
+                    on_release : root.pop_up_html(self)
+                    size_hint : None, None
+                    width : 175
+                    height : 70
+                    text_size : self.size
+                    halign : "center"
+                    valign : "middle"
+                    pos_hint: {"center_x" : 0.75,"center_y" : 0.4}
+
+                TooltipButtons :
+                    text : "Clear data"
+                    size_hint : None, None
+                    width : 175
+                    height : 70
+                    on_release : root.clear_graph_data()
+                    pos_hint: {"center_x" : 0.75,"center_y" : 0.2}
 
             BoxLayout:
                 orientation : "vertical"
@@ -349,53 +416,7 @@
                     height : 50
                     size_hint_x : 1
 
-            BoxLayout :
-                size_hint_x : 0.2
-                orientation : "vertical"
-                background_color : "#E11E1E"
-                Label :
-                    text : "2) Choose the name of the saved graph (html file)"
-                    text_size : self.size
-                    valign : "middle"
-                    halign : "center"
 
-                Button :
-                    type : "html"
-                    text : "Draw Graph"
-                    on_release : root.pop_up_html(self)
-                    size_hint : 1,None
-                    height : 50
-                    text_size : self.size
-                    font_size : 16
-                    halign : "center"
-                    valign : "middle"
-
-                Label :
-                    text : "3) Choose the name of the saved graph (json file) "
-                    text_size : self.size
-                    valign : "middle"
-                    haligne : "center"
-
-                Button :
-                    type : "json"
-                    text : "Save json"
-                    on_release : root.pop_up_html(self)
-                    size_hint : 1,None
-                    height : 50
-                    text_size : self.size
-                    font_size : 16
-                    halign : "center"
-                    valign : "middle"
-                Label :
-                    text : "Clear data before generating new graph"
-                    text_size : self.size
-                    valign : "middle"
-                    halign : "center"
-
-                Button :
-                    text : "Clear data"
-                    size_hint : 1,0.3
-                    on_release : root.clear_graph_data()
 
 <Meta_list_buttons>:
     halign: "center"
@@ -575,20 +596,48 @@
                 background_color:"#fcbba1"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
                 size_hint: (0.3,0.4)
-            
-<Physics>:
-    Button :
-        id : default
-        text : "Default value"
-        on_release : root.select(self)
-    Button :
-        id : option_select
-        text : "Buttons selection"
-        on_release : root.select(self)
-    Button :
-        id : no_physics
-        text : "No physics"
-        on_release : root.select(self)
 
-            
+
+
+<Physics_selection>
+    size_hint: (None, None)
+    size: (250, 120)
+    pos_hint : {"center_x" : 0.75, "center_y" : 0.85}
+
+    BubbleButton:
+        type : "default"
+        text: 'Default value'
+        text_size : self.size
+        font_size : 16
+        halign : "center"
+        valign : "middle"
+        on_release : root.change_option(self)
+
+    BubbleButton:
+        type : "dynamic"
+        text: 'Dynamic Selection'
+        text_size : self.size
+        font_size : 16
+        halign : "center"
+        valign : "middle"
+        on_release : root.change_option(self)
+
+    BubbleButton:
+        type : "no_physics"
+        text: 'No Physics'
+        text_size : self.size
+        font_size : 16
+        halign : "center"
+        valign : "middle"
+        on_release : root.change_option(self)
+
+<Tooltip>:
+    size_hint: None, None
+    size: self.texture_size[0]+5, self.texture_size[1]+5
+    canvas.before:
+        Color:
+            rgb: 0.2, 0.2, 0.2
+        Rectangle:
+            size: self.size
+            pos: self.pos
 

@@ -13,7 +13,8 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.recycleview import RecycleView
-from kivy.lang import Builder
+from kivy.uix.bubble import Bubble
+from kivy.uix.bubble import BubbleButton
 
 import Graph
 import subprocess
@@ -27,7 +28,7 @@ class MyPanel(TabbedPanel):
              "json": ""}  # dictionary to store file names according to format
     format = ""  # takes the value of the extension expected by the clicked button
     buttonName = ""  # takes the value of the button id of the clicked button
-    module = ""  # takes the value of the modulus of the clicked button
+    module = "Main"  # takes the value of the module of the clicked button
     parametre = {"i": 50.0, "d": 30.0, "ev": 0.0, "c": 20.0, "bs": 300.0,
                  "nom": "draft"}  # dictionary to store values parameters of module
     defaut = {"i": 50, "d": 30, "ev": 0, "c": 20, "bs": 300,
@@ -39,17 +40,44 @@ class MyPanel(TabbedPanel):
     mainDirectory = ""  # take the path of the main directory
     compartment = []
     graph = Graph.Graph("")
+    check_bubble = False
     options = 1
 
-    def on_tab_change(self, tab):
+    def on_tab_change(self):
+        pop = False
+        empty_dict = all(x == "" for x in self.files.values())
+        # and self.old_module == self.get_current_tab().text
+        if not empty_dict :
+            content = Change_tab(proceed=self.change_tabs, cancel=self.stay_same_tab)  # define the content of the pop-up
+            self._popup = Popup(title="Load file", content=content,
+                                size_hint=(0.8, 0.8))
+            self._popup.open()
+            pop = True
+        if not pop :
+            self.module = self.get_current_tab().text
+
+
+    def change_tabs(self):
+        tab = self.get_current_tab()
+        self._popup.dismiss()
         for key in self.files.keys():
             self.files[key] = ""
         self.module = tab.text
         self.parametre.update(self.defaut)
-        self.ids[
-            "files_main"].text = "Currently selected files :\n\ngff :\n\nsbml :\n\nfna :\n\ntsv :\n\nfaaM :\n\nfaaS :"
+        self.clear_graph_data()
+        self.ids["files_main"].text = "Currently selected files :\n\ngff :\n\nsbml :\n\nfna :\n\ntsv :\n\nfaaM :\n\nfaaS :"
         self.ids["files_blast"].text = "Currently selected files :\n\ngff :\n\nsbml :\n\nfaaM :\n\nfaaS :"
         self.ids["files_mpwt"].text = "Currently selected files :\n\ngff :\n\nfna :\n\ntsv :"
+
+
+
+    def stay_same_tab(self):
+        self.dismiss_popup()
+        for index, tab in enumerate(self.tab_list):
+            if self.module == tab.text:
+                self.switch_to(self.tab_list[index])
+                self.module = self.get_current_tab().text
+                self.dismiss_popup()
 
     # close a pop-up
     def dismiss_popup(self):
@@ -59,26 +87,29 @@ class MyPanel(TabbedPanel):
     def dismiss_popup_dt(self, dt):
         self._popup1.dismiss()
 
-    def loaded_files(self, module):
-        if module == "Main":
+    def loaded_files(self):
+        if self.module == "Main":
             self.ids["files_main"].text = "Currently selected files :\n\n"
             for item in self.files.items():
                 if item[0] != "json":
-                    path = item[1].split("\\")
+                    path = str(item[1]).replace("\\", "/")
+                    path = path.split("/")
                     name = path[-1]
                     self.ids["files_main"].text += f"{item[0]} : {name}\n\n"
-        if module == "BLASTing":
+        if self.module == "BLASTing":
             self.ids["files_blast"].text = "Currently selected files :\n\n"
             for item in self.files.items():
                 if item[0] == "faaM" or item[0] == "faaS" or item[0] == "gff" or item[0] == "sbml":
-                    path = item[1].split("\\")
+                    path = item[1].replace("\\", "/")
+                    path = path.split("/")
                     name = path[-1]
                     self.ids["files_blast"].text += f"{item[0]} : {name}\n\n"
-        if module == "MPWTing":
+        if self.module == "MPWTing":
             self.ids["files_mpwt"].text = "Currently selected files :\n\n"
             for item in self.files.items():
                 if item[0] == "gff" or item[0] == "fna" or item[0] == "tsv":
-                    path = item[1].split("\\")
+                    path = item[1].replace("\\", "/")
+                    path = path.split("/")
                     name = path[-1]
                     self.ids["files_mpwt"].text += f"{item[0]} : {name}\n\n"
 
@@ -97,18 +128,10 @@ class MyPanel(TabbedPanel):
 
     def get_id(self, instance):
         for id, widget in instance.parent.ids.items():
-            print(id, widget)
             if widget.__self__ == instance:
                 return id
 
-    def change_option(self, instance):
-        id = self.get_id(instance)
-        if id == "default":
-            MyPanel.options = 1
-        if id == "option_select":
-            MyPanel.options = 2
-        if id == "no_physics":
-            MyPanel.options = 3
+
 
     # get the path of the uploaded file
     def load_file(self, path, filename):
@@ -120,7 +143,7 @@ class MyPanel(TabbedPanel):
             if verifie:
                 self.dismiss_popup()
             extension = filename[0].split(".")
-            self.loaded_files(self.module)
+            self.loaded_files()
             if extension[1] == "json":
                 self.graph.Load_json(filename[0])
         else:
@@ -349,10 +372,10 @@ class MyPanel(TabbedPanel):
     def toggle_meta_list(self):
         if self.ids["Meta_list"].opacity == 0:
             if self.graph.data:
-                if self.graph.compartment:
+                if self.graph.search_compartment:
                     self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for meta in
                                                   self.graph.data["metabolites"] if
-                                                  meta["compartment"] in self.graph.compartment]
+                                                  meta["compartment"] in self.graph.search_compartment]
 
                 else:
                     if not self.ids["TI_meta"].text:
@@ -386,6 +409,16 @@ class MyPanel(TabbedPanel):
         self._popup = Popup(title="set options", content=content, size_hint=(0.7, 0.7))
         self._popup.open()
 
+    def show_bubble(self, *l):
+        if not self.check_bubble:
+            self.bubb = Physics_selection()
+            self.bubb.arrow_pos = "bottom_mid"
+            self.check_bubble = True
+            self.add_widget(self.bubb)
+        else :
+            self.check_bubble = False
+            self.remove_widget(self.bubb)
+
 
 class Physics(BoxLayout):
     select = ObjectProperty(None)
@@ -402,6 +435,10 @@ class Save_dialog(FloatLayout):
     cancel = ObjectProperty(None)
     text = ObjectProperty(None)
 
+class Change_tab(FloatLayout):
+    cancel = ObjectProperty(None)
+    proceed = ObjectProperty(None)
+
 
 # define the object oice folder dialog
 class DirectoryName(BoxLayout):
@@ -411,7 +448,6 @@ class DirectoryName(BoxLayout):
         valeur = self.ids[inputname].text
         if valeur != "":
             MyPanel.mainDirectory = valeur
-
 
 # define the object settings dialog
 class Parameters(BoxLayout):
@@ -553,6 +589,53 @@ class Compartment_List(RecycleView):
             MyPanel.graph.compartment_update(btn.text)
             self.selected_keyword()
             self.update_comp_list()
+
+class Physics_selection(Bubble):
+
+    def change_option(self, instance):
+        if instance.type == "default":
+            MyPanel.options = 1
+        if instance.type == "dynamic":
+            MyPanel.options = 2
+        if instance.type == "no_physics":
+            MyPanel.options = 3
+
+class CustomBubbleBtn(BubbleButton):
+    type = ObjectProperty(None)
+
+
+class Tooltip(Label):
+    pass
+
+
+class TooltipButtons(Button):
+    tooltip = Tooltip(text = "Hello World")
+
+    def __int__(self, **kwargs):
+        Window.bind(mouse_pos = self.on_mouse_pos)
+        super(Button, self).__init__(**kwargs)
+
+    def on_mouse_pos(self, *args):
+        if not self.get_root_window():
+            return
+        pos = args[1]
+        self.tooltip.pos = pos
+        Clock.unschedule(self.display_tooltip)
+        self.close_tooltip()
+        if self.collide_point(*self.to_widget(*pos)):
+            Clock.schedule_once(self.display_tooltip,1)
+
+    def close_tooltip(self):
+        Window.remove_windget(self.tooltip)
+        print("Im out !")
+
+    def display_tooltip(self):
+        Window.add_widget(self.tooltip)
+        print("Im in !")
+
+
+
+
 
 
 class PlantGEMApp(App):
