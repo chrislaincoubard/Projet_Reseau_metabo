@@ -1,8 +1,8 @@
 from kivy.clock import Clock
 from cgitb import text
 from kivy.app import App
+from kivy.lang import Builder
 from kivy.properties import ObjectProperty
-
 from kivy.core.window import Window
 from kivy.uix.popup import Popup
 from kivy.uix.floatlayout import FloatLayout
@@ -21,6 +21,7 @@ import subprocess
 import os
 
 Window.size = (1000, 800)
+root = Builder.load_file("PlantGEM.kv")
 
 
 class MyPanel(TabbedPanel):
@@ -638,7 +639,7 @@ class TooltipButtons(Button):
 
 
 
-class PlantGEMApp(App):
+class plantGEMApp(App):
 
     def build(self):
         return MyPanel()
