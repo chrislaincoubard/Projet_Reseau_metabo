@@ -24,6 +24,37 @@
                 background_color:"#34C924"
                 on_press: root.load(filechooser.path, filechooser.selection)
 
+<Save_dialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserIconView:
+            id: filechooser
+            dirselect : True
+            path : sys.path.expanduser('~')
+        BoxLayout:
+            size_hint_y: None
+            height : 100
+            spacing : 100
+            Button:
+                text: "Cancel"
+                size_hint_y : 0.5
+                size_hint_x : 0.3
+                background_color:"#F00020"
+                on_release: root.cancel()
+            TextInput :
+                id : save_html
+                text : root.text
+                size_hint_y : 0.5
+                size_hint_x : 0.3
+            Button:
+                text: "Save graph"
+                size_hint_y : 0.5
+                size_hint_x : 0.3
+                background_color:"#34C924"
+                on_press: root.save(filechooser.path, save_html.text)
+
 <MyPanel>:
 
     do_default_tab: False
@@ -230,9 +261,15 @@
             id : Grid
 
             BoxLayout :
+
                 size_hint_x : 0.2
                 orientation : "vertical"
                 spacing : 30
+                Button :
+                    text : "1) load file"
+                    size_hint : 1,None
+                    height : 50
+                    on_release : root.show_load("json","json")
                 Label :
                     id : keywords
                     size_hint_y : 0.5
@@ -255,13 +292,14 @@
                     halign : "center"
 
                 Button :
-                    id : physics selection
+                    id : physics_selection
                     size_hint : 1,0.2
-                    text : "placeholder for physics selection"
+                    text : "Physics Selection"
                     text_size : self.size
-                    font_size : 14
+                    font_size : 20
                     valign : "middle"
                     halign : "center"
+                    on_release : root.select_options()
 
             BoxLayout:
                 orientation : "vertical"
@@ -281,7 +319,7 @@
                     id : Meta_list
 
                 TI_meta :
-                    id : TI_Metab
+                    id : TI_meta
                     text : ""
                     size_hint_y : None
                     height : 50
@@ -315,65 +353,39 @@
                 size_hint_x : 0.2
                 orientation : "vertical"
                 background_color : "#E11E1E"
-                Button :
-                    text : "1) load file"
-                    size_hint : 1,0.3
-                    on_release : root.show_load("json","json")
-                Button :
-                    text : "TEST"
-                    size_hint : 1,0.3
-                    on_release : root.print_compartment()
                 Label :
                     text : "2) Choose the name of the saved graph (html file)"
                     text_size : self.size
                     valign : "middle"
                     halign : "center"
-                GridLayout :
-                    cols : 2
-                    id : Grid_TI_graph
-                    TextInput :
-                        id : TI_graph
-                        text : "graph.html"
-                        multiline : False
-                        on_text_validate : root.show_graph()
-                        size_hint : 0.6,None
-                        height : 50
-                    Button :
-                        id : submit_graph
-                        text : "Draw Graph"
-                        on_release : root.show_graph()
-                        size_hint : 0.4,None
-                        height : 50
-                        text_size : self.size
-                        font_size : 16
-                        halign : "center"
-                        valign : "middle"
+
+                Button :
+                    type : "html"
+                    text : "Draw Graph"
+                    on_release : root.pop_up_html(self)
+                    size_hint : 1,None
+                    height : 50
+                    text_size : self.size
+                    font_size : 16
+                    halign : "center"
+                    valign : "middle"
+
                 Label :
                     text : "3) Choose the name of the saved graph (json file) "
                     text_size : self.size
                     valign : "middle"
                     haligne : "center"
-                GridLayout:
 
-                    cols : 2
-                    id : Grid_TI_save
-                    TextInput :
-                        id : TI_save
-                        text : "Save_graph.json"
-                        size_hint : 1,None
-                        height : 50
-                        multiline : False
-                        on_text_validate : root.save_graph()
-                    Button :
-                        id : submit_graph
-                        text : "Save json"
-                        on_release : root.save_graph()
-                        size_hint : 0.4,None
-                        height : 50
-                        text_size : self.size
-                        font_size : 16
-                        halign : "center"
-                        valign : "middle"
+                Button :
+                    type : "json"
+                    text : "Save json"
+                    on_release : root.pop_up_html(self)
+                    size_hint : 1,None
+                    height : 50
+                    text_size : self.size
+                    font_size : 16
+                    halign : "center"
+                    valign : "middle"
                 Label :
                     text : "Clear data before generating new graph"
                     text_size : self.size
@@ -384,6 +396,14 @@
                     text : "Clear data"
                     size_hint : 1,0.3
                     on_release : root.clear_graph_data()
+
+<Meta_list_buttons>:
+    halign: "center"
+    valign: "center"
+    font_size: 20
+    size_hint_y: None
+    text_size : self.size
+    height: self.texture_size[1]
 
 <Meta_List>:
     viewclass : "Meta_list_buttons"
@@ -556,6 +576,19 @@
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
                 size_hint: (0.3,0.4)
             
+<Physics>:
+    Button :
+        id : default
+        text : "Default value"
+        on_release : root.select(self)
+    Button :
+        id : option_select
+        text : "Buttons selection"
+        on_release : root.select(self)
+    Button :
+        id : no_physics
+        text : "No physics"
+        on_release : root.select(self)
 
             
 
