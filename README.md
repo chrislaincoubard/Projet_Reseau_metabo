@@ -1,5 +1,5 @@
 # Projet_Reseau_metabo
 
-Work in progress for PdP.
-Goal is to create GUI for PlantGems and show metabolic network corresponding to User demand.
+GUI to launch PlantGems pipeline form Antoine Laporte : https://github.com/AsaLap/PlantGEMs.
+Also add another module to visualize selected subparts of the whole GEM.
 
