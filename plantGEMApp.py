@@ -1,3 +1,5 @@
+import sys
+
 from kivy.clock import Clock
 from cgitb import text
 from kivy.app import App
@@ -21,11 +23,13 @@ import subprocess
 import os
 
 Window.size = (1000, 800)
-root = Builder.load_file("PlantGEM.kv")
+
+if "linux" in sys.platform:
+    root = Builder.load_file("PlantGEM.kv")
 
 
 class MyPanel(TabbedPanel):
-    files = {"gff": "", "sbml": "", "fna": "", "tsv": "", "faaM": "", "faaS": "",
+    files = {"faaM": "", "faaS": "", "fna": "", "gff": "", "sbml": "", "tsv": "",
              "json": ""}  # dictionary to store file names according to format
     format = ""  # takes the value of the extension expected by the clicked button
     buttonName = ""  # takes the value of the button id of the clicked button
@@ -39,24 +43,24 @@ class MyPanel(TabbedPanel):
     type = ObjectProperty(None)
     input = False
     mainDirectory = ""  # take the path of the main directory
-    compartment = []
     graph = Graph.Graph("")
     check_bubble = False
     options = 1
+    cofac = False
 
     def on_tab_change(self):
         pop = False
         empty_dict = all(x == "" for x in self.files.values())
         # and self.old_module == self.get_current_tab().text
-        if not empty_dict :
-            content = Change_tab(proceed=self.change_tabs, cancel=self.stay_same_tab)  # define the content of the pop-up
+        if not empty_dict:
+            content = Change_tab(proceed=self.change_tabs,
+                                 cancel=self.stay_same_tab)  # define the content of the pop-up
             self._popup = Popup(title="Load file", content=content,
-                                size_hint=(0.8, 0.8))
+                                size_hint=(0.8, 0.8), auto_dismiss=False)
             self._popup.open()
             pop = True
-        if not pop :
+        if not pop:
             self.module = self.get_current_tab().text
-
 
     def change_tabs(self):
         tab = self.get_current_tab()
@@ -66,11 +70,10 @@ class MyPanel(TabbedPanel):
         self.module = tab.text
         self.parametre.update(self.defaut)
         self.clear_graph_data()
-        self.ids["files_main"].text = "Currently selected files :\n\ngff :\n\nsbml :\n\nfna :\n\ntsv :\n\nfaaM :\n\nfaaS :"
-        self.ids["files_blast"].text = "Currently selected files :\n\ngff :\n\nsbml :\n\nfaaM :\n\nfaaS :"
-        self.ids["files_mpwt"].text = "Currently selected files :\n\ngff :\n\nfna :\n\ntsv :"
-
-
+        self.ids[
+            "files_main"].text = "Currently selected files :\n\nfaa Model :\n\nfaa Subject :\n\nfna :\n\ngff :\n\nsbml :\n\ntsv :"
+        self.ids["files_blast"].text = "Currently selected files :\n\nfaa Model :\n\nfaa Subject :\n\ngff :\n\nsbml :"
+        self.ids["files_mpwt"].text = "Currently selected files :\n\nfna :\n\ngff :\n\ntsv :"
 
     def stay_same_tab(self):
         self.dismiss_popup()
@@ -97,10 +100,11 @@ class MyPanel(TabbedPanel):
                     path = path.split("/")
                     name = path[-1]
                     self.ids["files_main"].text += f"{item[0]} : {name}\n\n"
+
         if self.module == "BLASTing":
             self.ids["files_blast"].text = "Currently selected files :\n\n"
             for item in self.files.items():
-                if item[0] == "faaM" or item[0] == "faaS" or item[0] == "gff" or item[0] == "sbml":
+                if item[0] == "faaM" and item[0] == "faaS" and item[0] == "gff" or item[0] == "sbml":
                     path = item[1].replace("\\", "/")
                     path = path.split("/")
                     name = path[-1]
@@ -115,12 +119,12 @@ class MyPanel(TabbedPanel):
                     self.ids["files_mpwt"].text += f"{item[0]} : {name}\n\n"
 
     # open the load dialog
-    def show_load(self, textName, extension):
+    def show_load(self, textName, extension, instance):
 
         self.buttonName = textName
         self.format = extension
         content = LoadDialog(load=self.load_file, cancel=self.dismiss_popup)  # define the content of the pop-up
-        self._popup = Popup(title="Load file", content=content,
+        self._popup = Popup(title=f"Select {instance.file} file", content=content,
                             size_hint=(0.9, 0.9))
         self._popup.open()
 
@@ -131,8 +135,6 @@ class MyPanel(TabbedPanel):
         for id, widget in instance.parent.ids.items():
             if widget.__self__ == instance:
                 return id
-
-
 
     # get the path of the uploaded file
     def load_file(self, path, filename):
@@ -147,6 +149,8 @@ class MyPanel(TabbedPanel):
             self.loaded_files()
             if extension[1] == "json":
                 self.graph.Load_json(filename[0])
+                self.toggle_meta_list()
+                self.toggle_reac_list()
         else:
             self._popup1 = Popup(title="No files !", content=Label(text="You did not chose any files !"),
                                  size_hint=(0.4, 0.4))
@@ -314,16 +318,17 @@ class MyPanel(TabbedPanel):
     def pop_up_html(self, instance):
         type = instance.type
         if type == "html":
-            content = Save_dialog(save=self.show_graph, cancel=self.dismiss_popup, text = "graph.html")  # define the content of the pop-up
+            content = Save_dialog(save=self.show_graph, cancel=self.dismiss_popup,
+                                  text="graph.html")  # define the content of the pop-up
             self._popup = Popup(title="Save html file", content=content,
                                 size_hint=(0.9, 0.9))
             self._popup.open()
         if type == "json":
-            content = Save_dialog(save=self.save_graph, cancel=self.dismiss_popup, text="graph.json")  # define the content of the pop-up
+            content = Save_dialog(save=self.save_graph, cancel=self.dismiss_popup,
+                                  text="graph.json")  # define the content of the pop-up
             self._popup = Popup(title="Save html file", content=content,
                                 size_hint=(0.9, 0.9))
             self._popup.open()
-
 
     def show_graph(self, path, filename):
         if "." in filename:
@@ -334,7 +339,7 @@ class MyPanel(TabbedPanel):
             filename = filename + ".html"
         complete_path = path + "/" + filename
         if self.graph.data:
-            self.graph.create_Graph(complete_path, self.options)
+            self.graph.create_Graph(complete_path, self.cofac, self.options)
         else:
             self._popup1 = Popup(title='Error', content=Label(text="Please load a file first"),
                                  size_hint=(0.5, 0.5))
@@ -371,22 +376,22 @@ class MyPanel(TabbedPanel):
         self._popup.open()
 
     def toggle_meta_list(self):
-        if self.ids["Meta_list"].opacity == 0:
-            if self.graph.data:
-                if self.graph.search_compartment:
-                    self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for meta in
-                                                  self.graph.data["metabolites"] if
-                                                  meta["compartment"] in self.graph.search_compartment]
+        temp_compartment = [Graph.cobra_compatibility(reac, False) for reac in MyPanel.graph.search_compartment]
+        if self.ids["Meta_list"].opacity == 0 and self.graph.data:
+            if self.graph.search_compartment:
+                self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for meta in
+                                              self.graph.data["metabolites"] if
+                                              meta["compartment"] in temp_compartment]
 
+            else:
+                if not self.ids["TI_meta"].text:
+                    self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for
+                                                  meta in
+                                                  self.graph.data["metabolites"]]
                 else:
-                    if not self.ids["TI_meta"].text:
-                        self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for
-                                                      meta in
-                                                      self.graph.data["metabolites"]]
-                    else:
-                        self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for
-                                                      meta in self.graph.data["metabolites"] if
-                                                      self.ids["TI_meta"].text.upper() in meta["id"].upper()]
+                    self.ids["Meta_list"].data = [{"text": meta["id"], "root_widget": self.ids["Meta_list"]} for
+                                                  meta in self.graph.data["metabolites"] if
+                                                  self.ids["TI_meta"].text.upper() in meta["id"].upper()]
             self.ids["Meta_list"].opacity = 1
         else:
             self.ids["Meta_list"].opacity = 0
@@ -405,24 +410,38 @@ class MyPanel(TabbedPanel):
         else:
             self.ids["Reac_list"].opacity = 0
 
+    def change_option(self, instance):
+        if instance.type == "default":
+            MyPanel.options = 1
+            self.ids["physics_options"].text = "Physics mode selected : \n\n               Default"
+        if instance.type == "dynamic":
+            MyPanel.options = 2
+            self.ids["physics_options"].text = "Physics mode selected : \n\n               Dynamic"
+        if instance.type == "no_physics":
+            MyPanel.options = 3
+            self.ids["physics_options"].text = "Physics mode selected : \n\n             No Physics"
+        if instance.type == "Yes":
+            MyPanel.cofac = True
+            self.ids["cofactors_selection"].text = "Cofactors displayed : Yes"
+        if instance.type == "No":
+            MyPanel.cofac = False
+            self.ids["cofactors_selection"].text = "Cofactors displayed : No"
+
+
     def select_options(self):
         content = Physics(select=self.change_option)
-        self._popup = Popup(title="set options", content=content, size_hint=(0.7, 0.7))
+        self._popup = Popup(title="set graph display options", content=content, size_hint=(0.7, 0.7), title_size = 16)
         self._popup.open()
 
-    def show_bubble(self, *l):
-        if not self.check_bubble:
-            self.bubb = Physics_selection()
-            self.bubb.arrow_pos = "bottom_mid"
-            self.check_bubble = True
-            self.add_widget(self.bubb)
-        else :
-            self.check_bubble = False
-            self.remove_widget(self.bubb)
 
-
-class Physics(BoxLayout):
+class Physics(FloatLayout):
     select = ObjectProperty(None)
+
+
+
+
+class Load_Button(Button):
+    file = ObjectProperty(None)
 
 
 # define the object load dialog
@@ -436,12 +455,13 @@ class Save_dialog(FloatLayout):
     cancel = ObjectProperty(None)
     text = ObjectProperty(None)
 
+
 class Change_tab(FloatLayout):
     cancel = ObjectProperty(None)
     proceed = ObjectProperty(None)
 
 
-# define the object oice folder dialog
+# define the object choice folder dialog
 class DirectoryName(BoxLayout):
     cancel = ObjectProperty(None)
 
@@ -449,6 +469,7 @@ class DirectoryName(BoxLayout):
         valeur = self.ids[inputname].text
         if valeur != "":
             MyPanel.mainDirectory = valeur
+
 
 # define the object settings dialog
 class Parameters(BoxLayout):
@@ -492,11 +513,14 @@ class Parameters(BoxLayout):
 class TI_meta(TextInput):
 
     def on_text(self, instance, value):
-        if App.get_running_app().root.ids["Meta_list"].data:
-            App.get_running_app().root.ids["Meta_list"].data = [
+        meta_list = App.get_running_app().root.ids["Meta_list"]
+        if meta_list.data:
+            meta_list.data = [
                 {"text": meta["id"], "root_widget": App.get_running_app().root.ids["Meta_list"]} for
                 meta in MyPanel.graph.data["metabolites"] if
                 value.upper() in meta["id"].upper()]
+            if meta_list.opacity == 0:
+                meta_list.opacity = 1
 
 
 class TI_reac(TextInput):
@@ -578,65 +602,30 @@ class Compartment_List(RecycleView):
                   f"{', '.join(MyPanel.graph.reac_keyword)}\n\nCompartments : {', '.join(MyPanel.graph.search_compartment)}"
         App.get_running_app().root.ids["keywords"].text = message
 
-    def update_comp_list(self):
-        if App.get_running_app().root.ids["Meta_list"].data:
-            App.get_running_app().root.ids["Meta_list"].data = [
-                {"text": meta["id"], "root_widget": App.get_running_app().root.ids["Meta_list"]} for
+    def update_meta_list(self):
+        temp_compartment = [Graph.cobra_compatibility(reac, False) for reac in MyPanel.graph.search_compartment]
+        meta_list = App.get_running_app().root.ids["Meta_list"]
+        if meta_list.data:
+            meta_list.data = []
+            meta_list.data = [
+                {"text": meta["id"], "root_widget": meta_list} for
                 meta in MyPanel.graph.data["metabolites"] if
-                meta["compartment"] in MyPanel.graph.compartment]
+                meta["compartment"]  in temp_compartment]
+        if not MyPanel.graph.search_compartment :
+            if not App.get_running_app().root.ids["TI_meta"].text:
+                meta_list.data = [{"text": meta["id"], "root_widget": meta_list} for
+                                              meta in
+                                              MyPanel.graph.data["metabolites"]]
+            else:
+                meta_list.data = [{"text": meta["id"], "root_widget": meta_list} for
+                                              meta in MyPanel.graph.data["metabolites"] if
+                                              App.get_running_app().root.ids["TI_meta"].text.upper() in meta["id"].upper()]
 
     def btn_callback(self, btn):
         if self.opacity == 1:
             MyPanel.graph.compartment_update(btn.text)
             self.selected_keyword()
-            self.update_comp_list()
-
-class Physics_selection(Bubble):
-
-    def change_option(self, instance):
-        if instance.type == "default":
-            MyPanel.options = 1
-        if instance.type == "dynamic":
-            MyPanel.options = 2
-        if instance.type == "no_physics":
-            MyPanel.options = 3
-
-class CustomBubbleBtn(BubbleButton):
-    type = ObjectProperty(None)
-
-
-class Tooltip(Label):
-    pass
-
-
-class TooltipButtons(Button):
-    tooltip = Tooltip(text = "Hello World")
-
-    def __int__(self, **kwargs):
-        Window.bind(mouse_pos = self.on_mouse_pos)
-        super(Button, self).__init__(**kwargs)
-
-    def on_mouse_pos(self, *args):
-        if not self.get_root_window():
-            return
-        pos = args[1]
-        self.tooltip.pos = pos
-        Clock.unschedule(self.display_tooltip)
-        self.close_tooltip()
-        if self.collide_point(*self.to_widget(*pos)):
-            Clock.schedule_once(self.display_tooltip,1)
-
-    def close_tooltip(self):
-        Window.remove_windget(self.tooltip)
-        print("Im out !")
-
-    def display_tooltip(self):
-        Window.add_widget(self.tooltip)
-        print("Im in !")
-
-
-
-
+            self.update_meta_list()
 
 
 class plantGEMApp(App):

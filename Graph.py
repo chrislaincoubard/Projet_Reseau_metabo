@@ -15,6 +15,10 @@ class Graph:
     edges = []
     meta_keyword = []  # liste of keyword during search
     reac_keyword = []  # liste temp pour garder les catégories pour reactions et metabolites
+    cofactors = ["CDP-CHOLINE_c", "CMP_c","PROTON_c","PPI_c","PROTOHEME_c","WATER_c",
+                 "OXYGEN-MOLECULE_c","CARBON-DIOXIDE_c","NADPH_c","NADP_c","CMP_CCO-RGH-ER-LUM",
+                 "PROTON_CCO-RGH-ER-LUM","Pi_c","AMP_c","Acceptor_c","CO-A_c","ATP_c","ADP_c","GDP_c",
+                 "GTP_c","MG+2_c","PROTON_e","OXYGEN-MOLECULE_m","WATER_m","CARBON-MONOXIDE_c", "NAD_c", "NADH_c"]
     G = nx.MultiDiGraph()
 
     # open the reference file and stores the data as attribute.
@@ -26,7 +30,28 @@ class Graph:
                 comp = cobra_compatibility(comp)
                 self.compartment.append(comp)
 
+    def cobra_compatibility(reaction, side=True):
+        """Function to transform a reaction ID into a cobra readable ID and vice versa.
 
+        PARAMS:
+            reaction (str) -- the reaction.
+            side (boolean) -- True if you want to convert a COBRA ID into a readable ID,
+            False for the reverse.
+        RETURNS:
+            reaction (str) -- the transformed reaction.
+        """
+
+        if side:
+            reaction = reaction.replace("__46__", ".").replace("__47__", "/").replace("__45__", "-") \
+                .replace("__43__", "+").replace("__91__", "[").replace("__93__", "]")
+            if re.search('(^_\d)', reaction):
+                reaction = reaction[1:]
+        else:
+            reaction = reaction.replace("/", "__47__").replace(".", "__46__").replace("-", "__45__") \
+                .replace("+", "__43__").replace("[", "__91__").replace("]", "__93")
+            if re.search('(\d)', reaction[0]):
+                reaction = "_" + reaction
+        return reaction
 
     def __init__(self, file=None):
         if file is not None:
@@ -79,9 +104,15 @@ class Graph:
 
     def create_nodes_metabolites(self, data):
         for item in data:
-            item["size"] = 20  # Size of the node
-            item["group"] = 2  # Group of the node (to differentiate metabolites from reactions
-            item["title"] = item["id"]  # Message displayed when node is hoverede by mouse
+            if item["id"] not in self.cofactors:
+                item["size"] = 20  # Size of the node
+                item["group"] = 2  # Group of the node (to differentiate metabolites from reactions and cofactors)
+                item["title"] = item["id"]  # Message displayed when node is hoverede by mouse
+                item["color"] = "blue"
+            else :
+                item["size"] = 10  # Size of the node
+                item["group"] = 3  # Group of the node (to differentiate metabolites from reactions and cofactors)
+                item["title"] = item["id"]  # Message displayed when node is hoverede by mouse
             if "name" in item:
                 del item["name"]
             self.nodes_metabolites.append((item['id'], item))
@@ -89,8 +120,9 @@ class Graph:
     # Similar to create_nodes_reactions
     def create_nodes_reactions(self, data):
         for item in data:
-            item["size"] = 50
+            item["size"] = 35
             item["group"] = 1
+            item["shape"] = "diamond"
             item["title"] = item["gene_reaction_rule"].replace(" or ", " <br> ")
             if "name" in item:
                 del item["name"]
@@ -98,17 +130,25 @@ class Graph:
 
     # edges creating by creating a 2-tuple for each edge.
     # Tuple means = (starting_node, ending node)
-    def create_edges(self, type):
+    def create_edges(self, type, cofactor):
         for reaction in type:
             for metabolite, stoech in reaction["metabolites"].items():
-                if stoech > 0:
-                    self.edges.append([reaction["id"], metabolite])
-                if stoech < 0:
-                    self.edges.append([metabolite, reaction["id"]])
+                if not cofactor:
+                    if metabolite not in self.cofactors:
+                        if stoech > 0:
+                            self.edges.append([reaction["id"], metabolite])
+                        if stoech < 0:
+                            self.edges.append([metabolite, reaction["id"]])
+                else :
+                    if stoech > 0:
+                        self.edges.append([reaction["id"], metabolite])
+                    if stoech < 0:
+                        self.edges.append([metabolite, reaction["id"]])
+
 
     # search for metabolites based on list of metabo ID
     # add all the reactions connected to the searched metabolites and all the metabolites associated with the reactions.
-    def search_metabolites(self):
+    def search_metabolites(self, cofactor = True):
         if not self.meta_keyword:
             return None
         temp_meta = {}
@@ -119,12 +159,19 @@ class Graph:
                     temp_meta = item["metabolites"]
                 for item in self.data["metabolites"]:
                     if item["id"] in temp_meta.keys() and item not in self.Metabolites:
-                        self.Metabolites.append(item)
+                        if not cofactor :
+                            if item["id"] not in self.cofactors:
+                                self.Metabolites.append(item)
+                        else :
+                            self.Metabolites.append(item)
         self.meta_keyword.clear()
+
+
+
 
     # search for reactions based on list of reaction ID
     # Add all the reactions and the meatbolites involved in them
-    def search_reactions(self):
+    def search_reactions(self, cofactor):
         if not self.reac_keyword:
             return None
         temp_meta = {}
@@ -135,8 +182,13 @@ class Graph:
                     temp_meta = item["metabolites"]
             for item in self.data["metabolites"]:
                 if item["id"] in temp_meta.keys() and item not in self.Metabolites:
-                    self.Metabolites.append(item)
+                    if not cofactor:
+                        if item["id"] not in self.cofactors:
+                            self.Metabolites.append(item)
+                    else:
+                        self.Metabolites.append(item)
         self.reac_keyword.clear()
+
 
     # ------------------ Function to save graphs ------------------- #
 
@@ -164,50 +216,32 @@ class Graph:
 
     # ------------------ Functions to show graph ----------------------------- #
 
-    def create_Graph(self,name,option=1):
-        # create or show graph depending if a search has been made
+    def create_Graph(self,name,cofactor,physics ):
+        # create or show graph wether a search has been made or not
         if self.meta_keyword or self.reac_keyword:  # if searched has been made.
-            self.search_metabolites()
-            self.search_reactions()
+            self.search_metabolites(cofactor)
+            self.search_reactions(cofactor)
             self.create_nodes_metabolites(self.Metabolites)
             self.create_nodes_reactions(self.Reaction)
-            self.create_edges(self.Reaction)
+            self.create_edges(self.Reaction, cofactor)
             self.G.add_nodes_from(self.nodes_metabolites)
             self.G.add_nodes_from(self.nodes_reactions)
             self.G.add_edges_from(self.edges)
-            # if "." in name:
-            #     extension = name.split('.')
-            #     if "html" == extension[1]:
-            #         self.show_graph(name, option)
-            #     else:
-            #         extension[1] = ".html"
-            #         self.show_graph(extension[0] + extension[1], option)
-            # else:
-            #     self.show_graph(name + ".html",option)
-            self.show_graph(name,option)
+            self.show_graph(name,physics)
         else:  # create graph from all JSON if no search was made
             self.create_nodes_metabolites(self.data["metabolites"])
             self.create_nodes_reactions(self.data["reactions"])
-            self.create_edges(self.data["reactions"])
+            self.create_edges(self.data["reactions"],cofactor)
             self.G.add_nodes_from(self.nodes_metabolites)
             self.G.add_nodes_from(self.nodes_reactions)
             self.G.add_edges_from(self.edges)
-            # if "." in name:
-            #     extension = name.split('.')
-            #     if "html" == extension[1]:
-            #         self.show_graph(name, option)
-            #     else:
-            #         extension[1] = ".html"
-            #         self.show_graph(extension[0] + extension[1], option)
-            # else:
-            #     self.show_graph(name + ".html",option)
-            self.show_graph(name, option)
+            self.show_graph(name, physics)
 
     def show_graph(self, name, option):
         nt = Network("1000px", "1000px")
-        nt.from_nx(self.G)
+        nt.from_nx(self.G,show_edge_weights=False)
         nt.toggle_hide_edges_on_drag(True)
-        nt.set_edge_smooth("dynamic")
+        nt.set_edge_smooth("vertical")
         # Set_graphical options to allow good representation of graph
         if option == 1:
             nt.set_options("""
@@ -241,30 +275,31 @@ class Graph:
             nt.show_buttons(filter_=["physics"])
         if option == 3:
             nt.set_options("""
-                        var options = {
-                        "nodes": {
-                            "borderWidthSelected": 5
-                           },
-                          "edges": {
-                          "arrows": {
-                            "to": {
-                                "enabled": true,
-                                "scaleFactor": 1.4
-                            }
-                        },
-                            "color": {
-                              "inherit": true
-                            },
-                            "smooth": {
-                              "forceDirection": "none"
-                            }
-                          },
-                          "interaction": {
-                            "hideEdgesOnDrag": true
-                          },
-                          "physics": {
-                            "enabled": False
-                          }
-                        }
-                        """)
+            var options = {
+            "nodes": {
+                "borderWidthSelected": 5
+               },
+              "edges": {
+              "arrows": {
+                "to": {
+                    "enabled": true,
+                    "scaleFactor": 1.4
+                }
+            },
+                "color": {
+                  "inherit": true
+                },
+                "smooth": {
+                  "forceDirection": "none"
+                }
+              },
+              "interaction": {
+                "hideEdgesOnDrag": true
+              },
+              "physics": {
+                "minVelocity": 0.75,
+                "enabled" : false
+              }
+            }
+            """)
         nt.show(name)

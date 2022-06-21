@@ -94,48 +94,54 @@
 
             Label :
                 id : files_main
-                text : "Currently selected files :\n\ngff :\n\nsbml :\n\nfna :\n\ntsv :\n\nfaaM :\n\nfaaS :"
+                text : "Currently selected files :\n\nfaa Model :\n\nfaa Subject :\n\nfna :\n\ngff :\n\nsbml :\n\ntsv :"
                 pos_hint : {"center_x" : 0.15, "center_y" : 0.6}
                 text_size : cm(6), None
                 halign: 'center'
                 valign: 'middle'
                 font_size : 18
 
-            Button:
+            Load_Button:
                 id : sbmlMain
+                file : "sbml"
                 text:"Choose .sbml file"
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
-                on_press : root.show_load("sbml","sbml")
-            Button:
+                pos_hint: {"center_x" : 0.8,"center_y" : 0.6}
+                on_press : root.show_load("sbml","sbml",self)
+            Load_Button:
                 id : faaSMain
+                file : "faa Subject"
                 text:"Choose .faa subject file"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.6}
-                on_press : root.show_load("faaS","faa")
+                on_press : root.show_load("faaS","faa",self)
 
-            Button:
+            Load_Button:
                 id : faaMMain
+                file : "faa Model"
                 text:"Choose .faa model file "
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.4}
-                on_press : root.show_load("faaM","faa")
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
+                on_press : root.show_load("faaM","faa",self)
             
             
-            Button:
+            Load_Button:
                 id : fnaMain
+                file : "fna"
                 text:"Choose .fna file"
-                pos_hint: {"center_x" : 0.8,"center_y" : 0.8}
-                on_press : root.show_load("fna","fna")
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.4}
+                on_press : root.show_load("fna","fna",self)
             
-            Button:
+            Load_Button:
                 id : tsvMain
+                file : "tsv"
                 text:"Choose .tsv file "
-                pos_hint: {"center_x" : 0.8,"center_y" : 0.6}
-                on_press : root.show_load("tsv","tsv")
-            
-            Button:
-                id : gffMain
-                text:"Choose .gff file "
                 pos_hint: {"center_x" : 0.8,"center_y" : 0.4}
-                on_press : root.show_load("gff","gff")
+                on_press : root.show_load("tsv","tsv",self)
+            
+            Load_Button:
+                id : gffMain
+                file : "gff"
+                text:"Choose .gff file "
+                pos_hint: {"center_x" : 0.8,"center_y" : 0.8}
+                on_press : root.show_load("gff","gff",self)
             
             Button:
                 id : btn7
@@ -151,7 +157,7 @@
                 pos_hint: {"center_x" : 0.2,"center_y" : 0.15}
                 on_press : root.show_param()
 
-            Button:
+            Load_Button:
                 id : btn
                 text:"Set main directory"
                 background_color:"#fcbba1"
@@ -166,35 +172,39 @@
         FloatLayout:
             Label :
                 id : files_blast
-                text : "Currently selected files :\n\ngff :\n\nsbml :\n\nfaaM :\n\nfaaS :"
+                text : "Currently selected files :\n\nfaa Model :\n\nfaa Subject :\n\ngff :\n\nsbml :"
                 pos_hint : {"center_x" : 0.15, "center_y" : 0.7}
                 text_size : cm(6), None
                 halign: 'center'
                 valign: 'middle'
                 font_size : 18
 
-            Button:
+            Load_Button:
                 id : sbmlBlast
+                file : "sbml"
                 text:"Choose .sbml file"
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
-                on_press : root.show_load("sbml","sbml")
-            Button:
-                id : faaSBlast
-                text:"Choose .faa subject file"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.55}
-                on_press : root.show_load("faaS","faa")
+                on_press : root.show_load("sbml","sbml",self)
+            Load_Button:
+                id : faaSBlast
+                file : "faa Subject"
+                text:"Choose .faa subject file"
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
+                on_press : root.show_load("faaS","faa",self)
 
-            Button:
+            Load_Button:
                 id : faaMBlast
+                file : "faa Model"
                 text:"Choose .faa model file"
-                pos_hint: {"center_x" : 0.8,"center_y" : 0.8}
-                on_press : root.show_load("faaM","faa")
-            
-            Button:
-                id : gffBlast
-                text:"Choose .gff file"
                 pos_hint: {"center_x" : 0.8,"center_y" : 0.55}
-                on_press : root.show_load("gff","gff")
+                on_press : root.show_load("faaM","faa",self)
+            
+            Load_Button:
+                id : gffBlast
+                file : "gff"
+                text:"Choose .gff file"
+                pos_hint: {"center_x" : 0.8,"center_y" : 0.8}
+                on_press : root.show_load("gff","gff",self)
             
             Button:
                 id : btn
@@ -224,30 +234,33 @@
         FloatLayout:
             Label :
                 id : files_mpwt
-                text : "Currently selected files :\n\ngff :\n\nfna :\n\ntsv :"
+                text : "Currently selected files :\n\nfna :\n\ngff :\n\ntsv :"
                 pos_hint : {"center_x" : 0.15, "center_y" : 0.7}
                 text_size : cm(6), None
                 halign: 'center'
                 valign: 'middle'
                 font_size : 18
 
-            Button:
+            Load_Button:
                 id : fnaMpwting
+                file : "fna"
                 text:"Choose .fna file"
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.6}
-                on_press : root.show_load("fna","fna")
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
+                on_press : root.show_load("fna","fna",self)
             
-            Button:
+            Load_Button:
                 id : tsvMpwting
+                file : "tsv"
                 text:"Choose .tsv file"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.4}
-                on_press : root.show_load("tsv","tsv")
+                on_press : root.show_load("tsv","tsv",self)
             
-            Button:
+            Load_Button:
                 id : gffMpwting
+                file : "gff"
                 text:"Choose .gff file"
-                pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
-                on_press : root.show_load("gff","gff")
+                pos_hint: {"center_x" : 0.5,"center_y" : 0.6}
+                on_press : root.show_load("gff","gff", self)
             
             Button:
                 id : btn
@@ -274,6 +287,7 @@
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.7}
                 on_press : root.choosedirectory()
 
+
     TabbedPanelItem :
         id : Graphs
         text : "Graphs"
@@ -281,7 +295,7 @@
         id : graph_panel
 
         GridLayout :
-            cols : 3
+            cols : 4
 
             FloatLayout :
                 size_hint_x : 0.5
@@ -291,27 +305,41 @@
                     text : "Currently in search :\n\nMetabolites :\n\nReactions:\n\nCompartment:\n"
                     text_size : cm(4), None
                     size_hint_y : 0.3
+                    font_size : 16
                     valign : "middle"
                     haligne : "center"
-                    pos_hint : {"center_x" : 0.25, "center_y" : 0.6}
+                    pos_hint : {"center_x" : 0.25, "center_y" : 0.7}
 
-                TooltipButtons :
-                    text : "1) load file"
+                Label :
+                    id : physics_options
+                    font_size : 16
+                    text : "Physics mode selected : \n\n               Default"
+                    pos_hint: {"center_x" : 0.25,"center_y" : 0.5}
+
+                Label :
+                    id : cofactors_selection
+                    text : "Cofactors displayed : No"
+                    font_size : 16
+                    pos_hint: {"center_x" : 0.25,"center_y" : 0.4}
+
+                Button :
+                    text : "Load file"
                     size_hint : None,None
                     width : 175
                     height : 70
-                    on_release : root.show_load("json","json")
+                    file : "json"
+                    on_release : root.show_load("json","json", self)
                     pos_hint: {"center_x" : 0.75,"center_y" : 0.8}
 
                 Compartment_List :
-                    pos_hint : {"center_x" : 0.25, "center_y" : 0.18}
+                    pos_hint : {"center_x" : 0.25, "center_y" : 0.27}
                     id : compartment_list
                     opacity : 0
                     size_hint : None, 0.36
                     width : 175
 
 
-                TooltipButtons :
+                Button :
                     id : open_cpt_list
                     size_hint : None, None
                     width : 175
@@ -321,9 +349,9 @@
                     on_release : root.toggle_compartment_list()
                     valign : "middle"
                     halign : "center"
-                    pos_hint: {"center_x" : 0.25,"center_y" : 0.4}
+                    pos_hint: {"center_x" : 0.25,"center_y" : 0.05}
 
-                TooltipButtons :
+                Button :
                     id : physics_selection
                     size_hint : None, None
                     width : 175
@@ -333,10 +361,10 @@
                     font_size : 20
                     valign : "middle"
                     halign : "center"
-                    on_release : root.show_bubble()
-                    pos_hint: {"center_x" : 0.25,"center_y" : 0.8}
+                    on_release : root.select_options()
+                    pos_hint: {"center_x" : 0.25,"center_y" : 0.9}
 
-                TooltipButtons :
+                Button :
                     type : "html"
                     text : "Draw Graph"
                     on_release : root.pop_up_html(self)
@@ -348,7 +376,7 @@
                     valign : "middle"
                     pos_hint: {"center_x" : 0.75,"center_y" : 0.6}
 
-                TooltipButtons :
+                Button :
                     type : "json"
                     text : "Save json"
                     on_release : root.pop_up_html(self)
@@ -360,14 +388,21 @@
                     valign : "middle"
                     pos_hint: {"center_x" : 0.75,"center_y" : 0.4}
 
-                TooltipButtons :
+                Button :
                     text : "Clear data"
                     size_hint : None, None
                     width : 175
                     height : 70
                     on_release : root.clear_graph_data()
                     pos_hint: {"center_x" : 0.75,"center_y" : 0.2}
-
+            BoxLayout :
+                size_hint_x : 0.005
+                canvas:
+                    Color:
+                        rgb: 0, 0, 0
+                    Rectangle:
+                        size: self.size
+                        pos : self.pos
             BoxLayout:
                 orientation : "vertical"
                 size_hint_x : 0.3
@@ -378,8 +413,8 @@
                     on_release : root.toggle_meta_list()
 
                 Label :
-                    text : "Click reaction in list to add to graph"
-                    size_hint_y : 0.3
+                    size_hint_y : None
+                    height : 80
 
                 Meta_List :
                     opacity : 0
@@ -402,8 +437,8 @@
                     on_release : root.toggle_reac_list()
 
                 Label :
-                    text : "Click metabolites in list to add to graph"
-                    size_hint_y : 0.3
+                    size_hint_y : None
+                    height : 80
 
                 Reac_List :
                     opacity : 0
@@ -419,6 +454,22 @@
 
 
 <Meta_list_buttons>:
+    halign: "center"
+    valign: "center"
+    font_size: 20
+    size_hint_y: None
+    text_size : self.size
+    height: self.texture_size[1]
+
+<Reac_list_buttons>:
+    halign: "center"
+    valign: "center"
+    font_size: 20
+    size_hint_y: None
+    text_size : self.size
+    height: self.texture_size[1]
+
+<Compartment_buttons>:
     halign: "center"
     valign: "center"
     font_size: 20
@@ -597,47 +648,63 @@
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.5}
                 size_hint: (0.3,0.4)
 
+<Physics>:
+    Label :
+        text: "Cofactors settings"
+        id : cofac_settings
+        font_size : 20
+        pos_hint: {"center_x" : 0.5,"center_y" : 0.75}
+
+    ToggleButton :
+        id : yes_cofac
+        type : "Yes"
+        group : "Cofactors"
+        text : "With cofactors"
+        pos_hint: {"center_x" : 0.3,"center_y" : 0.6}
+        on_release : root.select(self)
+
+    ToggleButton :
+        id : no_cofac
+        type : "No"
+        group : "Cofactors"
+        text : "Without cofactors"
+        pos_hint: {"center_x" : 0.7,"center_y" : 0.6}
+        on_release : root.select(self)
 
 
-<Physics_selection>
-    size_hint: (None, None)
-    size: (250, 120)
-    pos_hint : {"center_x" : 0.75, "center_y" : 0.85}
+    Label :
+        text : "Physics settings"
+        id : physics_selection
+        font_size : 20
+        pos_hint: {"center_x" : 0.5,"center_y" : 0.35}
 
-    BubbleButton:
+    ToggleButton :
+        id : default
         type : "default"
-        text: 'Default value'
-        text_size : self.size
-        font_size : 16
-        halign : "center"
-        valign : "middle"
-        on_release : root.change_option(self)
+        group : "Physics"
+        text : "Default value"
+        pos_hint: {"center_x" : 0.2,"center_y" : 0.2}
+        on_release : root.select(self)
 
-    BubbleButton:
+    ToggleButton :
+        id : option_select
+        group : "Physics"
         type : "dynamic"
-        text: 'Dynamic Selection'
-        text_size : self.size
-        font_size : 16
-        halign : "center"
-        valign : "middle"
-        on_release : root.change_option(self)
+        text : "Buttons selection"
+        pos_hint: {"center_x" : 0.5,"center_y" : 0.2}
+        on_release : root.select(self)
 
-    BubbleButton:
+    ToggleButton :
+        id : no_physics
         type : "no_physics"
-        text: 'No Physics'
-        text_size : self.size
-        font_size : 16
-        halign : "center"
-        valign : "middle"
-        on_release : root.change_option(self)
+        group : "Physics"
+        pos_hint: {"center_x" : 0.8,"center_y" : 0.2}
+        text : "No physics"
+        on_release : root.select(self)
 
-<Tooltip>:
-    size_hint: None, None
-    size: self.texture_size[0]+5, self.texture_size[1]+5
-    canvas.before:
-        Color:
-            rgb: 0.2, 0.2, 0.2
-        Rectangle:
-            size: self.size
-            pos: self.pos
+
+
+
+
+
 
