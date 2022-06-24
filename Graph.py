@@ -1,4 +1,6 @@
 import json
+import webbrowser
+
 import networkx as nx
 from pyvis.network import Network
 from utils import *
@@ -15,10 +17,10 @@ class Graph:
     edges = []
     meta_keyword = []  # liste of keyword during search
     reac_keyword = []  # liste temp pour garder les catégories pour reactions et metabolites
-    cofactors = ["CDP-CHOLINE_c", "CMP_c","PROTON_c","PPI_c","PROTOHEME_c","WATER_c",
-                 "OXYGEN-MOLECULE_c","CARBON-DIOXIDE_c","NADPH_c","NADP_c","CMP_CCO-RGH-ER-LUM",
-                 "PROTON_CCO-RGH-ER-LUM","Pi_c","AMP_c","Acceptor_c","CO-A_c","ATP_c","ADP_c","GDP_c",
-                 "GTP_c","MG+2_c","PROTON_e","OXYGEN-MOLECULE_m","WATER_m","CARBON-MONOXIDE_c", "NAD_c", "NADH_c"]
+    cofactors = ["CDP-CHOLINE_c", "CMP_c", "PROTON_c", "PPI_c", "PROTOHEME_c", "WATER_c",
+                 "OXYGEN-MOLECULE_c", "CARBON-DIOXIDE_c", "NADPH_c", "NADP_c", "CMP_CCO-RGH-ER-LUM",
+                 "PROTON_CCO-RGH-ER-LUM", "Pi_c", "AMP_c", "Acceptor_c", "CO-A_c", "ATP_c", "ADP_c", "GDP_c",
+                 "GTP_c", "MG+2_c", "PROTON_e", "OXYGEN-MOLECULE_m", "WATER_m", "CARBON-MONOXIDE_c", "NAD_c", "NADH_c"]
     G = nx.MultiDiGraph()
 
     # open the reference file and stores the data as attribute.
@@ -29,29 +31,6 @@ class Graph:
             for comp in self.data["compartments"]:
                 comp = cobra_compatibility(comp)
                 self.compartment.append(comp)
-
-    def cobra_compatibility(reaction, side=True):
-        """Function to transform a reaction ID into a cobra readable ID and vice versa.
-
-        PARAMS:
-            reaction (str) -- the reaction.
-            side (boolean) -- True if you want to convert a COBRA ID into a readable ID,
-            False for the reverse.
-        RETURNS:
-            reaction (str) -- the transformed reaction.
-        """
-
-        if side:
-            reaction = reaction.replace("__46__", ".").replace("__47__", "/").replace("__45__", "-") \
-                .replace("__43__", "+").replace("__91__", "[").replace("__93__", "]")
-            if re.search('(^_\d)', reaction):
-                reaction = reaction[1:]
-        else:
-            reaction = reaction.replace("/", "__47__").replace(".", "__46__").replace("-", "__45__") \
-                .replace("+", "__43__").replace("[", "__91__").replace("]", "__93")
-            if re.search('(\d)', reaction[0]):
-                reaction = "_" + reaction
-        return reaction
 
     def __init__(self, file=None):
         if file is not None:
@@ -69,7 +48,7 @@ class Graph:
         self.nodes_metabolites.clear()
         self.meta_keyword.clear()
         self.reac_keyword.clear()
-        self.compartment.clear()
+        self.search_compartment.clear()
 
     def meta_keyword_update(self, keyword):
         keyword = cobra_compatibility(keyword)
@@ -91,10 +70,10 @@ class Graph:
 
     def compartment_update(self, keyword):
         keyword = cobra_compatibility(keyword)
-        if keyword not in self.search_compartment :
+        if keyword not in self.search_compartment:
             self.search_compartment.append(keyword)
             return True
-        if keyword in self.search_compartment :
+        if keyword in self.search_compartment:
             self.search_compartment.remove(keyword)
             return False
 
@@ -108,11 +87,13 @@ class Graph:
                 item["size"] = 20  # Size of the node
                 item["group"] = 2  # Group of the node (to differentiate metabolites from reactions and cofactors)
                 item["title"] = item["id"]  # Message displayed when node is hoverede by mouse
-                item["color"] = "blue"
-            else :
+                item["mass"] = 2
+            else:
                 item["size"] = 10  # Size of the node
                 item["group"] = 3  # Group of the node (to differentiate metabolites from reactions and cofactors)
                 item["title"] = item["id"]  # Message displayed when node is hoverede by mouse
+                item["mass"] = 0.5
+                item["physics"] = False
             if "name" in item:
                 del item["name"]
             self.nodes_metabolites.append((item['id'], item))
@@ -123,6 +104,7 @@ class Graph:
             item["size"] = 35
             item["group"] = 1
             item["shape"] = "diamond"
+            item["mass"] = 5
             item["title"] = item["gene_reaction_rule"].replace(" or ", " <br> ")
             if "name" in item:
                 del item["name"]
@@ -139,35 +121,31 @@ class Graph:
                             self.edges.append([reaction["id"], metabolite])
                         if stoech < 0:
                             self.edges.append([metabolite, reaction["id"]])
-                else :
+                else:
                     if stoech > 0:
                         self.edges.append([reaction["id"], metabolite])
                     if stoech < 0:
                         self.edges.append([metabolite, reaction["id"]])
 
-
     # search for metabolites based on list of metabo ID
     # add all the reactions connected to the searched metabolites and all the metabolites associated with the reactions.
-    def search_metabolites(self, cofactor = True):
+    def search_metabolites(self, cofactor):
         if not self.meta_keyword:
             return None
         temp_meta = {}
         for key in self.meta_keyword:
             for item in self.data["reactions"]:
                 if key in item["metabolites"] and item not in self.Reaction:
+                    item = get_metacyc_ids(item)
                     self.Reaction.append(item)
                     temp_meta = item["metabolites"]
                 for item in self.data["metabolites"]:
                     if item["id"] in temp_meta.keys() and item not in self.Metabolites:
-                        if not cofactor :
+                        if not cofactor:
                             if item["id"] not in self.cofactors:
                                 self.Metabolites.append(item)
-                        else :
+                        else:
                             self.Metabolites.append(item)
-        self.meta_keyword.clear()
-
-
-
 
     # search for reactions based on list of reaction ID
     # Add all the reactions and the meatbolites involved in them
@@ -188,7 +166,6 @@ class Graph:
                     else:
                         self.Metabolites.append(item)
         self.reac_keyword.clear()
-
 
     # ------------------ Function to save graphs ------------------- #
 
@@ -216,7 +193,7 @@ class Graph:
 
     # ------------------ Functions to show graph ----------------------------- #
 
-    def create_Graph(self,name,cofactor,physics ):
+    def create_Graph(self, name, cofactor, physics):
         # create or show graph wether a search has been made or not
         if self.meta_keyword or self.reac_keyword:  # if searched has been made.
             self.search_metabolites(cofactor)
@@ -226,53 +203,59 @@ class Graph:
             self.create_edges(self.Reaction, cofactor)
             self.G.add_nodes_from(self.nodes_metabolites)
             self.G.add_nodes_from(self.nodes_reactions)
-            self.G.add_edges_from(self.edges)
-            self.show_graph(name,physics)
+            for start, finish in self.edges:
+                if start in self.cofactors or finish in self.cofactors:
+                    self.G.add_edge(start, finish, physics=False, dashes=True)
+                else:
+                    self.G.add_edge(start, finish, physics=True, width=3)
+            self.show_graph(name, physics)
         else:  # create graph from all JSON if no search was made
             self.create_nodes_metabolites(self.data["metabolites"])
             self.create_nodes_reactions(self.data["reactions"])
-            self.create_edges(self.data["reactions"],cofactor)
+            self.create_edges(self.data["reactions"], cofactor)
             self.G.add_nodes_from(self.nodes_metabolites)
             self.G.add_nodes_from(self.nodes_reactions)
-            self.G.add_edges_from(self.edges)
+            self.G.add_edges_from(self.edges, physics=False)
             self.show_graph(name, physics)
 
     def show_graph(self, name, option):
         nt = Network("1000px", "1000px")
-        nt.from_nx(self.G,show_edge_weights=False)
+        nt.set_template("PlantGEM_template.html")
+        nt.from_nx(self.G, show_edge_weights=False)
         nt.toggle_hide_edges_on_drag(True)
         nt.set_edge_smooth("vertical")
-        # Set_graphical options to allow good representation of graph
+        # Set_graphical options to try to have good representation of graph
         if option == 1:
             nt.set_options("""
             var options = {
-            "nodes": {
+              "nodes": {
                 "borderWidthSelected": 5
-               },
+              },
               "edges": {
-              "arrows": {
-                "to": {
+                "arrows": {
+                  "to": {
                     "enabled": true,
                     "scaleFactor": 1.4
-                }
-            },
+                  }
+                },
                 "color": {
                   "inherit": true
                 },
+                "selectionWidth": 5,
                 "smooth": {
+                  "type": "vertical",
                   "forceDirection": "none"
                 }
               },
-              "interaction": {
-                "hideEdgesOnDrag": true
-              },
               "physics": {
+                "barnesHut": {
+                  "gravitationalConstant": -1500
+                },
                 "minVelocity": 0.75
               }
-            }
-            """)
+            }""")
         if option == 2:
-            nt.show_buttons(filter_=["physics"])
+            nt.show_buttons(filter_=["physics", "nodes", "edges"])
         if option == 3:
             nt.set_options("""
             var options = {
@@ -280,6 +263,7 @@ class Graph:
                 "borderWidthSelected": 5
                },
               "edges": {
+              "selectionWidth": 5,
               "arrows": {
                 "to": {
                     "enabled": true,
@@ -302,4 +286,5 @@ class Graph:
               }
             }
             """)
-        nt.show(name)
+        nt.write_html(name)
+        webbrowser.open(name)

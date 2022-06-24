@@ -15,8 +15,6 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.recycleview import RecycleView
-from kivy.uix.bubble import Bubble
-from kivy.uix.bubble import BubbleButton
 
 import Graph
 import subprocess
@@ -25,7 +23,7 @@ import os
 Window.size = (1000, 800)
 
 if "linux" in sys.platform:
-    root = Builder.load_file("PlantGEM.kv")
+    root = Builder.load_file("plantGEM.kv")
 
 
 class MyPanel(TabbedPanel):
@@ -50,9 +48,9 @@ class MyPanel(TabbedPanel):
 
     def on_tab_change(self):
         pop = False
-        empty_dict = all(x == "" for x in self.files.values())
+        empty_files = all(x == "" for x in self.files.values())
         # and self.old_module == self.get_current_tab().text
-        if not empty_dict:
+        if not empty_files:
             content = Change_tab(proceed=self.change_tabs,
                                  cancel=self.stay_same_tab)  # define the content of the pop-up
             self._popup = Popup(title="Load file", content=content,
@@ -427,17 +425,14 @@ class MyPanel(TabbedPanel):
             MyPanel.cofac = False
             self.ids["cofactors_selection"].text = "Cofactors displayed : No"
 
-
     def select_options(self):
         content = Physics(select=self.change_option)
-        self._popup = Popup(title="set graph display options", content=content, size_hint=(0.7, 0.7), title_size = 16)
+        self._popup = Popup(title="Set graph display options", content=content, size_hint=(0.7, 0.7), title_size=16)
         self._popup.open()
 
 
 class Physics(FloatLayout):
     select = ObjectProperty(None)
-
-
 
 
 class Load_Button(Button):
@@ -610,16 +605,16 @@ class Compartment_List(RecycleView):
             meta_list.data = [
                 {"text": meta["id"], "root_widget": meta_list} for
                 meta in MyPanel.graph.data["metabolites"] if
-                meta["compartment"]  in temp_compartment]
-        if not MyPanel.graph.search_compartment :
+                meta["compartment"] in temp_compartment]
+        if not MyPanel.graph.search_compartment:
             if not App.get_running_app().root.ids["TI_meta"].text:
                 meta_list.data = [{"text": meta["id"], "root_widget": meta_list} for
-                                              meta in
-                                              MyPanel.graph.data["metabolites"]]
+                                  meta in
+                                  MyPanel.graph.data["metabolites"]]
             else:
                 meta_list.data = [{"text": meta["id"], "root_widget": meta_list} for
-                                              meta in MyPanel.graph.data["metabolites"] if
-                                              App.get_running_app().root.ids["TI_meta"].text.upper() in meta["id"].upper()]
+                                  meta in MyPanel.graph.data["metabolites"] if
+                                  App.get_running_app().root.ids["TI_meta"].text.upper() in meta["id"].upper()]
 
     def btn_callback(self, btn):
         if self.opacity == 1:
