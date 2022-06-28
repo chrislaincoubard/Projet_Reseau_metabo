@@ -27,7 +27,7 @@ if "linux" in sys.platform:
 
 
 class MyPanel(TabbedPanel):
-    files = {"faaM": "", "faaS": "", "fna": "", "gff": "", "sbml": "", "tsv": "",
+    files = {"faa Model": "", "faa Subject": "", "fna": "", "gff": "", "sbml": "", "tsv": "",
              "json": ""}  # dictionary to store file names according to format
     format = ""  # takes the value of the extension expected by the clicked button
     buttonName = ""  # takes the value of the button id of the clicked button
@@ -44,20 +44,19 @@ class MyPanel(TabbedPanel):
     graph = Graph.Graph("")
     check_bubble = False
     options = 1
-    cofac = False
+    cofac = True
 
     def on_tab_change(self):
-        pop = False
+        check = False
         empty_files = all(x == "" for x in self.files.values())
-        # and self.old_module == self.get_current_tab().text
         if not empty_files:
             content = Change_tab(proceed=self.change_tabs,
                                  cancel=self.stay_same_tab)  # define the content of the pop-up
             self._popup = Popup(title="Load file", content=content,
                                 size_hint=(0.8, 0.8), auto_dismiss=False)
             self._popup.open()
-            pop = True
-        if not pop:
+            check = True
+        if not check:
             self.module = self.get_current_tab().text
 
     def change_tabs(self):
@@ -102,7 +101,7 @@ class MyPanel(TabbedPanel):
         if self.module == "BLASTing":
             self.ids["files_blast"].text = "Currently selected files :\n\n"
             for item in self.files.items():
-                if item[0] == "faaM" and item[0] == "faaS" and item[0] == "gff" or item[0] == "sbml":
+                if item[0] == "faa Model" and item[0] == "faa Subject" and item[0] == "gff" or item[0] == "sbml":
                     path = item[1].replace("\\", "/")
                     path = path.split("/")
                     name = path[-1]
@@ -146,7 +145,7 @@ class MyPanel(TabbedPanel):
             extension = filename[0].split(".")
             self.loaded_files()
             if extension[1] == "json":
-                self.graph.Load_json(filename[0])
+                self.graph.update_data(filename[0])
                 self.toggle_meta_list()
                 self.toggle_reac_list()
         else:
@@ -184,7 +183,7 @@ class MyPanel(TabbedPanel):
                         good_format = True
 
         else:
-            self._popup1 = Popup(title='Error', content=Label(text='Wrong format, try again'), size_hint=(0.5, 0.5))
+            self._popup1 = Popup(title='Error', content=Label(text='Please choose the right format'), size_hint=(0.5, 0.5))
             self._popup1.open()
             Clock.schedule_once(self.dismiss_popup_dt, 1)
         return good_format
@@ -215,9 +214,9 @@ class MyPanel(TabbedPanel):
                 message += "Please enter a main directory\n\n"
 
         if self.module == "BLASTing":
-            if self.files.get("faaS") != "" and self.files.get("faaM") != "" and self.files.get(
+            if self.files.get("faa Subject") != "" and self.files.get("faa Model") != "" and self.files.get(
                     "gff") != "" and self.files.get("sbml") != "":
-                if self.files.get("faaS") == self.files.get("faaM"):
+                if self.files.get("faa Subject") == self.files.get("faa Model"):
                     check_value = False
                     message += "Fasta files must be different\n\n"
             else:
@@ -238,10 +237,10 @@ class MyPanel(TabbedPanel):
                 message += "Please load all necessary files\n\n"
 
         if self.module == "Main":
-            if self.files.get("faaS") != "" and self.files.get("faaM") != "" and self.files.get(
+            if self.files.get("faa Subject") != "" and self.files.get("faa Model") != "" and self.files.get(
                     "gff") != "" and self.files.get("sbml") != "" and self.files.get("fna") != "" and self.files.get(
                 "tsv") != "":
-                if self.files.get("faaM") == self.files.get("faaS"):
+                if self.files.get("faa Model") == self.files.get("faa Subject"):
                     message += "Fasta files must be different\n\n"
                     check_value = False
             else:
@@ -273,12 +272,12 @@ class MyPanel(TabbedPanel):
         if self.module == "Merging":
             cmd = f"python3 merging.py {self.mainDirectory}"
         if self.module == "BLASTing":
-            cmd = f"python3 blasting.py {self.mainDirectory} -n {self.parametre['nom']} -m {self.files['sbml']} -mfaa {self.files['faaM']} -sfaa {self.files['faaS']} -sgff {self.files['gff']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs']}"
+            cmd = f"python3 blasting.py {self.mainDirectory} -n {self.parametre['nom']} -m {self.files['sbml']} -mfaa {self.files['faa Model']} -sfaa {self.files['faa Subject']} -sgff {self.files['gff']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs']}"
         if self.module == "MPWTing":
             cmd = f"python3 "
         if self.module == "Main":
             self.temp_dir()
-            cmd = f"python3 main.py {self.mainDirectory} -m {self.files['sbml']} -mfaa {self.files['faaM']} -sfaa {self.files['faaS']} -sgff {self.files['gff']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs']} "
+            cmd = f"python3 main.py {self.mainDirectory} -m {self.files['sbml']} -mfaa {self.files['faa Model']} -sfaa {self.files['faa Subject']} -sgff {self.files['gff']} -i {self.parametre['i']} -d {self.parametre['d']} -ev {self.parametre['ev']} -c {self.parametre['c']} -bs {self.parametre['bs']} "
         p = subprocess.Popen(cmd, shell=True)
         p.wait()
         os.system("rm -rf ./temp_dir/")
@@ -314,14 +313,13 @@ class MyPanel(TabbedPanel):
         self.graph.clear_data()
 
     def pop_up_html(self, instance):
-        type = instance.type
-        if type == "html":
+        if instance.type == "html":
             content = Save_dialog(save=self.show_graph, cancel=self.dismiss_popup,
                                   text="graph.html")  # define the content of the pop-up
             self._popup = Popup(title="Save html file", content=content,
                                 size_hint=(0.9, 0.9))
             self._popup.open()
-        if type == "json":
+        if instance.type == "json":
             content = Save_dialog(save=self.save_graph, cancel=self.dismiss_popup,
                                   text="graph.json")  # define the content of the pop-up
             self._popup = Popup(title="Save html file", content=content,

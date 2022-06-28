@@ -1,10 +1,9 @@
-import json
 import webbrowser
 
 import networkx as nx
 from pyvis.network import Network
 from utils import *
-
+import random as rd
 
 class Graph:
     data = []  # data from Json used to initialize the graph
@@ -22,19 +21,25 @@ class Graph:
                  "PROTON_CCO-RGH-ER-LUM", "Pi_c", "AMP_c", "Acceptor_c", "CO-A_c", "ATP_c", "ADP_c", "GDP_c",
                  "GTP_c", "MG+2_c", "PROTON_e", "OXYGEN-MOLECULE_m", "WATER_m", "CARBON-MONOXIDE_c", "NAD_c", "NADH_c"]
     G = nx.MultiDiGraph()
+    corresp_dict_reac = {}
+    reversed_corresp_dict_reac = {}
 
-    # open the reference file and stores the data as attribute.
-    def Load_json(self, file):
+    def update_data(self, file):
+        self.data = load_json(file)
+        get_metacyc_ids(self.data, os.path.dirname(file))
+        self.corresp_dict_reac, self.reversed_corresp_dict_reac = build_correspondence_dict(os.path.dirname(file) + "\\metacyc_ids.tsv")
+        for comp in self.data["compartments"]:
+            comp = cobra_compatibility(comp)
+            self.compartment.append(comp)
+
+
+    def __init__(self, file=""):
         if file != "":
-            with open(file, "r") as json_file:
-                self.data = json.load(json_file)
+            self.data = load_json(file)
             for comp in self.data["compartments"]:
                 comp = cobra_compatibility(comp)
                 self.compartment.append(comp)
-
-    def __init__(self, file=None):
-        if file is not None:
-            self.Load_json(file)
+            get_metacyc_ids(self.data, os.path.dirname(file))
         else:
             self.data = []
 
@@ -43,7 +48,6 @@ class Graph:
         self.Metabolites.clear()
         self.Reaction.clear()
         self.edges.clear()
-        self.G.clear()
         self.nodes_reactions.clear()
         self.nodes_metabolites.clear()
         self.meta_keyword.clear()
@@ -85,12 +89,12 @@ class Graph:
         for item in data:
             if item["id"] not in self.cofactors:
                 item["size"] = 20  # Size of the node
-                item["group"] = 2  # Group of the node (to differentiate metabolites from reactions and cofactors)
+                item["group"] = "metabolites"  # Group of the node (to differentiate metabolites from reactions and cofactors)
                 item["title"] = item["id"]  # Message displayed when node is hoverede by mouse
                 item["mass"] = 2
             else:
                 item["size"] = 10  # Size of the node
-                item["group"] = 3  # Group of the node (to differentiate metabolites from reactions and cofactors)
+                item["group"] = "cofactors"  # Group of the node (to differentiate metabolites from reactions and cofactors)
                 item["title"] = item["id"]  # Message displayed when node is hoverede by mouse
                 item["mass"] = 0.5
                 item["physics"] = False
@@ -101,8 +105,12 @@ class Graph:
     # Similar to create_nodes_reactions
     def create_nodes_reactions(self, data):
         for item in data:
+            # test to add node size scaling depending on a specified value.
+            # It works but override the size attribute of the node.
+            # rand = rd.uniform(0.5,1.0)
+            # item["value"] = rand
             item["size"] = 35
-            item["group"] = 1
+            item["group"] = "reactions"
             item["shape"] = "diamond"
             item["mass"] = 5
             item["title"] = item["gene_reaction_rule"].replace(" or ", " <br> ")
@@ -110,22 +118,52 @@ class Graph:
                 del item["name"]
             self.nodes_reactions.append((item['id'], item))
 
-    # edges creating by creating a 2-tuple for each edge.
-    # Tuple means = (starting_node, ending node)
+    def create_legends_nodes(self, cofactor):
+        """
+        Trick to add legend to the graph because it seems you cannot add it from the template for some reasons
+        :param cofactor: boolean ; If true, add the cofactor legend
+        """
+        if cofactor :
+            nodes = ["reactions", "metabolites", "cofactors"]
+            pos = [[-600,-500], [-600,-400], [-600, -300]]
+        else :
+            nodes = ["reactions", "metabolites"]
+            pos = [[-600,-500 ], [-600, -400]]
+        legend_nodes = [
+            (
+                legend_node,
+                {
+                    'group': str(legend_node),
+                    'label': str(legend_node),
+                    'size': 30,
+                    'fixed': True,
+                    'physics': False,
+                    'x': pos[0],
+                    'y': pos[1],
+                    'shape': 'box',
+                    'widthConstraint': 100,
+                    'font': {'size': 20}
+                }
+            )
+            for legend_node, pos in zip(nodes,pos)
+        ]
+        return legend_nodes
+
+
     def create_edges(self, type, cofactor):
         for reaction in type:
             for metabolite, stoech in reaction["metabolites"].items():
                 if not cofactor:
                     if metabolite not in self.cofactors:
                         if stoech > 0:
-                            self.edges.append([reaction["id"], metabolite])
+                            self.edges.append((reaction["id"], metabolite))
                         if stoech < 0:
-                            self.edges.append([metabolite, reaction["id"]])
+                            self.edges.append((metabolite, reaction["id"]))
                 else:
                     if stoech > 0:
-                        self.edges.append([reaction["id"], metabolite])
+                        self.edges.append((reaction["id"], metabolite))
                     if stoech < 0:
-                        self.edges.append([metabolite, reaction["id"]])
+                        self.edges.append((metabolite, reaction["id"]))
 
     # search for metabolites based on list of metabo ID
     # add all the reactions connected to the searched metabolites and all the metabolites associated with the reactions.
@@ -133,19 +171,21 @@ class Graph:
         if not self.meta_keyword:
             return None
         temp_meta = {}
+        temp_keyword =[]
         for key in self.meta_keyword:
-            for item in self.data["reactions"]:
-                if key in item["metabolites"] and item not in self.Reaction:
-                    item = get_metacyc_ids(item)
-                    self.Reaction.append(item)
-                    temp_meta = item["metabolites"]
-                for item in self.data["metabolites"]:
-                    if item["id"] in temp_meta.keys() and item not in self.Metabolites:
+            for reac in self.data["reactions"]:
+                if key in reac["metabolites"] and reac not in self.Reaction:
+                    reac["id"] = self.reversed_corresp_dict_reac[reac["id"].strip("_")]
+                    self.Reaction.append(reac)
+                    temp_meta = reac["metabolites"]
+                for meta in self.data["metabolites"]:
+                    if meta["id"] in temp_meta.keys() and meta not in self.Metabolites:
                         if not cofactor:
-                            if item["id"] not in self.cofactors:
-                                self.Metabolites.append(item)
+                            if meta["id"] not in self.cofactors:
+                                self.Metabolites.append(meta)
                         else:
-                            self.Metabolites.append(item)
+                            self.Metabolites.append(meta)
+
 
     # search for reactions based on list of reaction ID
     # Add all the reactions and the meatbolites involved in them
@@ -154,18 +194,18 @@ class Graph:
             return None
         temp_meta = {}
         for key in self.reac_keyword:
-            for item in self.data["reactions"]:
-                if item["id"] == key and item not in self.Reaction:
-                    self.Reaction.append(item)
-                    temp_meta = item["metabolites"]
-            for item in self.data["metabolites"]:
-                if item["id"] in temp_meta.keys() and item not in self.Metabolites:
+            for reac in self.data["reactions"]:
+                if reac["id"] == key and reac not in self.Reaction:
+                    reac["id"] = self.reversed_corresp_dict_reac[reac["id"].strip("_")]
+                    self.Reaction.append(reac)
+                    temp_meta = reac["metabolites"]
+            for meta in self.data["metabolites"]:
+                if meta["id"] in temp_meta.keys() and meta not in self.Metabolites:
                     if not cofactor:
-                        if item["id"] not in self.cofactors:
-                            self.Metabolites.append(item)
+                        if meta["id"] not in self.cofactors:
+                            self.Metabolites.append(meta)
                     else:
-                        self.Metabolites.append(item)
-        self.reac_keyword.clear()
+                        self.Metabolites.append(meta)
 
     # ------------------ Function to save graphs ------------------- #
 
@@ -203,6 +243,7 @@ class Graph:
             self.create_edges(self.Reaction, cofactor)
             self.G.add_nodes_from(self.nodes_metabolites)
             self.G.add_nodes_from(self.nodes_reactions)
+            self.G.add_nodes_from(self.create_legends_nodes(cofactor))
             for start, finish in self.edges:
                 if start in self.cofactors or finish in self.cofactors:
                     self.G.add_edge(start, finish, physics=False, dashes=True)
@@ -216,6 +257,7 @@ class Graph:
             self.G.add_nodes_from(self.nodes_metabolites)
             self.G.add_nodes_from(self.nodes_reactions)
             self.G.add_edges_from(self.edges, physics=False)
+            self.G.add_nodes_from(self.create_legends_nodes(True))
             self.show_graph(name, physics)
 
     def show_graph(self, name, option):

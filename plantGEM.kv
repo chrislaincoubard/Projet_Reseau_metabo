@@ -112,14 +112,14 @@
                 file : "faa Subject"
                 text:"Choose .faa subject file"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.6}
-                on_press : root.show_load("faaS","faa",self)
+                on_press : root.show_load("faa Subject","faa",self)
 
             Load_Button:
                 id : faaMMain
                 file : "faa Model"
                 text:"Choose .faa model file "
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
-                on_press : root.show_load("faaM","faa",self)
+                on_press : root.show_load("faa Model","faa",self)
             
             
             Load_Button:
@@ -190,14 +190,14 @@
                 file : "faa Subject"
                 text:"Choose .faa subject file"
                 pos_hint: {"center_x" : 0.5,"center_y" : 0.8}
-                on_press : root.show_load("faaS","faa",self)
+                on_press : root.show_load("faa Subject","faa",self)
 
             Load_Button:
                 id : faaMBlast
                 file : "faa Model"
                 text:"Choose .faa model file"
                 pos_hint: {"center_x" : 0.8,"center_y" : 0.55}
-                on_press : root.show_load("faaM","faa",self)
+                on_press : root.show_load("faa Model","faa",self)
             
             Load_Button:
                 id : gffBlast
@@ -321,7 +321,7 @@
 
                 Label :
                     id : cofactors_selection
-                    text : "Cofactors displayed : No"
+                    text : "Cofactors displayed : Yes"
                     font_size : 16
                     pos_hint: {"center_x" : 0.25,"center_y" : 0.4}
 

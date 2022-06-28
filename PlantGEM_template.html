@@ -134,6 +134,7 @@
         </div>
     </div>
 </div>
+
 {% endif %}
 {% if conf %}
 <div id = "config"></div>
@@ -330,15 +331,6 @@
             }
           }
 
-          // try to get the third degree nodes
-            /*for (i = 1; i < degrees; i++) {
-            for (j = 0; j < allConnectedNodes.length; j++) {
-               RealAllConnectedNodes = allConnectedNodes.concat(
-                network.getConnectedNodes(allConnectedNodes[j])
-              );
-            }
-          }*/
-
           // all second degree nodes get a different color and their label back
           for (i = 0; i < allConnectedNodes.length; i++) {
             allNodes[allConnectedNodes[i]].color = "rgba(150,150,150,0.75)";
@@ -385,8 +377,8 @@
           }
         }
         nodes.update(updateArray);
-      }
 
+}
 </script>
 
 </body>
