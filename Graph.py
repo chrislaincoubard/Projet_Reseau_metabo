@@ -1,9 +1,9 @@
 import webbrowser
-
 import networkx as nx
 from pyvis.network import Network
 from utils import *
 import random as rd
+
 
 class Graph:
     data = []  # data from Json used to initialize the graph
@@ -19,19 +19,30 @@ class Graph:
     cofactors = ["CDP-CHOLINE_c", "CMP_c", "PROTON_c", "PPI_c", "PROTOHEME_c", "WATER_c",
                  "OXYGEN-MOLECULE_c", "CARBON-DIOXIDE_c", "NADPH_c", "NADP_c", "CMP_CCO-RGH-ER-LUM",
                  "PROTON_CCO-RGH-ER-LUM", "Pi_c", "AMP_c", "Acceptor_c", "CO-A_c", "ATP_c", "ADP_c", "GDP_c",
-                 "GTP_c", "MG+2_c", "PROTON_e", "OXYGEN-MOLECULE_m", "WATER_m", "CARBON-MONOXIDE_c", "NAD_c", "NADH_c"]
+                 "GTP_c", "MG+2_c", "PROTON_e", "OXYGEN-MOLECULE_m", "WATER_m", "CARBON-MONOXIDE_c", "NAD_c", "NADH_c",
+                 "Donor-H2_c"]
     G = nx.MultiDiGraph()
     corresp_dict_reac = {}
     reversed_corresp_dict_reac = {}
 
     def update_data(self, file):
+        """
+        This is used to update the file used to draw graph in the app. By clearing data from the previous file and
+        update the data from the new file
+        :param file: path to the file to be used. (Selected in the app)
+        """
+        self.Metabolites.clear()
+        self.Reaction.clear()
+        self.edges.clear()
+        self.nodes_metabolites.clear()
+        self.nodes_reactions.clear()
         self.data = load_json(file)
         get_metacyc_ids(self.data, os.path.dirname(file))
-        self.corresp_dict_reac, self.reversed_corresp_dict_reac = build_correspondence_dict(os.path.dirname(file) + "\\metacyc_ids.tsv")
+        self.corresp_dict_reac, self.reversed_corresp_dict_reac = build_correspondence_dict(
+            os.path.dirname(file) + "\\metacyc_ids.tsv")
         for comp in self.data["compartments"]:
             comp = cobra_compatibility(comp)
             self.compartment.append(comp)
-
 
     def __init__(self, file=""):
         if file != "":
@@ -43,8 +54,12 @@ class Graph:
         else:
             self.data = []
 
-    # clear data from current instance, used for GUI implementation where only one graphe instance is used.
+    # clear data from current instance, used for GUI implementation where only one graph instance is used.
     def clear_data(self):
+        """
+        Clear all the data used to create graph.
+        :return:
+        """
         self.Metabolites.clear()
         self.Reaction.clear()
         self.edges.clear()
@@ -55,6 +70,13 @@ class Graph:
         self.search_compartment.clear()
 
     def meta_keyword_update(self, keyword):
+        """
+        Fills the list containing the current search for metabolites selected in the app. Clicking on a new metabolite
+        adds it to the list. Clicking on the metabolite already searched removes it from the list.
+        :param keyword: ID of the metabolite (selected in app)
+        :return: Boolean return used to only do the first if statement if condition is fullfilled.
+        (Return vlaue is not used)
+        """
         keyword = cobra_compatibility(keyword)
         if keyword not in self.meta_keyword:
             self.meta_keyword.append(keyword)
@@ -64,6 +86,13 @@ class Graph:
             return False
 
     def reac_keyword_update(self, keyword):
+        """
+        Fills the list containing the current search for reactions selected in the app. Clicking on a new reaction
+        adds it to the list. Clicking on the reaction already searched removes it from the list.
+        :param keyword: ID of the reaction (selected in app)
+        :return: Boolean return used to only do the first if statement if condition is fullfilled.
+        (Return value is not used)
+        """
         keyword = cobra_compatibility(keyword)
         if keyword not in self.reac_keyword:
             self.reac_keyword.append(keyword)
@@ -73,6 +102,13 @@ class Graph:
             return False
 
     def compartment_update(self, keyword):
+        """
+        Fills the list containing the current search for reactions selected in the app. Clicking on a new reaction
+        adds it to the list. Clicking on the reaction already searched removes it from the list.
+        :param keyword: ID of the compartment (selected in app)
+        :return: Boolean return used to only do the first if statement if condition is fullfilled.
+        (Return value is not used)
+        """
         keyword = cobra_compatibility(keyword)
         if keyword not in self.search_compartment:
             self.search_compartment.append(keyword)
@@ -81,29 +117,44 @@ class Graph:
             self.search_compartment.remove(keyword)
             return False
 
-    # create the list of nodes for the graph.
-    # All info from Json file are added as nodes attributes + graphical attributes for visualization
-    # Name key deleted from dictionnary because it causes conflict with netwrokx graph creation
+
 
     def create_nodes_metabolites(self, data):
+        """
+        Add graphic attributes to the nodes that will be used for a better visualisation. Different options are selected
+        whether the metabolite is a cofactor or not.
+        :param data: Either the data relevant to user search, or the whole json file loaded in the app
+         if no search were made.
+        """
         for item in data:
-            if item["id"] not in self.cofactors:
-                item["size"] = 20  # Size of the node
-                item["group"] = "metabolites"  # Group of the node (to differentiate metabolites from reactions and cofactors)
-                item["title"] = item["id"]  # Message displayed when node is hoverede by mouse
-                item["mass"] = 2
-            else:
+            if item["id"] in self.cofactors:
                 item["size"] = 10  # Size of the node
-                item["group"] = "cofactors"  # Group of the node (to differentiate metabolites from reactions and cofactors)
+                item[
+                    "group"] = "cofactors"  # Group of the node (to differentiate metabolites from reactions and cofactors)
                 item["title"] = item["id"]  # Message displayed when node is hoverede by mouse
                 item["mass"] = 0.5
                 item["physics"] = False
+                item["color"] = "#26A4DCFF"
+                item["border"] = "#000000"
+            else:
+                item["size"] = 20  # Size of the node
+                item[
+                    "group"] = "metabolites"  # Group of the node (to differentiate metabolites from reactions and cofactors)
+                item["title"] = item["id"]  # Message displayed when node is hoverede by mouse
+                item["mass"] = 2
+                item["color"] = "#EE2121FF"
             if "name" in item:
                 del item["name"]
             self.nodes_metabolites.append((item['id'], item))
 
-    # Similar to create_nodes_reactions
     def create_nodes_reactions(self, data):
+        """
+        Add graphic attributes to the nodes that will be used for a better visualisation.
+        :param data: Either the data relevant to user search, or the whole json file loaded in the app
+         if no search were made.
+        :param data:
+        :return:
+        """
         for item in data:
             # test to add node size scaling depending on a specified value.
             # It works but override the size attribute of the node.
@@ -113,45 +164,23 @@ class Graph:
             item["group"] = "reactions"
             item["shape"] = "diamond"
             item["mass"] = 5
-            item["title"] = item["gene_reaction_rule"].replace(" or ", " <br> ")
+            item["title"] = item["gene_reaction_rule"].replace(" or ", " <br> ")#trick to display the gene reaction rule over multiple line for the web browser visualisation.
+            item["color"] = "#BFE117FF"
             if "name" in item:
                 del item["name"]
             self.nodes_reactions.append((item['id'], item))
 
-    def create_legends_nodes(self, cofactor):
+    def create_edges(self, cofactor):
         """
-        Trick to add legend to the graph because it seems you cannot add it from the template for some reasons
-        :param cofactor: boolean ; If true, add the cofactor legend
+        Function to create edges. Edges are 2-tuple containing the beginning node and the arrival node.
+        It looks through the metabolites invovled in the reaction and the stoechiometry.
+        If the metabolite is produced, its stoechiometry is positive, thus the edge is created with the pattern :
+        (reaction, metabolite).
+        If the metabolite is consumed, its stoechiometry is negative, thus the edge is created with the pattern :
+        (metabolite, reaction).
+        :param cofactor: Boolean : True, if cofactors are to be included in the graph. False elsewise. (selected in app)
         """
-        if cofactor :
-            nodes = ["reactions", "metabolites", "cofactors"]
-            pos = [[-600,-500], [-600,-400], [-600, -300]]
-        else :
-            nodes = ["reactions", "metabolites"]
-            pos = [[-600,-500 ], [-600, -400]]
-        legend_nodes = [
-            (
-                legend_node,
-                {
-                    'group': str(legend_node),
-                    'label': str(legend_node),
-                    'size': 30,
-                    'fixed': True,
-                    'physics': False,
-                    'x': pos[0],
-                    'y': pos[1],
-                    'shape': 'box',
-                    'widthConstraint': 100,
-                    'font': {'size': 20}
-                }
-            )
-            for legend_node, pos in zip(nodes,pos)
-        ]
-        return legend_nodes
-
-
-    def create_edges(self, type, cofactor):
-        for reaction in type:
+        for reaction in self.Reaction:
             for metabolite, stoech in reaction["metabolites"].items():
                 if not cofactor:
                     if metabolite not in self.cofactors:
@@ -168,10 +197,16 @@ class Graph:
     # search for metabolites based on list of metabo ID
     # add all the reactions connected to the searched metabolites and all the metabolites associated with the reactions.
     def search_metabolites(self, cofactor):
+        """
+        Loop through the list of metabolites added in the search list. It then adds the reaction were each metabolite
+        appear and all the metabolites involved in these reactions to the Reactions and Metabolites list respectively.
+        These lists will be used to create the graph.
+        :param cofactor: Boolean : True, if cofactors are to be included in the graph. False elsewise. (selected in app)
+        :return:
+        """
         if not self.meta_keyword:
             return None
         temp_meta = {}
-        temp_keyword =[]
         for key in self.meta_keyword:
             for reac in self.data["reactions"]:
                 if key in reac["metabolites"] and reac not in self.Reaction:
@@ -186,10 +221,13 @@ class Graph:
                         else:
                             self.Metabolites.append(meta)
 
-
-    # search for reactions based on list of reaction ID
-    # Add all the reactions and the meatbolites involved in them
     def search_reactions(self, cofactor):
+        """
+        Loop through the reactions added in the search. Add the reactions to the Reactions list and the metabolitses
+        involved in them in the Metabolites list. These lists will be used to create the graph.
+        :param cofactor:
+        :return: Boolean : True, if cofactors are to be included in the graph. False elsewise. (selected in app)
+        """
         if not self.reac_keyword:
             return None
         temp_meta = {}
@@ -209,9 +247,11 @@ class Graph:
 
     # ------------------ Function to save graphs ------------------- #
 
-    # Remove the graphical attribute from nodes
-    # Keep the structure from the initial JSON file
     def save_graph_json(self, name):
+        """
+        Save the metabolites and reactions that were used to create the graph visualised.
+        :param name: Name of the file to save.
+        """
         tot_dico = {}
         meta = []
         reac = []
@@ -234,16 +274,25 @@ class Graph:
     # ------------------ Functions to show graph ----------------------------- #
 
     def create_Graph(self, name, cofactor, physics):
-        # create or show graph wether a search has been made or not
-        if self.meta_keyword or self.reac_keyword:  # if searched has been made.
+        """
+        First extract data from the full model to only add metabolites and reactions relevant to the search.
+        Then create the nodes and edges and use Networkx to generate a graph. Once graph is created, launch the function
+        using Pyvis to visualize the graph.
+        :param name: name of the html file created by pyvis to show the graph
+        :param cofactor: Boolean : True, if cofactors are to be included in the graph. False elsewise.(selected in app)
+        :param physics: int : Value determined the kind of physics wanted by the user to draw the graph. (selected in app)
+        :return:
+        """
+        self.G.clear()
+        if self.meta_keyword or self.reac_keyword:
+            # if searched has been made.
             self.search_metabolites(cofactor)
             self.search_reactions(cofactor)
             self.create_nodes_metabolites(self.Metabolites)
             self.create_nodes_reactions(self.Reaction)
-            self.create_edges(self.Reaction, cofactor)
+            self.create_edges(cofactor)
             self.G.add_nodes_from(self.nodes_metabolites)
             self.G.add_nodes_from(self.nodes_reactions)
-            self.G.add_nodes_from(self.create_legends_nodes(cofactor))
             for start, finish in self.edges:
                 if start in self.cofactors or finish in self.cofactors:
                     self.G.add_edge(start, finish, physics=False, dashes=True)
@@ -257,10 +306,15 @@ class Graph:
             self.G.add_nodes_from(self.nodes_metabolites)
             self.G.add_nodes_from(self.nodes_reactions)
             self.G.add_edges_from(self.edges, physics=False)
-            self.G.add_nodes_from(self.create_legends_nodes(True))
             self.show_graph(name, physics)
 
     def show_graph(self, name, option):
+        """
+        Create Pyvis network from the networkx graph created before, with several display options depending on user
+        demand.
+        :param name: string : Name of the html file saved containing the graph visualization.
+        :param option: int : Value determined the kind of physics wanted by the user to draw the graph. (selected in app)
+        """
         nt = Network("1000px", "1000px")
         nt.set_template("PlantGEM_template.html")
         nt.from_nx(self.G, show_edge_weights=False)
@@ -271,7 +325,11 @@ class Graph:
             nt.set_options("""
             var options = {
               "nodes": {
-                "borderWidthSelected": 5
+                "borderWidth": 4,
+                "borderWidthSelected": 5,
+                "color": {
+                  "border": "rgba(0,0,0,1)"
+                }
               },
               "edges": {
                 "arrows": {

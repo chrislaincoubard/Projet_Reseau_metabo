@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css" type="text/css" />
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js"> </script>
@@ -125,6 +126,9 @@
 
 <body>
 <div id = "mynetwork"></div>
+<div>
+    <svg id = "legend"></svg>
+</div>
 {% if nodes|length > 100 and physics_enabled %}
 <div id="loadingBar">
     <div class="outerBorder">
@@ -134,6 +138,7 @@
         </div>
     </div>
 </div>
+
 
 {% endif %}
 {% if conf %}
@@ -146,13 +151,10 @@
     var nodes;
     var network; 
     var container;
-    var options, data;
+    var data;
     var allNodes;
     var highlightActive = false;
-    var nodesDataset = nodes;
 
-
-    
     // This method is responsible for drawing the graph, returns the drawn network
     function drawGraph() {
         var container = document.getElementById('mynetwork');
@@ -166,6 +168,7 @@
           nodes: parsedData.nodes,
           edges: parsedData.edges
         }
+
         
         var options = parsedData.options;
         options.nodes = {
@@ -193,9 +196,9 @@
 
         network = new vis.Network(container, data, options);
 
-        allNodes = nodes.get({ returnType: "Object" });
 
-        network.on("click", neighbourhoodHighlight);
+
+
 	 
         {% if tooltip_link %}
         // make a custom popup
@@ -294,6 +297,8 @@
 	    });
         {% endif %}
 
+        allNodes = nodes.get({ returnType: "Object" });
+        network.on("click", neighbourhoodHighlight)
         return network;
 
     }
@@ -309,9 +314,13 @@
           var i, j;
           var selectedNode = params.nodes[0];
           var degrees = 4;
+          console.log(params);
+
+
 
           // mark all nodes as hard to read.
           for (var nodeId in allNodes) {
+            allNodes[nodeId].hiddencolor = allNodes[nodeId].color;
             allNodes[nodeId].color = "rgba(200,200,200,0.5)";
             if (allNodes[nodeId].hiddenLabel === undefined) {
               allNodes[nodeId].hiddenLabel = allNodes[nodeId].label;
@@ -320,7 +329,6 @@
           }
           var connectedNodes = network.getConnectedNodes(selectedNode);
           var allConnectedNodes = [];
-          //var RealAllConnectedNodes = [];
 
           // get the second degree nodes
           for (i = 1; i < degrees; i++) {
@@ -343,7 +351,7 @@
 
           // all first degree nodes get their own color and their label back
           for (i = 0; i < connectedNodes.length; i++) {
-            allNodes[connectedNodes[i]].color = undefined;
+            allNodes[connectedNodes[i]].color = allNodes[connectedNodes[i]].hiddencolor;
             if (allNodes[connectedNodes[i]].hiddenLabel !== undefined) {
               allNodes[connectedNodes[i]].label =
                 allNodes[connectedNodes[i]].hiddenLabel;
@@ -352,7 +360,7 @@
           }
 
           // the main node gets its own color and its label back.
-          allNodes[selectedNode].color = undefined;
+          allNodes[selectedNode].color = allNodes[selectedNode].hiddencolor;
           if (allNodes[selectedNode].hiddenLabel !== undefined) {
             allNodes[selectedNode].label = allNodes[selectedNode].hiddenLabel;
             allNodes[selectedNode].hiddenLabel = undefined;
@@ -360,7 +368,7 @@
         } else if (highlightActive === true) {
           // reset all nodes
           for (nodeId in allNodes) {
-            allNodes[nodeId].color = undefined;
+            allNodes[nodeId].color = allNodes[nodeId].hiddencolor;
             if (allNodes[nodeId].hiddenLabel !== undefined) {
               allNodes[nodeId].label = allNodes[nodeId].hiddenLabel;
               allNodes[nodeId].hiddenLabel = undefined;
@@ -378,7 +386,96 @@
         }
         nodes.update(updateArray);
 
+
 }
+    function create(type){
+    return document.createElementNS("http://www.w3.org/2000/svg", type);
+}
+    function rect(x,y,w,h){
+        let el = create("rect");
+        if(w<=0 && h<=0){
+            throw new Error("Size less or equal to 0");
+        }
+        if(w<=0){
+            throw new Error("Width less or equal to 0");
+        }
+        if(h<=0){
+            throw new Error("Height less or equal to 0");
+        }
+
+        let att = ["x",x,"y",y,"width",w,"height",h];
+        attributes(el, att)
+        return el;
+    }
+    /**
+     * Get or set attributes
+     * attribute(el, key) --> returns the value
+     * attribute(el, key, value) sets the attribute of "key" with "value"
+      */
+    function attribute(el, key, value=null){
+        if(value != null){
+            el.setAttribute(key,value);
+            return el
+        }
+        else {
+            return el.getAttribute(key)
+        }
+
+    }
+
+
+    /**
+    Set a collection of attributes to elements
+     */
+    function attributes(el, array){
+        for(let i = 0; i<array.length; i +=2){
+            el.setAttribute(array[i],array[i+1]);
+        }
+        return el;
+    }
+    function append(parent,child){
+    parent.appendChild(child);
+    return parent;
+}
+    function text(x,y,msg,font ="sans-serif",font_size=12){
+    let el = create("text");
+    let att = ["x",x,"y",y,"font-family", font, "font-size", font_size];
+    attributes(el,att);
+    el.textContent = msg;
+    return el;
+}
+
+    function legend(data,colors, x,y,w,h){
+    let legend = create('g');
+    for (let i=0;i<data.length;i++){
+        let str_msg = data[i];
+        let box = rect(x,y,w,h);
+        attribute(box,"fill", colors[i]);
+        attribute(box,"stroke", "#000000");
+        append(legend,box);
+        let msg = text(x+w+10,y+10,str_msg);
+        append(legend,msg);
+        y += 20;
+    }
+    return legend;
+
+    }
+    let legData = []
+    let colors = []
+    function legendData(legData){
+
+        for (let nodeID in allNodes){
+            if (!legData.includes(allNodes[nodeID].group)){
+                legData.push(allNodes[nodeID].group);
+                colors.push(allNodes[nodeID].color);
+        }
+        }
+    }
+    legendData(legData);
+    console.log(legData)
+    console.log(colors)
+    append(document.getElementById('legend'),legend(legData,colors, 50,100,50,10));
+
 </script>
 
 </body>
